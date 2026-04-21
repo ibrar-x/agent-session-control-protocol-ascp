@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-22 - Replay semantics
+
+- Branch: `feature/replay-semantics`
+- Commit: `not committed`
+- Summary: added the normative replay semantics spec, created replay-focused conformance fixtures for snapshot, from-seq, from-event-id, opaque-cursor, and retention-limited recovery paths, and added a repeatable validator that checks replay-specific ordering, boundary, and fallback rules against the frozen method and event contracts
+- Documentation updated: `plans.md`, `docs/status.md`, `spec/replay.md`, `docs/superpowers/specs/2026-04-22-replay-semantics-design.md`, `docs/superpowers/plans/2026-04-22-replay-semantics.md`
+- Next likely step: build `feature/auth-and-approvals` or widen into the broader `conformance` slice using the replay rules and replay fixtures as fixed inputs
+
 ### 2026-04-22 - Event contracts
 
 - Branch: `feature/event-contracts`

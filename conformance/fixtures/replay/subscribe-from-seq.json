@@ -1,0 +1,101 @@
+{
+  "scenario": "subscribe from sequence number without snapshot",
+  "entrypoint": "sessions.subscribe",
+  "request": {
+    "jsonrpc": "2.0",
+    "id": "req_sub_seq_1",
+    "method": "sessions.subscribe",
+    "params": {
+      "session_id": "sess_replay_1",
+      "from_seq": 104,
+      "include_snapshot": false
+    }
+  },
+  "response": {
+    "jsonrpc": "2.0",
+    "id": "req_sub_seq_1",
+    "result": {
+      "subscription_id": "sub_replay_2",
+      "session_id": "sess_replay_1",
+      "snapshot_emitted": false
+    }
+  },
+  "expectations": {
+    "include_snapshot": false,
+    "replay_marker_required": true,
+    "replayed_event_count": 3,
+    "from_seq": 104,
+    "to_seq": 106,
+    "expected_cursor": "seq:107"
+  },
+  "stream": [
+    {
+      "id": "evt_hist_104",
+      "type": "message.user",
+      "ts": "2026-04-22T08:14:04Z",
+      "session_id": "sess_replay_1",
+      "run_id": "run_replay_1",
+      "seq": 104,
+      "payload": {
+        "message_id": "msg_u_104",
+        "content": "Continue from the last green test run."
+      }
+    },
+    {
+      "id": "evt_hist_105",
+      "type": "message.assistant.delta",
+      "ts": "2026-04-22T08:14:05Z",
+      "session_id": "sess_replay_1",
+      "run_id": "run_replay_1",
+      "seq": 105,
+      "payload": {
+        "message_id": "msg_a_105",
+        "delta": "Replaying the verification summary..."
+      }
+    },
+    {
+      "id": "evt_hist_106",
+      "type": "message.assistant.completed",
+      "ts": "2026-04-22T08:14:06Z",
+      "session_id": "sess_replay_1",
+      "run_id": "run_replay_1",
+      "seq": 106,
+      "payload": {
+        "message_id": "msg_a_105",
+        "content": "The last replayable event confirms the green test run."
+      }
+    },
+    {
+      "id": "evt_replayed_106",
+      "type": "sync.replayed",
+      "ts": "2026-04-22T08:16:00Z",
+      "session_id": "sess_replay_1",
+      "payload": {
+        "from_seq": 104,
+        "to_seq": 106,
+        "event_count": 3
+      }
+    },
+    {
+      "id": "evt_live_107",
+      "type": "message.assistant.delta",
+      "ts": "2026-04-22T08:16:01Z",
+      "session_id": "sess_replay_1",
+      "run_id": "run_replay_1",
+      "seq": 107,
+      "payload": {
+        "message_id": "msg_a_107",
+        "delta": "Streaming new output after the replay boundary."
+      }
+    },
+    {
+      "id": "evt_cursor_107",
+      "type": "sync.cursor_advanced",
+      "ts": "2026-04-22T08:16:02Z",
+      "session_id": "sess_replay_1",
+      "payload": {
+        "cursor": "seq:107"
+      }
+    }
+  ]
+}

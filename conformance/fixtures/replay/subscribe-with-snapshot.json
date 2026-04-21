@@ -1,0 +1,112 @@
+{
+  "scenario": "subscribe with snapshot, replayed history, and live continuation",
+  "entrypoint": "sessions.subscribe",
+  "request": {
+    "jsonrpc": "2.0",
+    "id": "req_sub_snapshot_1",
+    "method": "sessions.subscribe",
+    "params": {
+      "session_id": "sess_replay_1",
+      "from_seq": 205,
+      "include_snapshot": true
+    }
+  },
+  "response": {
+    "jsonrpc": "2.0",
+    "id": "req_sub_snapshot_1",
+    "result": {
+      "subscription_id": "sub_replay_1",
+      "session_id": "sess_replay_1",
+      "snapshot_emitted": true
+    }
+  },
+  "expectations": {
+    "include_snapshot": true,
+    "replay_marker_required": true,
+    "replayed_event_count": 2,
+    "from_seq": 205,
+    "to_seq": 206,
+    "expected_cursor": "opaque:sess_replay_1:207"
+  },
+  "stream": [
+    {
+      "id": "evt_snapshot_curr_210",
+      "type": "sync.snapshot",
+      "ts": "2026-04-22T08:25:00Z",
+      "session_id": "sess_replay_1",
+      "run_id": "run_replay_1",
+      "payload": {
+        "session": {
+          "id": "sess_replay_1",
+          "runtime_id": "codex_local",
+          "status": "running",
+          "created_at": "2026-04-22T08:00:00Z",
+          "updated_at": "2026-04-22T08:25:00Z"
+        },
+        "active_run": {
+          "id": "run_replay_1",
+          "session_id": "sess_replay_1",
+          "status": "running",
+          "started_at": "2026-04-22T08:05:00Z"
+        },
+        "pending_approvals": []
+      }
+    },
+    {
+      "id": "evt_hist_205",
+      "type": "message.user",
+      "ts": "2026-04-22T08:20:05Z",
+      "session_id": "sess_replay_1",
+      "run_id": "run_replay_1",
+      "seq": 205,
+      "payload": {
+        "message_id": "msg_u_205",
+        "content": "Reconnect and continue the checkout investigation."
+      }
+    },
+    {
+      "id": "evt_hist_206",
+      "type": "message.assistant.completed",
+      "ts": "2026-04-22T08:20:06Z",
+      "session_id": "sess_replay_1",
+      "run_id": "run_replay_1",
+      "seq": 206,
+      "payload": {
+        "message_id": "msg_a_206",
+        "content": "Resuming from the last confirmed replay point."
+      }
+    },
+    {
+      "id": "evt_replayed_206",
+      "type": "sync.replayed",
+      "ts": "2026-04-22T08:25:01Z",
+      "session_id": "sess_replay_1",
+      "payload": {
+        "from_seq": 205,
+        "to_seq": 206,
+        "event_count": 2
+      }
+    },
+    {
+      "id": "evt_live_207",
+      "type": "message.assistant.delta",
+      "ts": "2026-04-22T08:25:02Z",
+      "session_id": "sess_replay_1",
+      "run_id": "run_replay_1",
+      "seq": 207,
+      "payload": {
+        "message_id": "msg_a_207",
+        "delta": "I am now streaming live output again."
+      }
+    },
+    {
+      "id": "evt_cursor_207",
+      "type": "sync.cursor_advanced",
+      "ts": "2026-04-22T08:25:03Z",
+      "session_id": "sess_replay_1",
+      "payload": {
+        "cursor": "opaque:sess_replay_1:207"
+      }
+    }
+  ]
+}
