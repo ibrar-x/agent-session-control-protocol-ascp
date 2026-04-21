@@ -17,7 +17,7 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 ### 2026-04-22 - Mock server
 
 - Branch: `feature/mock-server`
-- Commit: `not committed`
+- Commit: `bd4472a`
 - Summary: added a deterministic fixture-backed ASCP mock server over line-oriented stdio JSON-RPC, seeded host/runtime/session/approval/artifact/diff data, replay-aware sample event streams, a repeatable mock validator, a docs index, and a protocol usage plus DTO-generation guide
 - Documentation updated: `plans.md`, `docs/status.md`, `README.md`, `docs/README.md`, `docs/protocol-usage-and-dto-generation.md`, `mock-server/README.md`
 - Next likely step: build a protocol-consumer reference or deeper interoperability checks on top of the mock without reopening the frozen ASCP v0.1 contracts
