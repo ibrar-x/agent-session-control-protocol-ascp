@@ -200,6 +200,36 @@ This initial planning step should break the project into manageable units such a
 
 Do not jump into implementation until that top-level breakdown exists.
 
+## Task Intake And Planning
+
+Agents should turn new work into an explicit task flow before implementation:
+
+- Intake the relevant docs, specs, chat requirements, and repository context first.
+- Identify the current feature boundary before writing code or changing repository structure.
+- Convert the current feature into a task plan in `plans.md`.
+- Keep the active plan scoped to one feature, refinement, or bugfix at a time.
+- Record which source documents define the current task so later sessions can resume cleanly.
+
+The minimum planning loop is:
+
+1. read the source material
+2. define the current feature boundary
+3. write or update the task plan
+4. execute only the current scoped work
+5. update documentation and checkpoint status
+6. commit
+7. push
+
+## Feature Drift Detection
+
+Agents must protect the current chat from drifting into a different feature.
+
+- Use the current conversation history, existing plan, and branch purpose to determine whether a new request belongs to the active feature.
+- If the request is a refinement, clarification, or bugfix for the same feature, continue on the current branch.
+- If the request is materially separate, warn the user that it appears to be a different feature.
+- Recommend opening or continuing on a new branch for that new feature.
+- Do not silently merge unrelated feature work into the active plan.
+
 ## Git Workflow Discipline
 
 Agents working in this repository should use a strict feature workflow:
@@ -232,6 +262,15 @@ Documentation is a required part of task completion in this repository.
 - If a change affects protocol behavior, schemas, events, replay semantics, compatibility, auth hooks, or workflow expectations, update the corresponding documentation in the same task.
 - If the work is not documented well enough for another implementer to understand it, it is not ready to commit.
 
+## Checkpointing
+
+Every completed task should leave a recovery point for the next session.
+
+- Update `plans.md` when task status changes.
+- Add a short checkpoint entry to `docs/status.md` after each completed task.
+- The checkpoint should state what was completed, what documents were updated, what branch was used, and what the next likely step is.
+- A new session should be able to resume from `plans.md`, `docs/status.md`, and the latest commit history without depending on hidden chat context.
+
 ## Expected Repository Growth
 
 As this repository matures, prefer a structure close to:
@@ -239,6 +278,7 @@ As this repository matures, prefer a structure close to:
 ```text
 README.md
 AGENTS.md
+plans.md
 docs/
 spec/ or schema/
 examples/
