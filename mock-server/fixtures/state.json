@@ -1,0 +1,198 @@
+{
+  "protocol_version": "0.1.0",
+  "host": {
+    "id": "host_01",
+    "name": "MacBook Pro",
+    "platform": "macos",
+    "arch": "arm64",
+    "labels": {
+      "environment": "local",
+      "owner": "user"
+    },
+    "status": "online",
+    "transports": [
+      "websocket",
+      "http_sse",
+      "relay"
+    ]
+  },
+  "runtimes": [
+    {
+      "id": "codex_local",
+      "kind": "codex",
+      "display_name": "Codex CLI",
+      "version": "0.1.x",
+      "adapter_kind": "native",
+      "capabilities": {
+        "session_list": true,
+        "session_resume": true,
+        "session_start": true,
+        "session_stop": true,
+        "stream_events": true,
+        "transcript_read": true,
+        "message_send": true,
+        "approval_requests": true,
+        "approval_respond": true,
+        "artifacts": true,
+        "diffs": true,
+        "terminal_passthrough": false,
+        "notifications": true,
+        "checkpoints": false,
+        "replay": true,
+        "multi_workspace": true
+      }
+    }
+  ],
+  "capability_document": {
+    "protocol_version": "0.1.0",
+    "host": {
+      "id": "host_01",
+      "name": "MacBook Pro",
+      "platform": "macos",
+      "arch": "arm64",
+      "labels": {
+        "environment": "local",
+        "owner": "user"
+      },
+      "status": "online",
+      "transports": [
+        "websocket",
+        "http_sse",
+        "relay"
+      ]
+    },
+    "runtimes": [
+      {
+        "id": "codex_local",
+        "kind": "codex",
+        "display_name": "Codex CLI",
+        "version": "0.1.x",
+        "adapter_kind": "native",
+        "capabilities": {
+          "session_list": true,
+          "session_resume": true,
+          "session_start": true,
+          "session_stop": true,
+          "stream_events": true,
+          "transcript_read": true,
+          "message_send": true,
+          "approval_requests": true,
+          "approval_respond": true,
+          "artifacts": true,
+          "diffs": true,
+          "terminal_passthrough": false,
+          "notifications": true,
+          "checkpoints": false,
+          "replay": true,
+          "multi_workspace": true
+        }
+      }
+    ],
+    "transports": [
+      "websocket",
+      "http_sse",
+      "relay"
+    ],
+    "capabilities": {
+      "session_list": true,
+      "session_resume": true,
+      "session_start": true,
+      "session_stop": true,
+      "stream_events": true,
+      "transcript_read": true,
+      "message_send": true,
+      "approval_requests": true,
+      "approval_respond": true,
+      "artifacts": true,
+      "diffs": true,
+      "terminal_passthrough": false,
+      "notifications": true,
+      "checkpoints": false,
+      "replay": true,
+      "multi_workspace": true,
+      "x_vendor_terminal_replay": false
+    },
+    "extensions": [
+      "x.codex",
+      "x.enterprise.audit"
+    ]
+  },
+  "sessions": [
+    {
+      "session": {
+        "id": "sess_abc123",
+        "runtime_id": "codex_local",
+        "title": "Fix failing Flutter integration tests",
+        "workspace": "/Users/me/app",
+        "status": "running",
+        "created_at": "2026-04-21T10:00:00Z",
+        "updated_at": "2026-04-21T10:12:00Z",
+        "last_activity_at": "2026-04-21T10:12:00Z",
+        "summary": "Working through checkout flow failures",
+        "active_run_id": "run_9",
+        "metadata": {
+          "source": "codex"
+        }
+      },
+      "runs": [
+        {
+          "id": "run_9",
+          "session_id": "sess_abc123",
+          "status": "running",
+          "started_at": "2026-04-21T10:05:00Z",
+          "ended_at": null,
+          "exit_code": null
+        }
+      ],
+      "approvals": [
+        {
+          "id": "apr_77",
+          "session_id": "sess_abc123",
+          "run_id": "run_9",
+          "kind": "command",
+          "status": "pending",
+          "title": "Approve shell command",
+          "description": "Agent wants to run flutter test integration_test",
+          "risk_level": "medium",
+          "payload": {
+            "command": "flutter test integration_test",
+            "cwd": "/Users/me/app"
+          },
+          "created_at": "2026-04-21T10:06:00Z",
+          "resolved_at": null
+        }
+      ],
+      "artifacts": [
+        {
+          "id": "art_3",
+          "session_id": "sess_abc123",
+          "run_id": "run_9",
+          "kind": "diff",
+          "name": "CheckoutFlow.diff",
+          "uri": "artifact://sess_abc123/art_3",
+          "mime_type": "text/x-diff",
+          "size_bytes": 4821,
+          "created_at": "2026-04-21T10:10:00Z",
+          "metadata": {
+            "files_changed": 4
+          }
+        }
+      ],
+      "diff": {
+        "session_id": "sess_abc123",
+        "run_id": "run_9",
+        "files_changed": 4,
+        "insertions": 73,
+        "deletions": 19,
+        "files": [
+          {
+            "path": "lib/checkout/checkout_service.dart",
+            "change_type": "modified",
+            "insertions": 22,
+            "deletions": 8
+          }
+        ]
+      }
+    }
+  ]
+}

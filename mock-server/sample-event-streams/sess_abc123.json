@@ -1,0 +1,86 @@
+{
+  "snapshot": {
+    "id": "evt_0034",
+    "type": "sync.snapshot",
+    "ts": "2026-04-21T10:21:00Z",
+    "session_id": "sess_abc123",
+    "run_id": "run_9",
+    "seq": 34,
+    "payload": {
+      "session": {
+        "id": "sess_abc123",
+        "runtime_id": "codex_local",
+        "status": "running",
+        "created_at": "2026-04-21T10:00:00Z",
+        "updated_at": "2026-04-21T10:21:00Z"
+      },
+      "active_run": {
+        "id": "run_9",
+        "session_id": "sess_abc123",
+        "status": "running",
+        "started_at": "2026-04-21T10:05:00Z"
+      },
+      "pending_approvals": []
+    }
+  },
+  "replayable_events": [
+    {
+      "id": "evt_0035",
+      "type": "message.assistant.delta",
+      "ts": "2026-04-21T10:21:01Z",
+      "session_id": "sess_abc123",
+      "run_id": "run_9",
+      "seq": 35,
+      "payload": {
+        "message_id": "msg_a_1",
+        "delta": "I found the source of the failure..."
+      }
+    },
+    {
+      "id": "evt_0036",
+      "type": "message.assistant.completed",
+      "ts": "2026-04-21T10:21:02Z",
+      "session_id": "sess_abc123",
+      "run_id": "run_9",
+      "seq": 36,
+      "payload": {
+        "message_id": "msg_a_1",
+        "content": "I found the source of the failure in the mocked checkout response."
+      }
+    },
+    {
+      "id": "evt_0037",
+      "type": "artifact.created",
+      "ts": "2026-04-21T10:21:03Z",
+      "session_id": "sess_abc123",
+      "run_id": "run_9",
+      "seq": 37,
+      "payload": {
+        "artifact": {
+          "id": "art_3",
+          "session_id": "sess_abc123",
+          "kind": "diff",
+          "name": "CheckoutFlow.diff",
+          "created_at": "2026-04-21T10:10:00Z"
+        }
+      }
+    },
+    {
+      "id": "evt_0038",
+      "type": "diff.ready",
+      "ts": "2026-04-21T10:21:04Z",
+      "session_id": "sess_abc123",
+      "run_id": "run_9",
+      "seq": 38,
+      "payload": {
+        "diff": {
+          "session_id": "sess_abc123",
+          "run_id": "run_9",
+          "files_changed": 4,
+          "insertions": 73,
+          "deletions": 19
+        }
+      }
+    }
+  ]
+}

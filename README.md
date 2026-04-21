@@ -121,7 +121,10 @@ The repo now includes:
 - [`AGENTS.md`](./AGENTS.md) for project-specific guidance to AI coding agents
 - [`plans.md`](./plans.md) for the active scoped task list
 - [`docs/status.md`](./docs/status.md) for checkpoint logging between sessions
+- [`docs/README.md`](./docs/README.md) for a navigable documentation index
+- [`docs/protocol-usage-and-dto-generation.md`](./docs/protocol-usage-and-dto-generation.md) for consumer guidance and schema-driven DTO generation options
 - [`.agents/skills/`](./.agents/skills/) for reusable ASCP build skills
+- [`mock-server/README.md`](./mock-server/README.md) for the deterministic proof mock
 
 The detailed spec recommends growing the repository toward a protocol-first layout with documentation, schemas, examples, conformance fixtures, and a mock server before any product UI work.
 
