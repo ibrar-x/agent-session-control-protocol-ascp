@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-22 - Extensions
+
+- Branch: `feature/extensions`
+- Commit: `not committed`
+- Summary: added the normative extensions spec, documented namespacing and capability advertisement rules, created namespaced method, event, field, and capability examples, and added a repeatable validator plus ignore-behavior fixtures that make the open-versus-closed schema boundary explicit for later conformance work
+- Documentation updated: `plans.md`, `docs/status.md`, `spec/extensions.md`, `docs/superpowers/specs/2026-04-22-extensions-design.md`, `docs/superpowers/plans/2026-04-22-extensions.md`
+- Next likely step: build `feature/conformance` or `feature/mock-server` using the frozen extension rules instead of reopening namespacing semantics
+
 ### 2026-04-22 - Auth and approvals
 
 - Branch: `feature/auth-approvals`

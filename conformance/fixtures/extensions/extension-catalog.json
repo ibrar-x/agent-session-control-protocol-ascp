@@ -1,0 +1,43 @@
+{
+  "namespacing": {
+    "method_prefix": "x.",
+    "event_prefix": "x.",
+    "field_prefix": "x_",
+    "capability_flag_prefix": "x_",
+    "extension_family_prefix": "x."
+  },
+  "surfaces": [
+    {
+      "kind": "capability_document",
+      "fixture": "examples/capabilities/capabilities-with-extensions.json",
+      "schema": "CapabilityDocument"
+    },
+    {
+      "kind": "namespaced_method_request",
+      "fixture": "examples/extensions/method-request.json",
+      "schema": "RequestEnvelope",
+      "method": "x.codex.checkpoint.create"
+    },
+    {
+      "kind": "namespaced_method_response",
+      "fixture": "examples/extensions/method-response.json",
+      "schema": "SuccessResponseEnvelope",
+      "method": "x.codex.checkpoint.create"
+    },
+    {
+      "kind": "namespaced_event",
+      "fixture": "examples/extensions/event-envelope.json",
+      "schema": "EventEnvelope",
+      "event_type": "x.enterprise.policy_violation"
+    },
+    {
+      "kind": "open_surface_field_extension",
+      "fixture": "examples/extensions/session-field-extension.json",
+      "schema": "Session",
+      "fields": [
+        "x_codex_origin_thread_id",
+        "x_enterprise_retention_class"
+      ]
+    }
+  ]
+}

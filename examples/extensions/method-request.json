@@ -1,0 +1,10 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_ext_1",
+  "method": "x.codex.checkpoint.create",
+  "params": {
+    "session_id": "sess_abc123",
+    "label": "pre_refactor",
+    "include_diff": true
+  }
+}
