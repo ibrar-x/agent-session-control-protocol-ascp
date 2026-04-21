@@ -1,0 +1,12 @@
+{
+  "id": "evt_0014",
+  "type": "message.assistant.completed",
+  "ts": "2026-04-21T10:07:33Z",
+  "session_id": "sess_abc123",
+  "run_id": "run_9",
+  "seq": 14,
+  "payload": {
+    "message_id": "msg_a_1",
+    "content": "I found the source of the failure in the mocked checkout response."
+  }
+}

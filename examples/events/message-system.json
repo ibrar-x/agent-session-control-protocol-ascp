@@ -1,0 +1,11 @@
+{
+  "id": "evt_0015",
+  "type": "message.system",
+  "ts": "2026-04-21T10:07:34Z",
+  "session_id": "sess_abc123",
+  "seq": 15,
+  "payload": {
+    "message_id": "msg_s_1",
+    "content": "Session resumed from remote client."
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "id": "evt_0029",
+  "type": "approval.expired",
+  "ts": "2026-04-21T10:10:00Z",
+  "session_id": "sess_abc123",
+  "run_id": "run_9",
+  "seq": 29,
+  "payload": {
+    "approval_id": "apr_77",
+    "expired_at": "2026-04-21T10:10:00Z"
+  }
+}

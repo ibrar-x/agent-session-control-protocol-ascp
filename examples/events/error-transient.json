@@ -1,0 +1,11 @@
+{
+  "id": "evt_0038",
+  "type": "error.transient",
+  "ts": "2026-04-21T10:22:00Z",
+  "session_id": "sess_abc123",
+  "seq": 38,
+  "payload": {
+    "code": "TRANSIENT_UNAVAILABLE",
+    "message": "Temporary adapter disconnection"
+  }
+}

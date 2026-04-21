@@ -1,0 +1,11 @@
+{
+  "id": "evt_0039",
+  "type": "error.fatal",
+  "ts": "2026-04-21T10:23:00Z",
+  "session_id": "sess_abc123",
+  "seq": 39,
+  "payload": {
+    "code": "RUNTIME_ERROR",
+    "message": "Runtime became unavailable"
+  }
+}

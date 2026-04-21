@@ -1,0 +1,16 @@
+{
+  "id": "evt_0001",
+  "type": "session.created",
+  "ts": "2026-04-21T10:00:00Z",
+  "session_id": "sess_abc123",
+  "seq": 1,
+  "payload": {
+    "session": {
+      "id": "sess_abc123",
+      "runtime_id": "codex_local",
+      "status": "idle",
+      "created_at": "2026-04-21T10:00:00Z",
+      "updated_at": "2026-04-21T10:00:00Z"
+    }
+  }
+}

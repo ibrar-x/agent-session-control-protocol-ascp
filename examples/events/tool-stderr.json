@@ -1,0 +1,12 @@
+{
+  "id": "evt_0018",
+  "type": "tool.stderr",
+  "ts": "2026-04-21T10:08:32Z",
+  "session_id": "sess_abc123",
+  "run_id": "run_9",
+  "seq": 18,
+  "payload": {
+    "tool_call_id": "tool_55",
+    "chunk": "Warning: deprecated API used"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "id": "evt_0004",
+  "type": "session.deleted",
+  "ts": "2026-04-21T10:40:00Z",
+  "session_id": "sess_abc123",
+  "seq": 4,
+  "payload": {
+    "reason": "runtime_cleanup"
+  }
+}

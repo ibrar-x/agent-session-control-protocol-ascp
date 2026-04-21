@@ -1,0 +1,17 @@
+{
+  "id": "evt_0032",
+  "type": "diff.ready",
+  "ts": "2026-04-21T10:12:45Z",
+  "session_id": "sess_abc123",
+  "run_id": "run_9",
+  "seq": 32,
+  "payload": {
+    "diff": {
+      "session_id": "sess_abc123",
+      "run_id": "run_9",
+      "files_changed": 4,
+      "insertions": 73,
+      "deletions": 19
+    }
+  }
+}

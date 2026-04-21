@@ -1,0 +1,13 @@
+{
+  "id": "evt_0008",
+  "type": "run.completed",
+  "ts": "2026-04-21T10:30:00Z",
+  "session_id": "sess_abc123",
+  "run_id": "run_9",
+  "seq": 8,
+  "payload": {
+    "run_id": "run_9",
+    "ended_at": "2026-04-21T10:30:00Z",
+    "exit_code": 0
+  }
+}

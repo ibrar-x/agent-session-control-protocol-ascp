@@ -1,0 +1,12 @@
+{
+  "id": "evt_0017",
+  "type": "tool.stdout",
+  "ts": "2026-04-21T10:08:31Z",
+  "session_id": "sess_abc123",
+  "run_id": "run_9",
+  "seq": 17,
+  "payload": {
+    "tool_call_id": "tool_55",
+    "chunk": "00:01 +1: loading test file..."
+  }
+}

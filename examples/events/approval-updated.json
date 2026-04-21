@@ -1,0 +1,14 @@
+{
+  "id": "evt_0026",
+  "type": "approval.updated",
+  "ts": "2026-04-21T10:06:30Z",
+  "session_id": "sess_abc123",
+  "run_id": "run_9",
+  "seq": 26,
+  "payload": {
+    "approval_id": "apr_77",
+    "changed_fields": [
+      "status"
+    ]
+  }
+}

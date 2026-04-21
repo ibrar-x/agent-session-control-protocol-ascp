@@ -1,0 +1,17 @@
+{
+  "id": "evt_0030",
+  "type": "artifact.created",
+  "ts": "2026-04-21T10:12:00Z",
+  "session_id": "sess_abc123",
+  "run_id": "run_9",
+  "seq": 30,
+  "payload": {
+    "artifact": {
+      "id": "art_3",
+      "session_id": "sess_abc123",
+      "kind": "report",
+      "name": "FailureSummary.md",
+      "created_at": "2026-04-21T10:12:00Z"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "id": "evt_0036",
+  "type": "sync.replayed",
+  "ts": "2026-04-21T10:21:01Z",
+  "session_id": "sess_abc123",
+  "seq": 36,
+  "payload": {
+    "from_seq": 31,
+    "to_seq": 45,
+    "event_count": 15
+  }
+}

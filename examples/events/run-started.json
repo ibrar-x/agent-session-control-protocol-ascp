@@ -1,0 +1,16 @@
+{
+  "id": "evt_0005",
+  "type": "run.started",
+  "ts": "2026-04-21T10:05:00Z",
+  "session_id": "sess_abc123",
+  "run_id": "run_9",
+  "seq": 5,
+  "payload": {
+    "run": {
+      "id": "run_9",
+      "session_id": "sess_abc123",
+      "status": "running",
+      "started_at": "2026-04-21T10:05:00Z"
+    }
+  }
+}
