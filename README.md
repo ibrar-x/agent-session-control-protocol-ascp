@@ -147,6 +147,7 @@ The repo-local skill pack is focused on the main ASCP workstreams:
 - `ascp-event-replay`
 - `ascp-auth-approvals`
 - `ascp-conformance-mock-server`
+- `ascp-documentation-discipline`
 
 These are intended to help future agents keep protocol work aligned with the draft spec instead of drifting into product assumptions.
 

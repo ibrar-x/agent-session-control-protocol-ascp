@@ -150,6 +150,38 @@ Do not start with a mobile app, dashboard, or runtime-specific UI. The first pro
 - Treat audit fields, actor attribution, and approval history as first-class protocol concerns.
 - Keep repository additions aligned with the suggested layouts from the source documents.
 
+## Git Workflow Discipline
+
+Agents working in this repository should use a strict feature workflow:
+
+- Create a new branch for every new feature or materially separate task.
+- Do not continue unrelated feature work on the current branch just because the conversation kept going.
+- If the conversation starts drifting into a different feature, stop and warn the user that the request appears to be a separate feature based on the current chat history and repository context.
+- Use the current conversation history to judge whether the requested work is still part of the same feature, refinement, or bugfix.
+- If it is clearly a new feature, tell the user and recommend continuing on a new branch so the current work stays coherent.
+
+## Commit And Push Discipline
+
+Agents should treat a completed task as a git checkpoint:
+
+- Commit every time a task is done.
+- Push after each completed task commit.
+- Do not bundle unrelated finished work into one catch-all commit.
+- Use meaningful commit messages that describe the completed unit of work.
+- Before committing, confirm that the branch contains only the intended task outcome.
+
+This repository should accumulate small, reviewable checkpoints instead of large mixed batches.
+
+## Documentation Before Commit
+
+Documentation is a required part of task completion in this repository.
+
+- Before committing, make sure the relevant work is documented.
+- Documentation should be updated before the commit, not deferred until later.
+- Keep documentation separate from code where possible, using dedicated docs, specs, examples, or protocol notes instead of burying rationale in implementation files.
+- If a change affects protocol behavior, schemas, events, replay semantics, compatibility, auth hooks, or workflow expectations, update the corresponding documentation in the same task.
+- If the work is not documented well enough for another implementer to understand it, it is not ready to commit.
+
 ## Expected Repository Growth
 
 As this repository matures, prefer a structure close to:
