@@ -1,0 +1,16 @@
+{
+  "id": "host_01",
+  "name": "MacBook Pro",
+  "platform": "macos",
+  "arch": "arm64",
+  "labels": {
+    "environment": "local",
+    "owner": "user"
+  },
+  "status": "online",
+  "transports": [
+    "websocket",
+    "http_sse",
+    "relay"
+  ]
+}

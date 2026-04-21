@@ -1,0 +1,12 @@
+{
+  "id": "evt_9001",
+  "type": "message.assistant.delta",
+  "ts": "2026-04-21T10:07:00Z",
+  "session_id": "sess_abc123",
+  "run_id": "run_9",
+  "seq": 45,
+  "payload": {
+    "message_id": "msg_12",
+    "delta": "I found the failing assertion..."
+  }
+}

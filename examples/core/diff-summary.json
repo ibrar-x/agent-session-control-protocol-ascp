@@ -1,0 +1,15 @@
+{
+  "session_id": "sess_abc123",
+  "run_id": "run_9",
+  "files_changed": 4,
+  "insertions": 73,
+  "deletions": 19,
+  "files": [
+    {
+      "path": "lib/checkout/checkout_service.dart",
+      "change_type": "modified",
+      "insertions": 22,
+      "deletions": 8
+    }
+  ]
+}

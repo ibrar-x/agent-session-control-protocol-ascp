@@ -1,0 +1,44 @@
+{
+  "$id": "https://ascp.dev/schema/v0.1/ascp-capabilities.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ASCP Capability Document",
+  "type": "object",
+  "required": [
+    "protocol_version",
+    "host",
+    "runtimes",
+    "transports",
+    "capabilities"
+  ],
+  "properties": {
+    "protocol_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "host": {
+      "$ref": "ascp-core.schema.json#/$defs/Host"
+    },
+    "runtimes": {
+      "type": "array",
+      "items": {
+        "$ref": "ascp-core.schema.json#/$defs/Runtime"
+      }
+    },
+    "transports": {
+      "type": "array",
+      "items": {
+        "$ref": "ascp-core.schema.json#/$defs/Transport"
+      }
+    },
+    "capabilities": {
+      "$ref": "ascp-core.schema.json#/$defs/Capabilities"
+    },
+    "extensions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": true
+}

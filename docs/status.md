@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-21 - Schema foundation
+
+- Branch: `feature/schema-foundation`
+- Commit: `not committed`
+- Summary: added the canonical ASCP core, capability, and error schemas; added schema-valid examples for the required protocol nouns and shared envelope baseline; and documented the schema-foundation scope and versioning assumptions for later method-contract work
+- Documentation updated: `plans.md`, `docs/status.md`, `docs/schema-foundation.md`
+- Next likely step: build `feature/method-contracts` from these frozen nouns and shared envelopes, without widening into full event or replay work yet
+
 ### 2026-04-21 - Workstream prompt pack
 
 - Branch: `main`
