@@ -12,9 +12,9 @@ This file tracks the active scoped feature for the current branch.
 
 ## Active Feature
 
-- Feature name: Method contracts
-- Branch: `feature/method-contracts`
-- Goal: freeze exact request, success-response, and allowed error contracts for every core ASCP method using the schema-foundation nouns and shared envelopes without widening into event payloads, replay flow, auth implementation, or mock-server behavior
+- Feature name: Event contracts
+- Branch: `feature/event-contracts`
+- Goal: freeze exact `EventEnvelope` payload contracts for every core ASCP event type using the canonical schema-foundation nouns and frozen method triggers without widening into replay implementation, auth middleware behavior, or mock-server logic
 - Source inputs:
   - `AGENTS.md`
   - `plans.md`
@@ -23,74 +23,64 @@ This file tracks the active scoped feature for the current branch.
   - `ASCP_Protocol_PRD_and_Build_Guide.md`
   - `README.md`
   - `docs/repo-operating-system.md`
-  - `docs/prompts/method-contracts.md`
+  - `docs/prompts/event-contracts.md`
+  - `docs/superpowers/specs/2026-04-22-event-contracts-design.md`
   - `docs/schema-foundation.md`
   - `schema/ascp-core.schema.json`
   - `schema/ascp-capabilities.schema.json`
   - `schema/ascp-errors.schema.json`
+  - `schema/ascp-methods.schema.json`
+  - `spec/methods.md`
   - existing core examples under `examples/`
-  - current chat requirements for the method-contracts slice only
+  - current chat requirements for the event-contracts slice only
 
 ## Bootstrap Outcome
 
 - The repository-level workstream breakdown already exists.
-- The dependency gate for method contracts is met: schema foundation assets are present under `schema/` and `examples/`.
-- No existing method-contract schema, spec, or request/response/error example assets are present yet.
-- This branch starts from up-to-date `main` at commit `6a4e78e`.
+- The dependency gate for event contracts is met: schema foundation, method contracts, and the seed `EventEnvelope` example are present under `schema/`, `spec/`, and `examples/`.
+- No dedicated event-contract schema, full event fixture set, or event support spec is present yet.
+- This branch starts from up-to-date `main` at commit `3f76faf`.
 
 ## Feature Boundary
 
 Included in this branch:
 
-- exact request params for every core ASCP method
-- exact success result shapes for every core ASCP method
-- explicit allowed error-code mapping per method, including shared validation and host-failure behavior
-- schema material for validating method requests and responses against the frozen core nouns
-- example request, success-response, and error-response envelopes for every core method
-- supporting documentation that ties the method surface back to capability advertisement and schema foundation
-- validation commands or scripts needed to verify the method-contract fixtures
+- exact `EventEnvelope` payload contracts for every core event type named in the detailed spec
+- event-family and event-type schema material under `schema/`
+- one schema-valid example fixture per core event type under `examples/events/`
+- event support and compatibility notes that distinguish live events, snapshots, and replay markers
+- validation commands or scripts needed to verify the event-contract assets
 
 Explicitly out of scope:
 
-- exact event payload schemas beyond method-triggered references
-- replay stream sequencing semantics beyond method-level flags and references
-- auth middleware implementation details beyond method-level error and capability notes
-- conformance harness expansion beyond validating the method-contract fixtures
-- mock-server behavior
+- replay retention rules or storage implementation
+- sequence generation implementation beyond schema-level replay-safe constraints
+- auth middleware behavior beyond fields already required by approval or audit-related events
+- mock-server streaming behavior
+- conformance harness expansion beyond validating the event-contract fixtures
 
 ## Tasks
 
 | Status | Task | Acceptance Criteria |
 | --- | --- | --- |
-| done | rewrite the active branch plan for method contracts | `plans.md` records the method-contract branch, source inputs, dependency gate, feature boundary, task list, and acceptance criteria |
-| done | create canonical method-contract schema material under `schema/` | `schema/ascp-methods.schema.json` defines exact params, success result shapes, and method-specific error envelopes while reusing the schema-foundation nouns and shared envelopes |
-| done | add request, success-response, and error-response examples for every core method | `examples/requests/`, `examples/responses/`, and `examples/errors/` contain schema-valid envelopes for each core method |
-| done | document capability gating and method error mapping | normative docs explain which methods rely on core compatibility versus advertised capability flags, and list the allowed error codes without requiring chat context |
-| done | add repeatable validation for method-contract assets | `scripts/validate_method_contracts.sh` validates the method schema plus the request/response/error example set |
-| done | verify all method-contract assets and checkpoint the branch | fresh validation passes, `docs/status.md` records the checkpoint, and the branch is ready for commit without widening scope |
+| done | rewrite the active branch plan for event contracts | `plans.md` records the event-contract branch, source inputs, dependency gate, feature boundary, task list, and acceptance criteria |
+| pending | create canonical event-contract schema material under `schema/` | `schema/ascp-events.schema.json` defines exact envelope and payload contracts for every core event type while reusing the schema-foundation nouns and shared envelope |
+| pending | add schema-valid event fixtures for every core event type | `examples/events/` contains one concrete `EventEnvelope` fixture for each spec-defined event type |
+| pending | document event support, compatibility expectations, and replay-safe boundaries | `spec/events.md` explains the event families, exact payload support, compatibility notes, and the difference between snapshots and replay markers |
+| pending | add repeatable validation for event-contract assets | `scripts/validate_event_contracts.sh` validates the event schema plus the event fixture set |
+| pending | verify all event-contract assets and checkpoint the branch | fresh validation passes, `docs/status.md` records the checkpoint, and the branch is ready for commit without widening scope |
 
 ## Acceptance Criteria
 
 The feature is complete only when all of the following are true:
 
-- every core ASCP method has exact request params and success result shapes
-- request `id` echo behavior and `result` versus `error` exclusivity stay explicit and testable
-- the method contracts reuse the canonical schema-foundation nouns rather than redefining them
-- allowed error codes are explicit per method and align with the detailed spec plus documented validation and host-failure rules
-- request, response, and error examples validate against the method-contract and shared schemas
-- documentation is sufficient for a later agent to begin event-contract work without reconstructing the method surface from chat history
+- every event type listed in the detailed spec has an explicit payload definition
+- every event example validates as an `EventEnvelope` with the exact matching `type`
+- event family names and payload field names exactly match the detailed spec
+- the event contracts reuse the canonical schema-foundation nouns rather than redefining them
+- snapshot and replay-marker events remain replay-safe and do not blur historical ordering
+- documentation is sufficient for a later agent to begin replay-semantics work without reconstructing the event surface from chat history
 
 ## Next Likely Step
 
-After this branch is complete, the next feature should be `event contracts` on `feature/event-contracts`, using the frozen method triggers, shared `EventEnvelope`, and schema-foundation nouns as the base contract inputs.
-
-## Completion Outcome
-
-- Status: complete on `feature/method-contracts`
-- Validation evidence: `./scripts/validate_method_contracts.sh` completed successfully and validated 48 method-contract example files
-- Merge target: `main`
-- Recommended next branch: `feature/event-contracts`
-- Recommended next scope:
-  - exact payload contracts for the core event taxonomy
-  - event examples and validators based on the shared `EventEnvelope`
-  - event-level notes for snapshot, replay references, and transport-neutral streaming behavior without revisiting method shapes
+After this branch is complete, the next feature should be `replay semantics` on `feature/replay-semantics`, using the locked event contracts as the base contract inputs for cursor, ordering, and retention notes.
