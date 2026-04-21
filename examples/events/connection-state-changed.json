@@ -1,0 +1,10 @@
+{
+  "id": "evt_0034",
+  "type": "connection.state_changed",
+  "ts": "2026-04-21T10:20:00Z",
+  "session_id": "sess_abc123",
+  "seq": 34,
+  "payload": {
+    "state": "reconnected"
+  }
+}

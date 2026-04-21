@@ -1,0 +1,12 @@
+{
+  "id": "evt_0013",
+  "type": "message.assistant.delta",
+  "ts": "2026-04-21T10:07:32Z",
+  "session_id": "sess_abc123",
+  "run_id": "run_9",
+  "seq": 13,
+  "payload": {
+    "message_id": "msg_a_1",
+    "delta": "I found the source of the failure..."
+  }
+}

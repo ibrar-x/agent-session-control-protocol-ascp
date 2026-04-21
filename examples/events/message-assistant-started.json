@@ -1,0 +1,11 @@
+{
+  "id": "evt_0012",
+  "type": "message.assistant.started",
+  "ts": "2026-04-21T10:07:31Z",
+  "session_id": "sess_abc123",
+  "run_id": "run_9",
+  "seq": 12,
+  "payload": {
+    "message_id": "msg_a_1"
+  }
+}

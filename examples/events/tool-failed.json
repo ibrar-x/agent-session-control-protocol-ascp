@@ -1,0 +1,13 @@
+{
+  "id": "evt_0020",
+  "type": "tool.failed",
+  "ts": "2026-04-21T10:08:46Z",
+  "session_id": "sess_abc123",
+  "run_id": "run_9",
+  "seq": 20,
+  "payload": {
+    "tool_call_id": "tool_55",
+    "exit_code": 1,
+    "message": "Command failed"
+  }
+}

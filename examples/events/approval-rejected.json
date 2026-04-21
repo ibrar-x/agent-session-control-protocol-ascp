@@ -1,0 +1,14 @@
+{
+  "id": "evt_0028",
+  "type": "approval.rejected",
+  "ts": "2026-04-21T10:07:00Z",
+  "session_id": "sess_abc123",
+  "run_id": "run_9",
+  "seq": 28,
+  "payload": {
+    "approval_id": "apr_77",
+    "resolved_at": "2026-04-21T10:07:00Z",
+    "actor_id": "device_user_1",
+    "note": "Do not run full integration tests now"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "id": "evt_0003",
+  "type": "session.status_changed",
+  "ts": "2026-04-21T10:06:00Z",
+  "session_id": "sess_abc123",
+  "seq": 3,
+  "payload": {
+    "from": "running",
+    "to": "waiting_approval"
+  }
+}

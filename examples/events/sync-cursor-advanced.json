@@ -1,0 +1,10 @@
+{
+  "id": "evt_0037",
+  "type": "sync.cursor_advanced",
+  "ts": "2026-04-21T10:21:02Z",
+  "session_id": "sess_abc123",
+  "seq": 37,
+  "payload": {
+    "cursor": "seq:45"
+  }
+}

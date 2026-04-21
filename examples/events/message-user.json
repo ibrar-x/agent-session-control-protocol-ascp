@@ -1,0 +1,12 @@
+{
+  "id": "evt_0011",
+  "type": "message.user",
+  "ts": "2026-04-21T10:07:30Z",
+  "session_id": "sess_abc123",
+  "run_id": "run_9",
+  "seq": 11,
+  "payload": {
+    "message_id": "msg_u_1",
+    "content": "Continue, but focus on the checkout API mock."
+  }
+}

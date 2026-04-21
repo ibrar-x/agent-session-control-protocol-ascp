@@ -1,0 +1,12 @@
+{
+  "id": "evt_0022",
+  "type": "terminal.output",
+  "ts": "2026-04-21T10:09:01Z",
+  "session_id": "sess_abc123",
+  "run_id": "run_9",
+  "seq": 22,
+  "payload": {
+    "terminal_id": "pty_1",
+    "chunk": "assistant> inspecting workspace..."
+  }
+}

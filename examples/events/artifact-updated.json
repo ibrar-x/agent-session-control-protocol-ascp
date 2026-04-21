@@ -1,0 +1,14 @@
+{
+  "id": "evt_0031",
+  "type": "artifact.updated",
+  "ts": "2026-04-21T10:12:30Z",
+  "session_id": "sess_abc123",
+  "run_id": "run_9",
+  "seq": 31,
+  "payload": {
+    "artifact_id": "art_3",
+    "changed_fields": [
+      "metadata"
+    ]
+  }
+}

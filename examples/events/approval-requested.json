@@ -1,0 +1,25 @@
+{
+  "id": "evt_0025",
+  "type": "approval.requested",
+  "ts": "2026-04-21T10:06:00Z",
+  "session_id": "sess_abc123",
+  "run_id": "run_9",
+  "seq": 25,
+  "payload": {
+    "approval": {
+      "id": "apr_77",
+      "session_id": "sess_abc123",
+      "run_id": "run_9",
+      "kind": "command",
+      "status": "pending",
+      "title": "Approve shell command",
+      "description": "Agent wants to run flutter test integration_test",
+      "risk_level": "medium",
+      "payload": {
+        "command": "flutter test integration_test",
+        "cwd": "/Users/me/app"
+      },
+      "created_at": "2026-04-21T10:06:00Z"
+    }
+  }
+}

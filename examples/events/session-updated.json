@@ -1,0 +1,19 @@
+{
+  "id": "evt_0002",
+  "type": "session.updated",
+  "ts": "2026-04-21T10:02:00Z",
+  "session_id": "sess_abc123",
+  "seq": 2,
+  "payload": {
+    "session": {
+      "id": "sess_abc123",
+      "runtime_id": "codex_local",
+      "status": "running",
+      "updated_at": "2026-04-21T10:02:00Z"
+    },
+    "changed_fields": [
+      "status",
+      "updated_at"
+    ]
+  }
+}

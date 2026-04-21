@@ -1,0 +1,13 @@
+{
+  "id": "evt_0016",
+  "type": "tool.started",
+  "ts": "2026-04-21T10:08:30Z",
+  "session_id": "sess_abc123",
+  "run_id": "run_9",
+  "seq": 16,
+  "payload": {
+    "tool_call_id": "tool_55",
+    "tool_name": "shell",
+    "summary": "Running flutter test integration_test"
+  }
+}

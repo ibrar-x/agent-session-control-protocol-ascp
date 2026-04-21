@@ -1,0 +1,24 @@
+{
+  "id": "evt_0035",
+  "type": "sync.snapshot",
+  "ts": "2026-04-21T10:21:00Z",
+  "session_id": "sess_abc123",
+  "run_id": "run_9",
+  "seq": 35,
+  "payload": {
+    "session": {
+      "id": "sess_abc123",
+      "runtime_id": "codex_local",
+      "status": "running",
+      "created_at": "2026-04-21T10:00:00Z",
+      "updated_at": "2026-04-21T10:21:00Z"
+    },
+    "active_run": {
+      "id": "run_9",
+      "session_id": "sess_abc123",
+      "status": "running",
+      "started_at": "2026-04-21T10:05:00Z"
+    },
+    "pending_approvals": []
+  }
+}
