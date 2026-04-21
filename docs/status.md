@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-22 - Conformance
+
+- Branch: `feature/conformance`
+- Commit: `not committed`
+- Summary: added a normative compatibility spec, a machine-readable compatibility matrix, golden example manifests spanning requests, responses, events, replay flows, auth failures, and extension handling, and a repeatable top-level conformance harness that composes the existing method, event, replay, auth, and extension validators into evidence-backed ASCP compatibility claims
+- Documentation updated: `plans.md`, `docs/status.md`, `spec/compatibility.md`
+- Next likely step: build `feature/mock-server` against the frozen compatibility matrix and golden conformance fixtures instead of redefining protocol behavior in the mock
+
 ### 2026-04-22 - Extensions
 
 - Branch: `feature/extensions`

@@ -1,0 +1,425 @@
+{
+  "scenarios": [
+    {
+      "id": "core-discovery-and-session-read",
+      "summary": "Capability discovery, runtime listing, session listing, session get, and the core observation envelope surface.",
+      "capabilities": [
+        {
+          "path": "examples/capabilities/capabilities.json",
+          "schema": "CapabilityDocument"
+        }
+      ],
+      "requests": [
+        {
+          "path": "examples/requests/capabilities-get.json",
+          "schema": "CapabilitiesGetRequest"
+        },
+        {
+          "path": "examples/requests/runtimes-list.json",
+          "schema": "RuntimesListRequest"
+        },
+        {
+          "path": "examples/requests/sessions-list.json",
+          "schema": "SessionsListRequest"
+        },
+        {
+          "path": "examples/requests/sessions-get.json",
+          "schema": "SessionsGetRequest"
+        }
+      ],
+      "responses": [
+        {
+          "path": "examples/responses/capabilities-get.json",
+          "schema": "CapabilitiesGetSuccessResponse"
+        },
+        {
+          "path": "examples/responses/runtimes-list.json",
+          "schema": "RuntimesListSuccessResponse"
+        },
+        {
+          "path": "examples/responses/sessions-list.json",
+          "schema": "SessionsListSuccessResponse"
+        },
+        {
+          "path": "examples/responses/sessions-get.json",
+          "schema": "SessionsGetSuccessResponse"
+        }
+      ],
+      "events": [
+        {
+          "path": "examples/events/event-envelope.json",
+          "schema": "EventEnvelope"
+        },
+        {
+          "path": "examples/events/session-created.json",
+          "schema": "SessionCreatedEvent"
+        },
+        {
+          "path": "examples/events/session-status-changed.json",
+          "schema": "SessionStatusChangedEvent"
+        },
+        {
+          "path": "examples/events/error-transient.json",
+          "schema": "ErrorTransientEvent"
+        }
+      ]
+    },
+    {
+      "id": "interactive-session-control",
+      "summary": "Interactive control entry points plus representative transcript, run, tool, and terminal activity.",
+      "requests": [
+        {
+          "path": "examples/requests/sessions-start.json",
+          "schema": "SessionsStartRequest"
+        },
+        {
+          "path": "examples/requests/sessions-resume.json",
+          "schema": "SessionsResumeRequest"
+        },
+        {
+          "path": "examples/requests/sessions-send-input.json",
+          "schema": "SessionsSendInputRequest"
+        },
+        {
+          "path": "examples/requests/sessions-subscribe.json",
+          "schema": "SessionsSubscribeRequest"
+        },
+        {
+          "path": "examples/requests/sessions-unsubscribe.json",
+          "schema": "SessionsUnsubscribeRequest"
+        }
+      ],
+      "responses": [
+        {
+          "path": "examples/responses/sessions-start.json",
+          "schema": "SessionsStartSuccessResponse"
+        },
+        {
+          "path": "examples/responses/sessions-resume.json",
+          "schema": "SessionsResumeSuccessResponse"
+        },
+        {
+          "path": "examples/responses/sessions-send-input.json",
+          "schema": "SessionsSendInputSuccessResponse"
+        },
+        {
+          "path": "examples/responses/sessions-subscribe.json",
+          "schema": "SessionsSubscribeSuccessResponse"
+        },
+        {
+          "path": "examples/responses/sessions-unsubscribe.json",
+          "schema": "SessionsUnsubscribeSuccessResponse"
+        }
+      ],
+      "events": [
+        {
+          "path": "examples/events/run-started.json",
+          "schema": "RunStartedEvent"
+        },
+        {
+          "path": "examples/events/message-user.json",
+          "schema": "MessageUserEvent"
+        },
+        {
+          "path": "examples/events/message-assistant-started.json",
+          "schema": "MessageAssistantStartedEvent"
+        },
+        {
+          "path": "examples/events/message-assistant-delta.json",
+          "schema": "MessageAssistantDeltaEvent"
+        },
+        {
+          "path": "examples/events/tool-started.json",
+          "schema": "ToolStartedEvent"
+        },
+        {
+          "path": "examples/events/tool-completed.json",
+          "schema": "ToolCompletedEvent"
+        },
+        {
+          "path": "examples/events/terminal-output.json",
+          "schema": "TerminalOutputEvent"
+        }
+      ]
+    },
+    {
+      "id": "approval-resolution",
+      "summary": "Approval methods, approval events, approval request shape, and approval-specific auth enforcement.",
+      "requests": [
+        {
+          "path": "examples/requests/approvals-list.json",
+          "schema": "ApprovalsListRequest"
+        },
+        {
+          "path": "examples/requests/approvals-respond.json",
+          "schema": "ApprovalsRespondRequest"
+        }
+      ],
+      "responses": [
+        {
+          "path": "examples/responses/approvals-list.json",
+          "schema": "ApprovalsListSuccessResponse"
+        },
+        {
+          "path": "examples/responses/approvals-respond.json",
+          "schema": "ApprovalsRespondSuccessResponse"
+        }
+      ],
+      "entities": [
+        {
+          "path": "examples/approvals/approval-request-command.json",
+          "schema": "ApprovalRequest"
+        }
+      ],
+      "events": [
+        {
+          "path": "examples/events/approval-requested.json",
+          "schema": "ApprovalRequestedEvent"
+        },
+        {
+          "path": "examples/events/approval-updated.json",
+          "schema": "ApprovalUpdatedEvent"
+        },
+        {
+          "path": "examples/events/approval-approved.json",
+          "schema": "ApprovalApprovedEvent"
+        },
+        {
+          "path": "examples/events/approval-rejected.json",
+          "schema": "ApprovalRejectedEvent"
+        },
+        {
+          "path": "examples/events/approval-expired.json",
+          "schema": "ApprovalExpiredEvent"
+        }
+      ],
+      "errors": [
+        {
+          "path": "examples/errors/approvals-respond-unauthorized.json",
+          "schema": "ApprovalsRespondErrorResponse"
+        },
+        {
+          "path": "examples/errors/approvals-respond-forbidden.json",
+          "schema": "ApprovalsRespondErrorResponse"
+        }
+      ],
+      "fixtures": [
+        {
+          "path": "conformance/fixtures/auth/approval-lifecycle.json"
+        }
+      ]
+    },
+    {
+      "id": "artifact-access",
+      "summary": "Artifact and diff methods, metadata events, and artifact-specific auth enforcement.",
+      "requests": [
+        {
+          "path": "examples/requests/artifacts-list.json",
+          "schema": "ArtifactsListRequest"
+        },
+        {
+          "path": "examples/requests/artifacts-get.json",
+          "schema": "ArtifactsGetRequest"
+        },
+        {
+          "path": "examples/requests/diffs-get.json",
+          "schema": "DiffsGetRequest"
+        }
+      ],
+      "responses": [
+        {
+          "path": "examples/responses/artifacts-list.json",
+          "schema": "ArtifactsListSuccessResponse"
+        },
+        {
+          "path": "examples/responses/artifacts-get.json",
+          "schema": "ArtifactsGetSuccessResponse"
+        },
+        {
+          "path": "examples/responses/diffs-get.json",
+          "schema": "DiffsGetSuccessResponse"
+        }
+      ],
+      "entities": [
+        {
+          "path": "examples/core/artifact.json",
+          "schema": "Artifact"
+        },
+        {
+          "path": "examples/core/diff-summary.json",
+          "schema": "DiffSummary"
+        }
+      ],
+      "events": [
+        {
+          "path": "examples/events/artifact-created.json",
+          "schema": "ArtifactCreatedEvent"
+        },
+        {
+          "path": "examples/events/artifact-updated.json",
+          "schema": "ArtifactUpdatedEvent"
+        },
+        {
+          "path": "examples/events/diff-ready.json",
+          "schema": "DiffReadyEvent"
+        },
+        {
+          "path": "examples/events/diff-updated.json",
+          "schema": "DiffUpdatedEvent"
+        }
+      ],
+      "errors": [
+        {
+          "path": "examples/errors/artifacts-get-unauthorized.json",
+          "schema": "ArtifactsGetErrorResponse"
+        },
+        {
+          "path": "examples/errors/artifacts-get.json",
+          "schema": "ArtifactsGetErrorResponse"
+        }
+      ]
+    },
+    {
+      "id": "replay-recovery",
+      "summary": "Replay-capable recovery with snapshot boundaries, replay markers, and cursor advancement.",
+      "capabilities": [
+        {
+          "path": "examples/capabilities/capabilities.json",
+          "schema": "CapabilityDocument"
+        }
+      ],
+      "requests": [
+        {
+          "path": "examples/requests/sessions-subscribe.json",
+          "schema": "SessionsSubscribeRequest"
+        },
+        {
+          "path": "examples/requests/sessions-resume.json",
+          "schema": "SessionsResumeRequest"
+        }
+      ],
+      "responses": [
+        {
+          "path": "examples/responses/sessions-subscribe.json",
+          "schema": "SessionsSubscribeSuccessResponse"
+        },
+        {
+          "path": "examples/responses/sessions-resume.json",
+          "schema": "SessionsResumeSuccessResponse"
+        }
+      ],
+      "events": [
+        {
+          "path": "examples/events/sync-snapshot.json",
+          "schema": "SyncSnapshotEvent"
+        },
+        {
+          "path": "examples/events/sync-replayed.json",
+          "schema": "SyncReplayedEvent"
+        },
+        {
+          "path": "examples/events/sync-cursor-advanced.json",
+          "schema": "SyncCursorAdvancedEvent"
+        }
+      ],
+      "fixtures": [
+        {
+          "path": "conformance/fixtures/replay/subscribe-with-snapshot.json"
+        },
+        {
+          "path": "conformance/fixtures/replay/subscribe-from-seq.json"
+        },
+        {
+          "path": "conformance/fixtures/replay/subscribe-from-event-id.json"
+        },
+        {
+          "path": "conformance/fixtures/replay/subscribe-with-opaque-cursor.json"
+        },
+        {
+          "path": "conformance/fixtures/replay/replay-retention-fallback.json"
+        }
+      ]
+    },
+    {
+      "id": "auth-failure-classification",
+      "summary": "Protocol-wide `UNAUTHORIZED` versus `FORBIDDEN` classification across session, approval, and artifact methods.",
+      "errors": [
+        {
+          "path": "examples/errors/sessions-start-unauthorized.json",
+          "schema": "SessionsStartErrorResponse"
+        },
+        {
+          "path": "examples/errors/sessions-start-forbidden.json",
+          "schema": "SessionsStartErrorResponse"
+        },
+        {
+          "path": "examples/errors/sessions-list-unauthorized.json",
+          "schema": "SessionsListErrorResponse"
+        },
+        {
+          "path": "examples/errors/approvals-respond-unauthorized.json",
+          "schema": "ApprovalsRespondErrorResponse"
+        },
+        {
+          "path": "examples/errors/approvals-respond-forbidden.json",
+          "schema": "ApprovalsRespondErrorResponse"
+        },
+        {
+          "path": "examples/errors/artifacts-get-unauthorized.json",
+          "schema": "ArtifactsGetErrorResponse"
+        },
+        {
+          "path": "examples/errors/artifacts-get.json",
+          "schema": "ArtifactsGetErrorResponse"
+        }
+      ],
+      "fixtures": [
+        {
+          "path": "conformance/fixtures/auth/auth-scope-matrix.json"
+        }
+      ]
+    },
+    {
+      "id": "extension-ignore-safe",
+      "summary": "Unknown extension fields, capability flags, methods, and events remain additive and safely ignorable.",
+      "capabilities": [
+        {
+          "path": "examples/capabilities/capabilities-with-extensions.json",
+          "schema": "CapabilityDocument"
+        }
+      ],
+      "requests": [
+        {
+          "path": "examples/extensions/method-request.json",
+          "schema": "RequestEnvelope"
+        }
+      ],
+      "responses": [
+        {
+          "path": "examples/extensions/method-response.json",
+          "schema": "SuccessResponseEnvelope"
+        }
+      ],
+      "events": [
+        {
+          "path": "examples/extensions/event-envelope.json",
+          "schema": "EventEnvelope"
+        }
+      ],
+      "entities": [
+        {
+          "path": "examples/extensions/session-field-extension.json",
+          "schema": "Session"
+        }
+      ],
+      "fixtures": [
+        {
+          "path": "conformance/fixtures/extensions/extension-catalog.json"
+        },
+        {
+          "path": "conformance/fixtures/extensions/ignore-behavior.json"
+        }
+      ]
+    }
+  ]
+}

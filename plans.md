@@ -12,9 +12,9 @@ This file tracks the active scoped feature for the current branch.
 
 ## Active Feature
 
-- Feature name: Extensions
-- Branch: `feature/extensions`
-- Goal: make ASCP extension rules, namespacing expectations, capability advertisement, and ignore-safe behavior explicit and testable on top of the frozen schema, method, event, replay, and auth contracts without widening into vendor-specific feature design or mock-server logic
+- Feature name: Conformance
+- Branch: `feature/conformance`
+- Goal: turn the frozen ASCP v0.1 protocol contracts into evidence-backed compatibility claims through a compatibility matrix, golden example manifests, and a top-level conformance validator without reopening schema, method, event, replay, auth, or extension design
 - Source inputs:
   - `AGENTS.md`
   - `plans.md`
@@ -23,78 +23,81 @@ This file tracks the active scoped feature for the current branch.
   - `ASCP_Protocol_PRD_and_Build_Guide.md`
   - `README.md`
   - `docs/repo-operating-system.md`
-  - `docs/prompts/extensions.md`
-  - `docs/superpowers/specs/2026-04-22-extensions-design.md`
+  - `docs/prompts/conformance.md`
+  - `schema/ascp-core.schema.json`
+  - `schema/ascp-capabilities.schema.json`
+  - `schema/ascp-errors.schema.json`
+  - `schema/ascp-methods.schema.json`
+  - `schema/ascp-events.schema.json`
   - `spec/methods.md`
   - `spec/events.md`
   - `spec/replay.md`
   - `spec/auth.md`
-  - `schema/ascp-core.schema.json`
-  - `schema/ascp-capabilities.schema.json`
-  - `schema/ascp-methods.schema.json`
-  - `schema/ascp-events.schema.json`
-  - capability-, method-, event-, and auth-related examples under `examples/`
-  - current chat requirements for the extensions slice only
+  - `spec/extensions.md`
+  - protocol examples under `examples/`
+  - replay, auth, and extension fixtures under `conformance/fixtures/`
+  - current chat requirements for the conformance slice only
 
 ## Bootstrap Outcome
 
 - The repository-level workstream breakdown already exists.
-- The dependency gate for extensions is met: schema foundation, method contracts, event contracts, replay semantics, and auth hooks are present and merged on `main`.
-- Frozen upstream contracts already provide the open capability document, open core entities, flexible request and event envelopes, and closed method-param and core-event-payload schemas that extension rules must respect.
-- Existing extension material is limited to brief spec text and one capability example; there is no dedicated normative extension document, no focused extension fixture set, and no extension-specific validator yet.
-- This branch starts from up-to-date `main` at commit `ad1f483`.
+- The dependency gate for conformance is met: schema foundation, method contracts, event contracts, replay semantics, auth and approvals, and extension rules are present on `main`.
+- Existing branch outputs already provide schema-valid protocol nouns, request and response examples for the full core method surface, one example for every core event type, replay fixture manifests, auth and approval fixtures, and extension ignore-behavior fixtures.
+- The remaining gap is the top-level conformance layer: there is no dedicated compatibility document, no machine-readable compatibility matrix, no golden example manifest spanning the compatibility ladder, and no repeatable harness that composes the earlier validators into evidence-backed compatibility claims.
+- This branch starts from up-to-date `main` at commit `f5b281c`.
 
 ## Feature Boundary
 
 Included in this branch:
 
-- normative extension semantics in `spec/extensions.md`
-- concrete namespacing rules for extension methods, events, fields, and capability flags
-- capability advertisement guidance for active extensions
-- explicit unknown-extension handling rules
-- explicit documentation of open additive surfaces versus closed frozen schemas
-- extension-focused examples and minimal conformance validation
+- normative compatibility documentation in `spec/compatibility.md`
+- a machine-readable compatibility matrix tied to exact methods, events, capabilities, and evidence paths
+- golden example manifests covering requests, responses, events, replay flows, auth failures, and extension handling
+- a top-level conformance validator and shell entrypoint that validate the compatibility claims and compose the existing contract validators
+- checkpoint updates for this branch only
 
 Explicitly out of scope:
 
-- vendor-specific extension feature design or policy behavior
-- transport-level extension negotiation or discovery handshakes
-- mock-server runtime logic beyond what is needed to express fixtures
-- reopening frozen core method params, core event payload contracts, or auth semantics unless a contradiction is discovered
-- broader compatibility-matrix or mock-server work beyond the extensions slice
+- mock server runtime behavior or transport implementation
+- new protocol nouns, method params, event payloads, or auth semantics
+- reopening replay, extension, or approval rules except to detect and report a validation gap
+- product client code, SDK code, or UI behavior
+- vendor-specific compatibility programs beyond the ASCP v0.1 levels
 
 ## Tasks
 
 | Status | Task | Acceptance Criteria |
 | --- | --- | --- |
-| done | rewrite the active branch plan for extensions | `plans.md` records the extensions branch, source inputs, dependency gate, feature boundary, task list, and acceptance criteria |
-| done | add the normative extensions document | `spec/extensions.md` defines extension rules, namespacing, capability advertisement, unknown handling, and the open-versus-closed schema boundary |
-| done | add extension examples | `examples/capabilities/` and `examples/extensions/` contain concrete namespaced method, event, field, and capability examples aligned with the frozen schemas |
-| done | add repeatable extension validation | `scripts/validate_extension_semantics.sh` and `conformance/tests/validate_extension_semantics.py` validate the extension fixture set and extension-specific invariants |
-| done | verify extension assets and checkpoint the branch | fresh extension validation passes, `plans.md` is updated to reflect completion, and `docs/status.md` records the extensions checkpoint |
+| done | rewrite the active branch plan for conformance | `plans.md` records the conformance branch, source inputs, dependency gate, feature boundary, task list, and acceptance criteria |
+| done | add the normative compatibility document | `spec/compatibility.md` defines each compatibility level, the required methods, events, and capability evidence, and the evidence model for conformance claims |
+| done | add machine-readable compatibility fixtures | `conformance/fixtures/compatibility/` contains a compatibility matrix and golden example manifests that point to concrete requests, responses, events, replay flows, auth failures, and extension fixtures |
+| done | add a repeatable top-level conformance validator | `conformance/validators/compatibility.py`, `conformance/tests/validate_conformance.py`, and `scripts/validate_conformance.sh` validate the compatibility manifests, schema-backed golden examples, and composed upstream validators |
+| done | verify conformance assets and checkpoint the branch | fresh conformance validation passes, `plans.md` is updated to reflect completion, and `docs/status.md` records the conformance checkpoint |
 
 ## Acceptance Criteria
 
 The feature is complete only when all of the following are true:
 
-- extension rules are explicit and consistent with the source specs
-- namespacing guidance is concrete for methods, events, fields, and capability flags
-- capability advertisement for active extensions is documented and illustrated
-- unknown extension fields and unknown extension events are explicitly ignore-safe by default
-- the open-versus-closed schema boundary is documented so later branches do not add inline fields to frozen core params or exact core event payloads
-- resulting docs, examples, and fixtures are sufficient for later conformance work without reopening core semantics
+- compatibility levels are explicit and consistent with the detailed spec and PRD
+- schema validity is testable through the conformance harness
+- method request and response validation is testable through the conformance harness
+- event payload validation is testable through the conformance harness
+- replay ordering and snapshot boundaries are testable through referenced replay fixtures and validation
+- auth failure handling is testable through referenced auth fixtures and validation
+- unknown extension ignore behavior is testable through referenced extension fixtures and validation
+- compatibility claims are backed by concrete fixtures and validators rather than prose only
 
 ## Next Likely Step
 
-After this branch is complete, the next feature should be the broader `conformance` slice or `mock-server`, using the extension rules from this branch as stable inputs rather than reopening namespacing semantics.
+After this branch is complete, the next feature should be `feature/mock-server`, using the conformance matrix and golden fixtures as stable inputs rather than redefining compatibility behavior inside the mock implementation.
 
 ## Completion Outcome
 
-- Status: complete on `feature/extensions`
-- Validation evidence: `./scripts/validate_extension_semantics.sh` completed successfully and validated 5 extension surfaces and 5 ignore-behavior rules
+- Status: complete on `feature/conformance`
+- Validation evidence: `./scripts/validate_conformance.sh` completed successfully and validated 5 compatibility levels, 7 golden scenarios, 76 schema-backed evidence files, and 5 composed validator scripts
 - Merge target: `main`
-- Recommended next branch after completion: `feature/conformance` or `feature/mock-server`
+- Recommended next branch after completion: `feature/mock-server`
 - Recommended current scope:
-  - extension rules, namespacing, and capability advertisement built on the frozen schema and contract surface
-  - ignore-safe behavior for unknown extension fields and namespaced events
-  - explicit open-versus-closed schema guidance for later conformance work
+  - evidence-backed compatibility claims tied to the frozen ASCP v0.1 contract surface
+  - machine-readable golden manifests for request, response, event, replay, auth, and extension evidence
+  - a top-level conformance harness that composes the existing contract validators without reopening upstream semantics
