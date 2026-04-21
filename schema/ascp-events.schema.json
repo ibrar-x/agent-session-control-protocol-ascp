@@ -56,7 +56,49 @@
       ],
       "properties": {
         "session": {
-          "$ref": "ascp-core.schema.json#/$defs/Session"
+          "type": "object",
+          "required": [
+            "id",
+            "runtime_id",
+            "status",
+            "updated_at"
+          ],
+          "properties": {
+            "id": {
+              "$ref": "ascp-core.schema.json#/$defs/Id"
+            },
+            "runtime_id": {
+              "$ref": "ascp-core.schema.json#/$defs/Id"
+            },
+            "title": {
+              "type": "string"
+            },
+            "workspace": {
+              "type": "string"
+            },
+            "status": {
+              "$ref": "ascp-core.schema.json#/$defs/SessionStatus"
+            },
+            "created_at": {
+              "$ref": "ascp-core.schema.json#/$defs/TimestampUtc"
+            },
+            "updated_at": {
+              "$ref": "ascp-core.schema.json#/$defs/TimestampUtc"
+            },
+            "last_activity_at": {
+              "$ref": "ascp-core.schema.json#/$defs/TimestampUtc"
+            },
+            "summary": {
+              "type": "string"
+            },
+            "active_run_id": {
+              "$ref": "ascp-core.schema.json#/$defs/Id"
+            },
+            "metadata": {
+              "$ref": "ascp-core.schema.json#/$defs/StringMap"
+            }
+          },
+          "additionalProperties": true
         },
         "changed_fields": {
           "$ref": "#/$defs/ChangedFields"
