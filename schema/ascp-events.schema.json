@@ -1,0 +1,1513 @@
+{
+  "$id": "https://ascp.dev/schema/v0.1/ascp-events.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ASCP Event Contracts",
+  "description": "Exact EventEnvelope payload contracts for every ASCP core event type.",
+  "$defs": {
+    "ChangedFields": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "ConnectionState": {
+      "type": "string",
+      "enum": [
+        "connected",
+        "disconnected",
+        "reconnecting",
+        "reconnected"
+      ]
+    },
+    "Cursor": {
+      "type": "string",
+      "minLength": 1
+    },
+    "NonNegativeInteger": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "PositiveInteger": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "BaseEvent": {
+      "$ref": "ascp-core.schema.json#/$defs/EventEnvelope"
+    },
+    "SessionCreatedPayload": {
+      "type": "object",
+      "required": [
+        "session"
+      ],
+      "properties": {
+        "session": {
+          "$ref": "ascp-core.schema.json#/$defs/Session"
+        }
+      },
+      "additionalProperties": false
+    },
+    "SessionUpdatedPayload": {
+      "type": "object",
+      "required": [
+        "session",
+        "changed_fields"
+      ],
+      "properties": {
+        "session": {
+          "$ref": "ascp-core.schema.json#/$defs/Session"
+        },
+        "changed_fields": {
+          "$ref": "#/$defs/ChangedFields"
+        }
+      },
+      "additionalProperties": false
+    },
+    "SessionStatusChangedPayload": {
+      "type": "object",
+      "required": [
+        "from",
+        "to"
+      ],
+      "properties": {
+        "from": {
+          "$ref": "ascp-core.schema.json#/$defs/SessionStatus"
+        },
+        "to": {
+          "$ref": "ascp-core.schema.json#/$defs/SessionStatus"
+        }
+      },
+      "additionalProperties": false
+    },
+    "SessionDeletedPayload": {
+      "type": "object",
+      "required": [
+        "reason"
+      ],
+      "properties": {
+        "reason": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "RunStartedPayload": {
+      "type": "object",
+      "required": [
+        "run"
+      ],
+      "properties": {
+        "run": {
+          "$ref": "ascp-core.schema.json#/$defs/Run"
+        }
+      },
+      "additionalProperties": false
+    },
+    "RunPausedPayload": {
+      "type": "object",
+      "required": [
+        "run_id",
+        "reason"
+      ],
+      "properties": {
+        "run_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "RunResumedPayload": {
+      "type": "object",
+      "required": [
+        "run_id",
+        "reason"
+      ],
+      "properties": {
+        "run_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "RunCompletedPayload": {
+      "type": "object",
+      "required": [
+        "run_id",
+        "ended_at",
+        "exit_code"
+      ],
+      "properties": {
+        "run_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "ended_at": {
+          "$ref": "ascp-core.schema.json#/$defs/TimestampUtc"
+        },
+        "exit_code": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false
+    },
+    "RunFailedPayload": {
+      "type": "object",
+      "required": [
+        "run_id",
+        "ended_at",
+        "error_code",
+        "message"
+      ],
+      "properties": {
+        "run_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "ended_at": {
+          "$ref": "ascp-core.schema.json#/$defs/TimestampUtc"
+        },
+        "error_code": {
+          "$ref": "ascp-errors.schema.json#/$defs/ErrorCode"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "RunCancelledPayload": {
+      "type": "object",
+      "required": [
+        "run_id",
+        "ended_at",
+        "reason"
+      ],
+      "properties": {
+        "run_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "ended_at": {
+          "$ref": "ascp-core.schema.json#/$defs/TimestampUtc"
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "MessageUserPayload": {
+      "type": "object",
+      "required": [
+        "message_id",
+        "content"
+      ],
+      "properties": {
+        "message_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "content": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "MessageAssistantStartedPayload": {
+      "type": "object",
+      "required": [
+        "message_id"
+      ],
+      "properties": {
+        "message_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        }
+      },
+      "additionalProperties": false
+    },
+    "MessageAssistantDeltaPayload": {
+      "type": "object",
+      "required": [
+        "message_id",
+        "delta"
+      ],
+      "properties": {
+        "message_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "delta": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "MessageAssistantCompletedPayload": {
+      "type": "object",
+      "required": [
+        "message_id",
+        "content"
+      ],
+      "properties": {
+        "message_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "content": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "MessageSystemPayload": {
+      "type": "object",
+      "required": [
+        "message_id",
+        "content"
+      ],
+      "properties": {
+        "message_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "content": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ToolStartedPayload": {
+      "type": "object",
+      "required": [
+        "tool_call_id",
+        "tool_name",
+        "summary"
+      ],
+      "properties": {
+        "tool_call_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "tool_name": {
+          "type": "string"
+        },
+        "summary": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ToolStdoutPayload": {
+      "type": "object",
+      "required": [
+        "tool_call_id",
+        "chunk"
+      ],
+      "properties": {
+        "tool_call_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "chunk": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ToolStderrPayload": {
+      "type": "object",
+      "required": [
+        "tool_call_id",
+        "chunk"
+      ],
+      "properties": {
+        "tool_call_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "chunk": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ToolCompletedPayload": {
+      "type": "object",
+      "required": [
+        "tool_call_id",
+        "exit_code"
+      ],
+      "properties": {
+        "tool_call_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "exit_code": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ToolFailedPayload": {
+      "type": "object",
+      "required": [
+        "tool_call_id",
+        "exit_code",
+        "message"
+      ],
+      "properties": {
+        "tool_call_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "exit_code": {
+          "type": "integer"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "TerminalOpenedPayload": {
+      "type": "object",
+      "required": [
+        "terminal_id",
+        "cols",
+        "rows"
+      ],
+      "properties": {
+        "terminal_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "cols": {
+          "$ref": "#/$defs/PositiveInteger"
+        },
+        "rows": {
+          "$ref": "#/$defs/PositiveInteger"
+        }
+      },
+      "additionalProperties": false
+    },
+    "TerminalOutputPayload": {
+      "type": "object",
+      "required": [
+        "terminal_id",
+        "chunk"
+      ],
+      "properties": {
+        "terminal_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "chunk": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "TerminalClosedPayload": {
+      "type": "object",
+      "required": [
+        "terminal_id",
+        "exit_code"
+      ],
+      "properties": {
+        "terminal_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "exit_code": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false
+    },
+    "TerminalResizeRequestedPayload": {
+      "type": "object",
+      "required": [
+        "terminal_id",
+        "cols",
+        "rows"
+      ],
+      "properties": {
+        "terminal_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "cols": {
+          "$ref": "#/$defs/PositiveInteger"
+        },
+        "rows": {
+          "$ref": "#/$defs/PositiveInteger"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ApprovalRequestedPayload": {
+      "type": "object",
+      "required": [
+        "approval"
+      ],
+      "properties": {
+        "approval": {
+          "$ref": "ascp-core.schema.json#/$defs/ApprovalRequest"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ApprovalUpdatedPayload": {
+      "type": "object",
+      "required": [
+        "approval_id",
+        "changed_fields"
+      ],
+      "properties": {
+        "approval_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "changed_fields": {
+          "$ref": "#/$defs/ChangedFields"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ApprovalApprovedPayload": {
+      "type": "object",
+      "required": [
+        "approval_id",
+        "resolved_at",
+        "actor_id"
+      ],
+      "properties": {
+        "approval_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "resolved_at": {
+          "$ref": "ascp-core.schema.json#/$defs/TimestampUtc"
+        },
+        "actor_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ApprovalRejectedPayload": {
+      "type": "object",
+      "required": [
+        "approval_id",
+        "resolved_at",
+        "actor_id",
+        "note"
+      ],
+      "properties": {
+        "approval_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "resolved_at": {
+          "$ref": "ascp-core.schema.json#/$defs/TimestampUtc"
+        },
+        "actor_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "note": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ApprovalExpiredPayload": {
+      "type": "object",
+      "required": [
+        "approval_id",
+        "expired_at"
+      ],
+      "properties": {
+        "approval_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "expired_at": {
+          "$ref": "ascp-core.schema.json#/$defs/TimestampUtc"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ArtifactCreatedPayload": {
+      "type": "object",
+      "required": [
+        "artifact"
+      ],
+      "properties": {
+        "artifact": {
+          "$ref": "ascp-core.schema.json#/$defs/Artifact"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ArtifactUpdatedPayload": {
+      "type": "object",
+      "required": [
+        "artifact_id",
+        "changed_fields"
+      ],
+      "properties": {
+        "artifact_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "changed_fields": {
+          "$ref": "#/$defs/ChangedFields"
+        }
+      },
+      "additionalProperties": false
+    },
+    "DiffReadyPayload": {
+      "type": "object",
+      "required": [
+        "diff"
+      ],
+      "properties": {
+        "diff": {
+          "$ref": "ascp-core.schema.json#/$defs/DiffSummary"
+        }
+      },
+      "additionalProperties": false
+    },
+    "DiffUpdatedPayload": {
+      "type": "object",
+      "required": [
+        "session_id",
+        "run_id",
+        "changed_fields"
+      ],
+      "properties": {
+        "session_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "run_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "changed_fields": {
+          "$ref": "#/$defs/ChangedFields"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ConnectionStateChangedPayload": {
+      "type": "object",
+      "required": [
+        "state"
+      ],
+      "properties": {
+        "state": {
+          "$ref": "#/$defs/ConnectionState"
+        }
+      },
+      "additionalProperties": false
+    },
+    "SyncSnapshotPayload": {
+      "type": "object",
+      "required": [
+        "session",
+        "pending_approvals"
+      ],
+      "properties": {
+        "session": {
+          "$ref": "ascp-core.schema.json#/$defs/Session"
+        },
+        "active_run": {
+          "$ref": "ascp-core.schema.json#/$defs/Run"
+        },
+        "pending_approvals": {
+          "type": "array",
+          "items": {
+            "$ref": "ascp-core.schema.json#/$defs/ApprovalRequest"
+          }
+        },
+        "summary": {
+          "$ref": "ascp-core.schema.json#/$defs/FlexibleObject"
+        }
+      },
+      "additionalProperties": false
+    },
+    "SyncReplayedPayload": {
+      "type": "object",
+      "required": [
+        "from_seq",
+        "to_seq",
+        "event_count"
+      ],
+      "properties": {
+        "from_seq": {
+          "$ref": "#/$defs/NonNegativeInteger"
+        },
+        "to_seq": {
+          "$ref": "#/$defs/NonNegativeInteger"
+        },
+        "event_count": {
+          "$ref": "#/$defs/NonNegativeInteger"
+        }
+      },
+      "additionalProperties": false
+    },
+    "SyncCursorAdvancedPayload": {
+      "type": "object",
+      "required": [
+        "cursor"
+      ],
+      "properties": {
+        "cursor": {
+          "$ref": "#/$defs/Cursor"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ErrorTransientPayload": {
+      "type": "object",
+      "required": [
+        "code",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "$ref": "ascp-errors.schema.json#/$defs/ErrorCode"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ErrorFatalPayload": {
+      "type": "object",
+      "required": [
+        "code",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "$ref": "ascp-errors.schema.json#/$defs/ErrorCode"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "SessionCreatedEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "session.created"
+            },
+            "payload": {
+              "$ref": "#/$defs/SessionCreatedPayload"
+            }
+          }
+        }
+      ]
+    },
+    "SessionUpdatedEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "session.updated"
+            },
+            "payload": {
+              "$ref": "#/$defs/SessionUpdatedPayload"
+            }
+          }
+        }
+      ]
+    },
+    "SessionStatusChangedEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "session.status_changed"
+            },
+            "payload": {
+              "$ref": "#/$defs/SessionStatusChangedPayload"
+            }
+          }
+        }
+      ]
+    },
+    "SessionDeletedEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "session.deleted"
+            },
+            "payload": {
+              "$ref": "#/$defs/SessionDeletedPayload"
+            }
+          }
+        }
+      ]
+    },
+    "RunStartedEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "run.started"
+            },
+            "payload": {
+              "$ref": "#/$defs/RunStartedPayload"
+            }
+          }
+        }
+      ]
+    },
+    "RunPausedEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "run.paused"
+            },
+            "payload": {
+              "$ref": "#/$defs/RunPausedPayload"
+            }
+          }
+        }
+      ]
+    },
+    "RunResumedEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "run.resumed"
+            },
+            "payload": {
+              "$ref": "#/$defs/RunResumedPayload"
+            }
+          }
+        }
+      ]
+    },
+    "RunCompletedEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "run.completed"
+            },
+            "payload": {
+              "$ref": "#/$defs/RunCompletedPayload"
+            }
+          }
+        }
+      ]
+    },
+    "RunFailedEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "run.failed"
+            },
+            "payload": {
+              "$ref": "#/$defs/RunFailedPayload"
+            }
+          }
+        }
+      ]
+    },
+    "RunCancelledEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "run.cancelled"
+            },
+            "payload": {
+              "$ref": "#/$defs/RunCancelledPayload"
+            }
+          }
+        }
+      ]
+    },
+    "MessageUserEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "message.user"
+            },
+            "payload": {
+              "$ref": "#/$defs/MessageUserPayload"
+            }
+          }
+        }
+      ]
+    },
+    "MessageAssistantStartedEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "message.assistant.started"
+            },
+            "payload": {
+              "$ref": "#/$defs/MessageAssistantStartedPayload"
+            }
+          }
+        }
+      ]
+    },
+    "MessageAssistantDeltaEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "message.assistant.delta"
+            },
+            "payload": {
+              "$ref": "#/$defs/MessageAssistantDeltaPayload"
+            }
+          }
+        }
+      ]
+    },
+    "MessageAssistantCompletedEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "message.assistant.completed"
+            },
+            "payload": {
+              "$ref": "#/$defs/MessageAssistantCompletedPayload"
+            }
+          }
+        }
+      ]
+    },
+    "MessageSystemEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "message.system"
+            },
+            "payload": {
+              "$ref": "#/$defs/MessageSystemPayload"
+            }
+          }
+        }
+      ]
+    },
+    "ToolStartedEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "tool.started"
+            },
+            "payload": {
+              "$ref": "#/$defs/ToolStartedPayload"
+            }
+          }
+        }
+      ]
+    },
+    "ToolStdoutEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "tool.stdout"
+            },
+            "payload": {
+              "$ref": "#/$defs/ToolStdoutPayload"
+            }
+          }
+        }
+      ]
+    },
+    "ToolStderrEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "tool.stderr"
+            },
+            "payload": {
+              "$ref": "#/$defs/ToolStderrPayload"
+            }
+          }
+        }
+      ]
+    },
+    "ToolCompletedEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "tool.completed"
+            },
+            "payload": {
+              "$ref": "#/$defs/ToolCompletedPayload"
+            }
+          }
+        }
+      ]
+    },
+    "ToolFailedEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "tool.failed"
+            },
+            "payload": {
+              "$ref": "#/$defs/ToolFailedPayload"
+            }
+          }
+        }
+      ]
+    },
+    "TerminalOpenedEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "terminal.opened"
+            },
+            "payload": {
+              "$ref": "#/$defs/TerminalOpenedPayload"
+            }
+          }
+        }
+      ]
+    },
+    "TerminalOutputEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "terminal.output"
+            },
+            "payload": {
+              "$ref": "#/$defs/TerminalOutputPayload"
+            }
+          }
+        }
+      ]
+    },
+    "TerminalClosedEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "terminal.closed"
+            },
+            "payload": {
+              "$ref": "#/$defs/TerminalClosedPayload"
+            }
+          }
+        }
+      ]
+    },
+    "TerminalResizeRequestedEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "terminal.resize_requested"
+            },
+            "payload": {
+              "$ref": "#/$defs/TerminalResizeRequestedPayload"
+            }
+          }
+        }
+      ]
+    },
+    "ApprovalRequestedEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "approval.requested"
+            },
+            "payload": {
+              "$ref": "#/$defs/ApprovalRequestedPayload"
+            }
+          }
+        }
+      ]
+    },
+    "ApprovalUpdatedEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "approval.updated"
+            },
+            "payload": {
+              "$ref": "#/$defs/ApprovalUpdatedPayload"
+            }
+          }
+        }
+      ]
+    },
+    "ApprovalApprovedEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "approval.approved"
+            },
+            "payload": {
+              "$ref": "#/$defs/ApprovalApprovedPayload"
+            }
+          }
+        }
+      ]
+    },
+    "ApprovalRejectedEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "approval.rejected"
+            },
+            "payload": {
+              "$ref": "#/$defs/ApprovalRejectedPayload"
+            }
+          }
+        }
+      ]
+    },
+    "ApprovalExpiredEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "approval.expired"
+            },
+            "payload": {
+              "$ref": "#/$defs/ApprovalExpiredPayload"
+            }
+          }
+        }
+      ]
+    },
+    "ArtifactCreatedEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "artifact.created"
+            },
+            "payload": {
+              "$ref": "#/$defs/ArtifactCreatedPayload"
+            }
+          }
+        }
+      ]
+    },
+    "ArtifactUpdatedEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "artifact.updated"
+            },
+            "payload": {
+              "$ref": "#/$defs/ArtifactUpdatedPayload"
+            }
+          }
+        }
+      ]
+    },
+    "DiffReadyEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "diff.ready"
+            },
+            "payload": {
+              "$ref": "#/$defs/DiffReadyPayload"
+            }
+          }
+        }
+      ]
+    },
+    "DiffUpdatedEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "diff.updated"
+            },
+            "payload": {
+              "$ref": "#/$defs/DiffUpdatedPayload"
+            }
+          }
+        }
+      ]
+    },
+    "ConnectionStateChangedEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "connection.state_changed"
+            },
+            "payload": {
+              "$ref": "#/$defs/ConnectionStateChangedPayload"
+            }
+          }
+        }
+      ]
+    },
+    "SyncSnapshotEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "sync.snapshot"
+            },
+            "payload": {
+              "$ref": "#/$defs/SyncSnapshotPayload"
+            }
+          }
+        }
+      ]
+    },
+    "SyncReplayedEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "sync.replayed"
+            },
+            "payload": {
+              "$ref": "#/$defs/SyncReplayedPayload"
+            }
+          }
+        }
+      ]
+    },
+    "SyncCursorAdvancedEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "sync.cursor_advanced"
+            },
+            "payload": {
+              "$ref": "#/$defs/SyncCursorAdvancedPayload"
+            }
+          }
+        }
+      ]
+    },
+    "ErrorTransientEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "error.transient"
+            },
+            "payload": {
+              "$ref": "#/$defs/ErrorTransientPayload"
+            }
+          }
+        }
+      ]
+    },
+    "ErrorFatalEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "error.fatal"
+            },
+            "payload": {
+              "$ref": "#/$defs/ErrorFatalPayload"
+            }
+          }
+        }
+      ]
+    },
+    "AnyEvent": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/SessionCreatedEvent"
+        },
+        {
+          "$ref": "#/$defs/SessionUpdatedEvent"
+        },
+        {
+          "$ref": "#/$defs/SessionStatusChangedEvent"
+        },
+        {
+          "$ref": "#/$defs/SessionDeletedEvent"
+        },
+        {
+          "$ref": "#/$defs/RunStartedEvent"
+        },
+        {
+          "$ref": "#/$defs/RunPausedEvent"
+        },
+        {
+          "$ref": "#/$defs/RunResumedEvent"
+        },
+        {
+          "$ref": "#/$defs/RunCompletedEvent"
+        },
+        {
+          "$ref": "#/$defs/RunFailedEvent"
+        },
+        {
+          "$ref": "#/$defs/RunCancelledEvent"
+        },
+        {
+          "$ref": "#/$defs/MessageUserEvent"
+        },
+        {
+          "$ref": "#/$defs/MessageAssistantStartedEvent"
+        },
+        {
+          "$ref": "#/$defs/MessageAssistantDeltaEvent"
+        },
+        {
+          "$ref": "#/$defs/MessageAssistantCompletedEvent"
+        },
+        {
+          "$ref": "#/$defs/MessageSystemEvent"
+        },
+        {
+          "$ref": "#/$defs/ToolStartedEvent"
+        },
+        {
+          "$ref": "#/$defs/ToolStdoutEvent"
+        },
+        {
+          "$ref": "#/$defs/ToolStderrEvent"
+        },
+        {
+          "$ref": "#/$defs/ToolCompletedEvent"
+        },
+        {
+          "$ref": "#/$defs/ToolFailedEvent"
+        },
+        {
+          "$ref": "#/$defs/TerminalOpenedEvent"
+        },
+        {
+          "$ref": "#/$defs/TerminalOutputEvent"
+        },
+        {
+          "$ref": "#/$defs/TerminalClosedEvent"
+        },
+        {
+          "$ref": "#/$defs/TerminalResizeRequestedEvent"
+        },
+        {
+          "$ref": "#/$defs/ApprovalRequestedEvent"
+        },
+        {
+          "$ref": "#/$defs/ApprovalUpdatedEvent"
+        },
+        {
+          "$ref": "#/$defs/ApprovalApprovedEvent"
+        },
+        {
+          "$ref": "#/$defs/ApprovalRejectedEvent"
+        },
+        {
+          "$ref": "#/$defs/ApprovalExpiredEvent"
+        },
+        {
+          "$ref": "#/$defs/ArtifactCreatedEvent"
+        },
+        {
+          "$ref": "#/$defs/ArtifactUpdatedEvent"
+        },
+        {
+          "$ref": "#/$defs/DiffReadyEvent"
+        },
+        {
+          "$ref": "#/$defs/DiffUpdatedEvent"
+        },
+        {
+          "$ref": "#/$defs/ConnectionStateChangedEvent"
+        },
+        {
+          "$ref": "#/$defs/SyncSnapshotEvent"
+        },
+        {
+          "$ref": "#/$defs/SyncReplayedEvent"
+        },
+        {
+          "$ref": "#/$defs/SyncCursorAdvancedEvent"
+        },
+        {
+          "$ref": "#/$defs/ErrorTransientEvent"
+        },
+        {
+          "$ref": "#/$defs/ErrorFatalEvent"
+        }
+      ]
+    }
+  },
+  "$ref": "#/$defs/AnyEvent"
+}
