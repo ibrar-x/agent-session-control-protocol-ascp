@@ -119,6 +119,8 @@ The current compatibility ladder is:
 The repo now includes:
 
 - [`AGENTS.md`](./AGENTS.md) for project-specific guidance to AI coding agents
+- [`plans.md`](./plans.md) for the active scoped task list
+- [`docs/status.md`](./docs/status.md) for checkpoint logging between sessions
 - [`.agents/skills/`](./.agents/skills/) for reusable ASCP build skills
 
 The detailed spec recommends growing the repository toward a protocol-first layout with documentation, schemas, examples, conformance fixtures, and a mock server before any product UI work.
@@ -148,6 +150,7 @@ The repo-local skill pack is focused on the main ASCP workstreams:
 - `ascp-auth-approvals`
 - `ascp-conformance-mock-server`
 - `ascp-documentation-discipline`
+- `ascp-task-operating-system`
 
 These are intended to help future agents keep protocol work aligned with the draft spec instead of drifting into product assumptions.
 
