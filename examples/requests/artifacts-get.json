@@ -1,0 +1,8 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_art_get_1",
+  "method": "artifacts.get",
+  "params": {
+    "artifact_id": "art_3"
+  }
+}

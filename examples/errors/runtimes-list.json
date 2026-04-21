@@ -1,0 +1,13 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_rt_1",
+  "error": {
+    "code": "ADAPTER_ERROR",
+    "message": "Runtime inventory adapter returned an invalid payload",
+    "retryable": false,
+    "details": {
+      "method": "runtimes.list"
+    },
+    "correlation_id": "corr_rt_adapter"
+  }
+}

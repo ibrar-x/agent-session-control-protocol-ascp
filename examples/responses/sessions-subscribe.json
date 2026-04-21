@@ -1,0 +1,9 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_sub_1",
+  "result": {
+    "subscription_id": "sub_01",
+    "session_id": "sess_abc123",
+    "snapshot_emitted": true
+  }
+}

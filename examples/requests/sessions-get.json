@@ -1,0 +1,10 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_get_1",
+  "method": "sessions.get",
+  "params": {
+    "session_id": "sess_abc123",
+    "include_runs": true,
+    "include_pending_approvals": true
+  }
+}

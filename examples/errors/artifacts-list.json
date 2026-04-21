@@ -1,0 +1,13 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_art_list_1",
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "Session not found",
+    "retryable": false,
+    "details": {
+      "session_id": "sess_missing"
+    },
+    "correlation_id": "corr_art_list_404"
+  }
+}

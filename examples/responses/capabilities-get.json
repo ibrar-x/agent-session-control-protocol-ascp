@@ -1,0 +1,21 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_cap_1",
+  "result": {
+    "protocol_version": "0.1.0",
+    "host": {
+      "id": "host_01",
+      "name": "MacBook Pro"
+    },
+    "transports": [
+      "websocket",
+      "relay"
+    ],
+    "capabilities": {
+      "session_list": true,
+      "session_resume": true,
+      "stream_events": true
+    },
+    "runtimes": []
+  }
+}

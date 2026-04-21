@@ -1,0 +1,16 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_appr_list_1",
+  "result": {
+    "approvals": [
+      {
+        "id": "apr_77",
+        "session_id": "sess_abc123",
+        "kind": "command",
+        "status": "pending",
+        "created_at": "2026-04-21T10:06:00Z"
+      }
+    ],
+    "next_cursor": null
+  }
+}

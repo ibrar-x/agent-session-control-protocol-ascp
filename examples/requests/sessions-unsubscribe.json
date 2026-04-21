@@ -1,0 +1,8 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_unsub_1",
+  "method": "sessions.unsubscribe",
+  "params": {
+    "subscription_id": "sub_01"
+  }
+}

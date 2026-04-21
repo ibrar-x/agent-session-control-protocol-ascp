@@ -1,0 +1,13 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_art_get_1",
+  "error": {
+    "code": "FORBIDDEN",
+    "message": "Caller cannot access this artifact",
+    "retryable": false,
+    "details": {
+      "artifact_id": "art_3"
+    },
+    "correlation_id": "corr_art_get_403"
+  }
+}

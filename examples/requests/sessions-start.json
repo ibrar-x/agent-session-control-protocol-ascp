@@ -1,0 +1,14 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_start_1",
+  "method": "sessions.start",
+  "params": {
+    "runtime_id": "codex_local",
+    "workspace": "/Users/me/app",
+    "title": "Investigate checkout test failures",
+    "initial_prompt": "Find the cause of checkout flow integration test failures.",
+    "metadata": {
+      "source": "mobile"
+    }
+  }
+}

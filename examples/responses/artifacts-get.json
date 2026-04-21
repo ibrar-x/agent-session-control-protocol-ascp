@@ -1,0 +1,14 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_art_get_1",
+  "result": {
+    "artifact": {
+      "id": "art_3",
+      "session_id": "sess_abc123",
+      "kind": "diff",
+      "uri": "artifact://sess_abc123/art_3",
+      "mime_type": "text/x-diff",
+      "created_at": "2026-04-21T10:10:00Z"
+    }
+  }
+}

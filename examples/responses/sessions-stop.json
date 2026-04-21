@@ -1,0 +1,8 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_stop_1",
+  "result": {
+    "session_id": "sess_abc123",
+    "status": "stopped"
+  }
+}

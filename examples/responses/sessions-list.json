@@ -1,0 +1,17 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_list_1",
+  "result": {
+    "sessions": [
+      {
+        "id": "sess_abc123",
+        "runtime_id": "codex_local",
+        "title": "Fix failing Flutter integration tests",
+        "status": "running",
+        "created_at": "2026-04-21T10:00:00Z",
+        "updated_at": "2026-04-21T10:12:00Z"
+      }
+    ],
+    "next_cursor": null
+  }
+}

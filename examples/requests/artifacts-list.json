@@ -1,0 +1,10 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_art_list_1",
+  "method": "artifacts.list",
+  "params": {
+    "session_id": "sess_abc123",
+    "run_id": "run_9",
+    "kind": "diff"
+  }
+}

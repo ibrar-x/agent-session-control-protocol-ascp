@@ -1,0 +1,13 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_host_1",
+  "error": {
+    "code": "INTERNAL_ERROR",
+    "message": "Host metadata could not be loaded",
+    "retryable": false,
+    "details": {
+      "method": "hosts.get"
+    },
+    "correlation_id": "corr_host_500"
+  }
+}

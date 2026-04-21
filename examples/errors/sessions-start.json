@@ -1,0 +1,13 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_start_1",
+  "error": {
+    "code": "UNSUPPORTED",
+    "message": "Runtime does not support starting new sessions",
+    "retryable": false,
+    "details": {
+      "runtime_id": "codex_local"
+    },
+    "correlation_id": "corr_start_unsupported"
+  }
+}

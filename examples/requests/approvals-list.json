@@ -1,0 +1,10 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_appr_list_1",
+  "method": "approvals.list",
+  "params": {
+    "session_id": "sess_abc123",
+    "status": "pending",
+    "limit": 10
+  }
+}

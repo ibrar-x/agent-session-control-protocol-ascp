@@ -1,0 +1,8 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_appr_1",
+  "result": {
+    "approval_id": "apr_77",
+    "status": "approved"
+  }
+}

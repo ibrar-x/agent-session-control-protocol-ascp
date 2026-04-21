@@ -1,0 +1,13 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_host_1",
+  "result": {
+    "host": {
+      "id": "host_01",
+      "name": "MacBook Pro",
+      "platform": "macos",
+      "arch": "arm64",
+      "status": "online"
+    }
+  }
+}

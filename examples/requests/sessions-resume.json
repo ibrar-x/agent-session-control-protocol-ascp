@@ -1,0 +1,9 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_resume_1",
+  "method": "sessions.resume",
+  "params": {
+    "session_id": "sess_abc123",
+    "runtime_id": "codex_local"
+  }
+}

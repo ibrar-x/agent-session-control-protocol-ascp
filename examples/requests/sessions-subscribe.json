@@ -1,0 +1,10 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_sub_1",
+  "method": "sessions.subscribe",
+  "params": {
+    "session_id": "sess_abc123",
+    "from_seq": 104,
+    "include_snapshot": true
+  }
+}

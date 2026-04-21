@@ -1,0 +1,13 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_input_1",
+  "method": "sessions.send_input",
+  "params": {
+    "session_id": "sess_abc123",
+    "input": "Continue, but focus on the checkout API mock.",
+    "input_kind": "instruction",
+    "metadata": {
+      "source": "mobile_ui"
+    }
+  }
+}

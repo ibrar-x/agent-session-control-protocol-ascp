@@ -12,9 +12,9 @@ This file tracks the active scoped feature for the current branch.
 
 ## Active Feature
 
-- Feature name: Schema foundation
-- Branch: `feature/schema-foundation`
-- Goal: freeze the canonical ASCP protocol nouns and shared validation assets needed before method contracts and event payload expansion
+- Feature name: Method contracts
+- Branch: `feature/method-contracts`
+- Goal: freeze exact request, success-response, and allowed error contracts for every core ASCP method using the schema-foundation nouns and shared envelopes without widening into event payloads, replay flow, auth implementation, or mock-server behavior
 - Source inputs:
   - `AGENTS.md`
   - `plans.md`
@@ -23,66 +23,74 @@ This file tracks the active scoped feature for the current branch.
   - `ASCP_Protocol_PRD_and_Build_Guide.md`
   - `README.md`
   - `docs/repo-operating-system.md`
-  - current chat requirements for the schema foundation slice only
+  - `docs/prompts/method-contracts.md`
+  - `docs/schema-foundation.md`
+  - `schema/ascp-core.schema.json`
+  - `schema/ascp-capabilities.schema.json`
+  - `schema/ascp-errors.schema.json`
+  - existing core examples under `examples/`
+  - current chat requirements for the method-contracts slice only
 
 ## Bootstrap Outcome
 
-- The repository-level workstream breakdown on `main` is complete.
-- The next unfinished task from repository state is `schema foundation`.
-- No existing `schema/` or `examples/` assets are present yet.
-- This branch starts from up-to-date `main` at commit `f005d81`.
+- The repository-level workstream breakdown already exists.
+- The dependency gate for method contracts is met: schema foundation assets are present under `schema/` and `examples/`.
+- No existing method-contract schema, spec, or request/response/error example assets are present yet.
+- This branch starts from up-to-date `main` at commit `6a4e78e`.
 
 ## Feature Boundary
 
 Included in this branch:
 
-- canonical object schemas
-- shared envelope schema material
-- capability schema
-- error schema
-- schema-valid examples for `Host`, `Runtime`, `Session`, `Run`, `ApprovalRequest`, `Artifact`, `DiffSummary`, and `EventEnvelope`
-- supporting documentation needed to explain scope, additive evolution, and versioning assumptions used by the schemas
+- exact request params for every core ASCP method
+- exact success result shapes for every core ASCP method
+- explicit allowed error-code mapping per method, including shared validation and host-failure behavior
+- schema material for validating method requests and responses against the frozen core nouns
+- example request, success-response, and error-response envelopes for every core method
+- supporting documentation that ties the method surface back to capability advertisement and schema foundation
+- validation commands or scripts needed to verify the method-contract fixtures
 
 Explicitly out of scope:
 
-- per-method request and response contracts
-- expanded event payload fixtures beyond a minimal `EventEnvelope` example
-- replay flow implementation
-- auth middleware behavior
-- conformance harnesses
-- mock server behavior
+- exact event payload schemas beyond method-triggered references
+- replay stream sequencing semantics beyond method-level flags and references
+- auth middleware implementation details beyond method-level error and capability notes
+- conformance harness expansion beyond validating the method-contract fixtures
+- mock-server behavior
 
 ## Tasks
 
 | Status | Task | Acceptance Criteria |
 | --- | --- | --- |
-| done | update branch plan for schema foundation | `plans.md` records the current branch, feature boundary, source inputs, task list, and acceptance criteria |
-| done | create canonical shared schemas under `schema/` | `schema/ascp-core.schema.json`, `schema/ascp-capabilities.schema.json`, and `schema/ascp-errors.schema.json` match the detailed spec field names, enums, required fields, and optional fields |
-| done | add schema-valid examples for required core objects | example files exist for `Host`, `Runtime`, `Session`, `Run`, `ApprovalRequest`, `Artifact`, `DiffSummary`, and `EventEnvelope` and validate against the corresponding schemas |
-| done | add capability and error examples | capability and error examples validate against their schemas and reflect the compatibility and error guidance from the detailed spec |
-| done | document schema-foundation assumptions | supporting docs explain scope limits, additive evolution, unknown-field handling, and versioning assumptions so later method-contract work does not need chat context |
-| done | verify schemas and examples | fresh validation confirms the example set is schema-valid before task completion is reported |
+| done | rewrite the active branch plan for method contracts | `plans.md` records the method-contract branch, source inputs, dependency gate, feature boundary, task list, and acceptance criteria |
+| done | create canonical method-contract schema material under `schema/` | `schema/ascp-methods.schema.json` defines exact params, success result shapes, and method-specific error envelopes while reusing the schema-foundation nouns and shared envelopes |
+| done | add request, success-response, and error-response examples for every core method | `examples/requests/`, `examples/responses/`, and `examples/errors/` contain schema-valid envelopes for each core method |
+| done | document capability gating and method error mapping | normative docs explain which methods rely on core compatibility versus advertised capability flags, and list the allowed error codes without requiring chat context |
+| done | add repeatable validation for method-contract assets | `scripts/validate_method_contracts.sh` validates the method schema plus the request/response/error example set |
+| done | verify all method-contract assets and checkpoint the branch | fresh validation passes, `docs/status.md` records the checkpoint, and the branch is ready for commit without widening scope |
 
 ## Acceptance Criteria
 
 The feature is complete only when all of the following are true:
 
-- canonical objects from the detailed spec validate without guessing
-- required fields, optional fields, enums, and exact field names match the detailed spec
-- capability and error examples validate against their schemas
-- unknown fields are handled in a way that preserves additive evolution and safe ignore behavior
-- documentation is sufficient for a later agent to begin method contracts without reconstructing schema intent from chat history
+- every core ASCP method has exact request params and success result shapes
+- request `id` echo behavior and `result` versus `error` exclusivity stay explicit and testable
+- the method contracts reuse the canonical schema-foundation nouns rather than redefining them
+- allowed error codes are explicit per method and align with the detailed spec plus documented validation and host-failure rules
+- request, response, and error examples validate against the method-contract and shared schemas
+- documentation is sufficient for a later agent to begin event-contract work without reconstructing the method surface from chat history
 
 ## Next Likely Step
 
-After this branch is complete, the next feature should be `method contracts` on `feature/method-contracts`, using the frozen schema assets from this branch as the base contract nouns.
+After this branch is complete, the next feature should be `event contracts` on `feature/event-contracts`, using the frozen method triggers, shared `EventEnvelope`, and schema-foundation nouns as the base contract inputs.
 
 ## Completion Outcome
 
-- Status: complete on `feature/schema-foundation`
+- Status: complete on `feature/method-contracts`
+- Validation evidence: `./scripts/validate_method_contracts.sh` completed successfully and validated 48 method-contract example files
 - Merge target: `main`
-- Recommended next branch: `feature/method-contracts`
+- Recommended next branch: `feature/event-contracts`
 - Recommended next scope:
-  - exact request and response contracts for every core ASCP method
-  - method-specific validation assets based on the frozen core nouns and shared envelopes from this branch
-  - method examples and compatibility notes without widening into replay, auth behavior, or full event-fixture expansion
+  - exact payload contracts for the core event taxonomy
+  - event examples and validators based on the shared `EventEnvelope`
+  - event-level notes for snapshot, replay references, and transport-neutral streaming behavior without revisiting method shapes

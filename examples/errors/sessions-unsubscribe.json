@@ -1,0 +1,13 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_unsub_1",
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "Subscription not found",
+    "retryable": false,
+    "details": {
+      "subscription_id": "sub_missing"
+    },
+    "correlation_id": "corr_unsub_404"
+  }
+}

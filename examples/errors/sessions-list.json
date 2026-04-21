@@ -1,0 +1,13 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_list_1",
+  "error": {
+    "code": "FORBIDDEN",
+    "message": "Caller cannot list sessions for this runtime",
+    "retryable": false,
+    "details": {
+      "runtime_id": "codex_local"
+    },
+    "correlation_id": "corr_list_403"
+  }
+}

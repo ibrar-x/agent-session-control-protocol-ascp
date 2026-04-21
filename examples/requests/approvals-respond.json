@@ -1,0 +1,10 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_appr_1",
+  "method": "approvals.respond",
+  "params": {
+    "approval_id": "apr_77",
+    "decision": "approved",
+    "note": "Looks safe"
+  }
+}

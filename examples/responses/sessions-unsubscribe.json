@@ -1,0 +1,8 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_unsub_1",
+  "result": {
+    "subscription_id": "sub_01",
+    "unsubscribed": true
+  }
+}

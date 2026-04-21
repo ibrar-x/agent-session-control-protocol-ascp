@@ -1,0 +1,8 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_input_1",
+  "result": {
+    "accepted": true,
+    "session_id": "sess_abc123"
+  }
+}

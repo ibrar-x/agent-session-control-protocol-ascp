@@ -1,0 +1,6 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_cap_1",
+  "method": "capabilities.get",
+  "params": {}
+}

@@ -1,0 +1,13 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_sub_1",
+  "error": {
+    "code": "TRANSIENT_UNAVAILABLE",
+    "message": "Replay store is warming and cannot serve the subscription yet",
+    "retryable": true,
+    "details": {
+      "session_id": "sess_abc123"
+    },
+    "correlation_id": "corr_sub_retry"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_stop_1",
+  "error": {
+    "code": "CONFLICT",
+    "message": "Session already stopped",
+    "retryable": false,
+    "details": {
+      "session_id": "sess_abc123",
+      "status": "stopped"
+    },
+    "correlation_id": "corr_stop_conflict"
+  }
+}

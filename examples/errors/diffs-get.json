@@ -1,0 +1,13 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_diff_1",
+  "error": {
+    "code": "UNSUPPORTED",
+    "message": "Runtime does not provide normalized diff summaries",
+    "retryable": false,
+    "details": {
+      "session_id": "sess_abc123"
+    },
+    "correlation_id": "corr_diff_unsupported"
+  }
+}

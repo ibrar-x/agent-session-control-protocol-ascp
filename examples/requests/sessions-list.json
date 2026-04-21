@@ -1,0 +1,10 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_list_1",
+  "method": "sessions.list",
+  "params": {
+    "runtime_id": "codex_local",
+    "status": "running",
+    "limit": 20
+  }
+}

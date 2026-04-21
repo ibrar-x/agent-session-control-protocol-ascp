@@ -1,0 +1,15 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_rt_1",
+  "result": {
+    "runtimes": [
+      {
+        "id": "codex_local",
+        "kind": "codex",
+        "display_name": "Codex CLI",
+        "version": "0.1.x",
+        "adapter_kind": "native"
+      }
+    ]
+  }
+}

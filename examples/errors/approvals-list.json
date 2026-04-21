@@ -1,0 +1,13 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_appr_list_1",
+  "error": {
+    "code": "UNSUPPORTED",
+    "message": "Runtime does not expose approval requests",
+    "retryable": false,
+    "details": {
+      "runtime_id": "codex_local"
+    },
+    "correlation_id": "corr_appr_list_unsupported"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_stop_1",
+  "method": "sessions.stop",
+  "params": {
+    "session_id": "sess_abc123",
+    "mode": "graceful",
+    "reason": "User cancelled the run"
+  }
+}

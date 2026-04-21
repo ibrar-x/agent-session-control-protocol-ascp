@@ -1,0 +1,9 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_diff_1",
+  "method": "diffs.get",
+  "params": {
+    "session_id": "sess_abc123",
+    "run_id": "run_9"
+  }
+}

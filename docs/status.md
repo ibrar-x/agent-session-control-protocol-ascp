@@ -14,6 +14,13 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-22 - Method contracts
+
+- Branch: `feature/method-contracts`
+- Commit: `not committed`
+- Summary: added the ASCP method-contract schema, a normative method surface spec, and request/success/error example envelopes for every core method; documented capability gating and method-specific error mapping; and added a repeatable validator that confirms the full method-contract example set against the shared schema foundation
+- Documentation updated: `plans.md`, `docs/status.md`, `spec/methods.md`
+- Next likely step: build `feature/event-contracts` from the frozen method triggers and shared `EventEnvelope`, without widening back into method shape changes
 ### 2026-04-21 - Schema foundation
 
 - Branch: `feature/schema-foundation`

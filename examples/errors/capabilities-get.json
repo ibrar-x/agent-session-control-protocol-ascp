@@ -1,0 +1,13 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_cap_1",
+  "error": {
+    "code": "UNAUTHORIZED",
+    "message": "Authentication is required to read capabilities",
+    "retryable": false,
+    "details": {
+      "method": "capabilities.get"
+    },
+    "correlation_id": "corr_cap_401"
+  }
+}

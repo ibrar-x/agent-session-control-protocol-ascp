@@ -1,0 +1,9 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_rt_1",
+  "method": "runtimes.list",
+  "params": {
+    "kind": "codex",
+    "adapter_kind": "native"
+  }
+}

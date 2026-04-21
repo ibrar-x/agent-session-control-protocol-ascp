@@ -1,0 +1,14 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_appr_1",
+  "error": {
+    "code": "CONFLICT",
+    "message": "Approval already resolved",
+    "retryable": false,
+    "details": {
+      "approval_id": "apr_77",
+      "status": "approved"
+    },
+    "correlation_id": "corr_123"
+  }
+}
