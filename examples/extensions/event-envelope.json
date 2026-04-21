@@ -1,0 +1,13 @@
+{
+  "id": "evt_ext_1",
+  "type": "x.enterprise.policy_violation",
+  "ts": "2026-04-22T09:15:00Z",
+  "session_id": "sess_abc123",
+  "seq": 72,
+  "payload": {
+    "policy_id": "policy_7",
+    "severity": "high",
+    "message": "Workspace policy blocked outbound network access.",
+    "x_enterprise_policy_family": "workspace_guard"
+  }
+}

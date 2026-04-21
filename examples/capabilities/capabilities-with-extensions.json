@@ -1,0 +1,67 @@
+{
+  "protocol_version": "0.1.0",
+  "host": {
+    "id": "host_01",
+    "name": "MacBook Pro",
+    "platform": "macos",
+    "arch": "arm64",
+    "status": "online"
+  },
+  "runtimes": [
+    {
+      "id": "codex_local",
+      "kind": "codex",
+      "display_name": "Codex CLI",
+      "version": "0.1.x",
+      "adapter_kind": "native",
+      "capabilities": {
+        "session_list": true,
+        "session_resume": true,
+        "session_start": true,
+        "session_stop": true,
+        "stream_events": true,
+        "transcript_read": true,
+        "message_send": true,
+        "approval_requests": true,
+        "approval_respond": true,
+        "artifacts": true,
+        "diffs": true,
+        "terminal_passthrough": false,
+        "notifications": true,
+        "checkpoints": false,
+        "replay": true,
+        "multi_workspace": true,
+        "x_codex_checkpointing": true
+      }
+    }
+  ],
+  "transports": [
+    "websocket",
+    "http_sse",
+    "relay"
+  ],
+  "capabilities": {
+    "session_list": true,
+    "session_resume": true,
+    "session_start": true,
+    "session_stop": true,
+    "stream_events": true,
+    "transcript_read": true,
+    "message_send": true,
+    "approval_requests": true,
+    "approval_respond": true,
+    "artifacts": true,
+    "diffs": true,
+    "terminal_passthrough": false,
+    "notifications": true,
+    "checkpoints": false,
+    "replay": true,
+    "multi_workspace": true,
+    "x_codex_checkpointing": true,
+    "x_enterprise_policy_events": true
+  },
+  "extensions": [
+    "x.codex",
+    "x.enterprise.audit"
+  ]
+}

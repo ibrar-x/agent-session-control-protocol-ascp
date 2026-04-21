@@ -1,0 +1,41 @@
+{
+  "cases": [
+    {
+      "case": "unknown_extension_field_on_open_core_object",
+      "surface": "Session",
+      "fixture": "examples/extensions/session-field-extension.json",
+      "behavior": "ignore",
+      "notes": "Unknown namespaced fields on open core entities must not break clients that only implement the frozen core session shape."
+    },
+    {
+      "case": "unknown_extension_event_type",
+      "surface": "EventEnvelope.type",
+      "fixture": "examples/extensions/event-envelope.json",
+      "behavior": "ignore",
+      "notes": "Unknown namespaced extension events are safely ignorable unless a client explicitly opts into fail-closed behavior."
+    },
+    {
+      "case": "unknown_extension_capability_flag",
+      "surface": "CapabilityDocument.capabilities",
+      "fixture": "examples/capabilities/capabilities-with-extensions.json",
+      "behavior": "ignore",
+      "notes": "Namespaced capability flags add discovery detail but do not replace the core capability booleans."
+    },
+    {
+      "case": "closed_core_method_params_require_namespaced_method",
+      "surface": "SessionsStartParams",
+      "fixture": "examples/requests/sessions-start.json",
+      "behavior": "reject_inline_extension_fields",
+      "alternative_method": "x.codex.checkpoint.create",
+      "notes": "Closed core method params must not be widened in place; a new namespaced method carries the extension-specific request shape."
+    },
+    {
+      "case": "closed_core_event_payload_requires_namespaced_event",
+      "surface": "SessionUpdatedPayload",
+      "fixture": "examples/events/session-updated.json",
+      "behavior": "use_namespaced_event",
+      "alternative_event_type": "x.enterprise.policy_violation",
+      "notes": "New event meaning must use a namespaced event instead of adding extra fields to a closed core event payload."
+    }
+  ]
+}
