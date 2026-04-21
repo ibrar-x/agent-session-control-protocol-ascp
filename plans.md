@@ -64,11 +64,11 @@ Explicitly out of scope:
 | Status | Task | Acceptance Criteria |
 | --- | --- | --- |
 | done | rewrite the active branch plan for event contracts | `plans.md` records the event-contract branch, source inputs, dependency gate, feature boundary, task list, and acceptance criteria |
-| pending | create canonical event-contract schema material under `schema/` | `schema/ascp-events.schema.json` defines exact envelope and payload contracts for every core event type while reusing the schema-foundation nouns and shared envelope |
-| pending | add schema-valid event fixtures for every core event type | `examples/events/` contains one concrete `EventEnvelope` fixture for each spec-defined event type |
-| pending | document event support, compatibility expectations, and replay-safe boundaries | `spec/events.md` explains the event families, exact payload support, compatibility notes, and the difference between snapshots and replay markers |
-| pending | add repeatable validation for event-contract assets | `scripts/validate_event_contracts.sh` validates the event schema plus the event fixture set |
-| pending | verify all event-contract assets and checkpoint the branch | fresh validation passes, `docs/status.md` records the checkpoint, and the branch is ready for commit without widening scope |
+| done | create canonical event-contract schema material under `schema/` | `schema/ascp-events.schema.json` defines exact envelope and payload contracts for every core event type while reusing the schema-foundation nouns and shared envelope |
+| done | add schema-valid event fixtures for every core event type | `examples/events/` contains one concrete `EventEnvelope` fixture for each spec-defined event type |
+| done | document event support, compatibility expectations, and replay-safe boundaries | `spec/events.md` explains the event families, exact payload support, compatibility notes, and the difference between snapshots and replay markers |
+| done | add repeatable validation for event-contract assets | `scripts/validate_event_contracts.sh` validates the event schema plus the event fixture set |
+| done | verify all event-contract assets and checkpoint the branch | fresh validation passes, `docs/status.md` records the checkpoint, and the branch is ready for commit without widening scope |
 
 ## Acceptance Criteria
 
@@ -84,3 +84,14 @@ The feature is complete only when all of the following are true:
 ## Next Likely Step
 
 After this branch is complete, the next feature should be `replay semantics` on `feature/replay-semantics`, using the locked event contracts as the base contract inputs for cursor, ordering, and retention notes.
+
+## Completion Outcome
+
+- Status: complete on `feature/event-contracts`
+- Validation evidence: `./scripts/validate_event_contracts.sh` completed successfully and validated 39 event-contract example files
+- Merge target: `main`
+- Recommended next branch: `feature/replay-semantics`
+- Recommended next scope:
+  - cursor and replay resumption rules built on the frozen event contracts
+  - sequence handling expectations and retention notes
+  - replay conformance tests without reopening event payload shapes

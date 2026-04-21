@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-22 - Event contracts
+
+- Branch: `feature/event-contracts`
+- Commit: `not committed`
+- Summary: added the ASCP event-contract schema, one schema-valid `EventEnvelope` fixture for every core event type, a normative event support spec, and a repeatable validator that confirms the full event surface against the frozen schema foundation
+- Documentation updated: `plans.md`, `docs/status.md`, `spec/events.md`, `docs/superpowers/specs/2026-04-22-event-contracts-design.md`, `docs/superpowers/plans/2026-04-22-event-contracts.md`
+- Next likely step: build `feature/replay-semantics` from the locked event stream surface, without redefining event payload shapes
+
 ### 2026-04-22 - Method contracts
 
 - Branch: `feature/method-contracts`
