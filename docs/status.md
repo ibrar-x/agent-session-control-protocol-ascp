@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-22 - Auth and approvals
+
+- Branch: `feature/auth-approvals`
+- Commit: `not committed`
+- Summary: added the normative auth and approvals spec, documented the method scope matrix and audit-attribution hooks, created approval lifecycle fixtures for approved, rejected, and expired outcomes, expanded auth failure examples to distinguish `UNAUTHORIZED` from `FORBIDDEN`, and added a repeatable validator for auth-specific invariants against the frozen method and event contracts
+- Documentation updated: `plans.md`, `docs/status.md`, `spec/auth.md`, `docs/superpowers/specs/2026-04-22-auth-approvals-design.md`, `docs/superpowers/plans/2026-04-22-auth-approvals.md`
+- Next likely step: build `feature/extensions` or widen into the broader `conformance` slice using the auth and approval rules from this branch as fixed inputs
+
 ### 2026-04-22 - Replay semantics
 
 - Branch: `feature/replay-semantics`

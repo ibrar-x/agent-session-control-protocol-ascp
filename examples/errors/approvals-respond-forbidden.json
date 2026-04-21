@@ -1,0 +1,15 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_appr_auth_forbidden_1",
+  "error": {
+    "code": "FORBIDDEN",
+    "message": "Caller lacks write:approvals scope",
+    "retryable": false,
+    "details": {
+      "method": "approvals.respond",
+      "approval_id": "apr_auth_approved_1",
+      "required_scope": "write:approvals"
+    },
+    "correlation_id": "corr_appr_403"
+  }
+}

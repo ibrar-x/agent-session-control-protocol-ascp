@@ -1,0 +1,170 @@
+{
+  "scopes": {
+    "read:capabilities": {
+      "access": "read",
+      "notes": "Read capability advertisement without implying broader session access."
+    },
+    "read:hosts": {
+      "access": "read",
+      "notes": "Read host metadata."
+    },
+    "read:runtimes": {
+      "access": "read",
+      "notes": "Read runtime inventory and runtime metadata."
+    },
+    "read:sessions": {
+      "access": "read",
+      "notes": "Read session metadata, subscribe to live events, and inspect running state."
+    },
+    "write:sessions": {
+      "access": "control",
+      "notes": "Start, resume, stop, or steer interactive sessions."
+    },
+    "read:approvals": {
+      "access": "read",
+      "notes": "Read pending and historical approval requests."
+    },
+    "write:approvals": {
+      "access": "control",
+      "notes": "Approve or reject pending approvals."
+    },
+    "read:artifacts": {
+      "access": "read",
+      "notes": "Read artifact metadata, access information, and diff summaries."
+    },
+    "admin:host": {
+      "access": "admin",
+      "notes": "Reserved for host-wide administrative operations or extensions outside the core v0.1 surface."
+    }
+  },
+  "methods": [
+    {
+      "method": "capabilities.get",
+      "access": "read",
+      "recommended_scopes": [
+        "read:capabilities"
+      ],
+      "sensitive": false
+    },
+    {
+      "method": "hosts.get",
+      "access": "read",
+      "recommended_scopes": [
+        "read:hosts"
+      ],
+      "sensitive": false
+    },
+    {
+      "method": "runtimes.list",
+      "access": "read",
+      "recommended_scopes": [
+        "read:runtimes"
+      ],
+      "sensitive": false
+    },
+    {
+      "method": "sessions.list",
+      "access": "read",
+      "recommended_scopes": [
+        "read:sessions"
+      ],
+      "sensitive": false
+    },
+    {
+      "method": "sessions.get",
+      "access": "read",
+      "recommended_scopes": [
+        "read:sessions"
+      ],
+      "sensitive": false
+    },
+    {
+      "method": "sessions.subscribe",
+      "access": "read",
+      "recommended_scopes": [
+        "read:sessions"
+      ],
+      "sensitive": false
+    },
+    {
+      "method": "sessions.unsubscribe",
+      "access": "read",
+      "recommended_scopes": [
+        "read:sessions"
+      ],
+      "sensitive": false
+    },
+    {
+      "method": "sessions.start",
+      "access": "control",
+      "recommended_scopes": [
+        "write:sessions"
+      ],
+      "sensitive": true
+    },
+    {
+      "method": "sessions.resume",
+      "access": "control",
+      "recommended_scopes": [
+        "write:sessions"
+      ],
+      "sensitive": true
+    },
+    {
+      "method": "sessions.stop",
+      "access": "control",
+      "recommended_scopes": [
+        "write:sessions"
+      ],
+      "sensitive": true
+    },
+    {
+      "method": "sessions.send_input",
+      "access": "control",
+      "recommended_scopes": [
+        "write:sessions"
+      ],
+      "sensitive": true
+    },
+    {
+      "method": "approvals.list",
+      "access": "read",
+      "recommended_scopes": [
+        "read:approvals"
+      ],
+      "sensitive": false
+    },
+    {
+      "method": "approvals.respond",
+      "access": "control",
+      "recommended_scopes": [
+        "write:approvals"
+      ],
+      "sensitive": true
+    },
+    {
+      "method": "artifacts.list",
+      "access": "read",
+      "recommended_scopes": [
+        "read:artifacts"
+      ],
+      "sensitive": false
+    },
+    {
+      "method": "artifacts.get",
+      "access": "read",
+      "recommended_scopes": [
+        "read:artifacts"
+      ],
+      "sensitive": false
+    },
+    {
+      "method": "diffs.get",
+      "access": "read",
+      "recommended_scopes": [
+        "read:artifacts"
+      ],
+      "sensitive": false
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "approval": {
+    "id": "apr_auth_approved_1",
+    "session_id": "sess_auth_123",
+    "run_id": "run_auth_9",
+    "kind": "command",
+    "status": "pending",
+    "title": "Approve dependency installation",
+    "description": "Agent wants to run npm install for the workspace",
+    "risk_level": "medium",
+    "payload": {
+      "command": "npm install",
+      "cwd": "/Users/me/app"
+    },
+    "created_at": "2026-04-22T08:05:00Z",
+    "resolved_at": null
+  },
+  "audit_context": {
+    "actor_id": "user_auth_1",
+    "device_id": "device_mobile_1",
+    "correlation_id": "corr_auth_approved_1"
+  },
+  "expected_scope": "write:approvals",
+  "request": {
+    "jsonrpc": "2.0",
+    "id": "req_appr_auth_approved_1",
+    "method": "approvals.respond",
+    "params": {
+      "approval_id": "apr_auth_approved_1",
+      "decision": "approved"
+    }
+  },
+  "response": {
+    "jsonrpc": "2.0",
+    "id": "req_appr_auth_approved_1",
+    "result": {
+      "approval_id": "apr_auth_approved_1",
+      "status": "approved"
+    }
+  },
+  "events": [
+    {
+      "id": "evt_auth_approved_1",
+      "type": "approval.updated",
+      "ts": "2026-04-22T08:05:20Z",
+      "session_id": "sess_auth_123",
+      "run_id": "run_auth_9",
+      "seq": 410,
+      "payload": {
+        "approval_id": "apr_auth_approved_1",
+        "changed_fields": [
+          "status"
+        ]
+      }
+    },
+    {
+      "id": "evt_auth_approved_2",
+      "type": "approval.approved",
+      "ts": "2026-04-22T08:05:21Z",
+      "session_id": "sess_auth_123",
+      "run_id": "run_auth_9",
+      "seq": 411,
+      "payload": {
+        "approval_id": "apr_auth_approved_1",
+        "resolved_at": "2026-04-22T08:05:21Z",
+        "actor_id": "user_auth_1"
+      }
+    }
+  ]
+}

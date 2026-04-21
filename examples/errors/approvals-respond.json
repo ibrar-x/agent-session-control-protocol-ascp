@@ -6,6 +6,7 @@
     "message": "Approval already resolved",
     "retryable": false,
     "details": {
+      "method": "approvals.respond",
       "approval_id": "apr_77",
       "status": "approved"
     },

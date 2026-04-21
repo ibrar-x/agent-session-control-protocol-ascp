@@ -1,0 +1,55 @@
+{
+  "flows": [
+    {
+      "name": "approved",
+      "fixture": "examples/approvals/approval-flow-approved.json",
+      "decision": "approved",
+      "terminal_status": "approved",
+      "terminal_event": "approval.approved",
+      "requires_actor_id": true,
+      "requires_note": false,
+      "required_audit_fields": [
+        "actor_id",
+        "device_id",
+        "correlation_id"
+      ]
+    },
+    {
+      "name": "rejected",
+      "fixture": "examples/approvals/approval-flow-rejected.json",
+      "decision": "rejected",
+      "terminal_status": "rejected",
+      "terminal_event": "approval.rejected",
+      "requires_actor_id": true,
+      "requires_note": true,
+      "required_audit_fields": [
+        "actor_id",
+        "device_id",
+        "correlation_id"
+      ]
+    },
+    {
+      "name": "expired",
+      "fixture": "examples/approvals/approval-flow-expired.json",
+      "decision": null,
+      "terminal_status": "expired",
+      "terminal_event": "approval.expired",
+      "requires_actor_id": false,
+      "requires_note": false,
+      "required_audit_fields": [
+        "correlation_id"
+      ]
+    }
+  ],
+  "conflict_example": {
+    "file": "examples/errors/approvals-respond.json",
+    "method": "approvals.respond",
+    "error_code": "CONFLICT",
+    "allowed_terminal_statuses": [
+      "approved",
+      "rejected",
+      "expired",
+      "cancelled"
+    ]
+  }
+}

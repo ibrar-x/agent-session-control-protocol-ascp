@@ -1,0 +1,14 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_art_get_auth_unauth_1",
+  "error": {
+    "code": "UNAUTHORIZED",
+    "message": "Authentication is required to access this artifact",
+    "retryable": false,
+    "details": {
+      "method": "artifacts.get",
+      "artifact_id": "art_3"
+    },
+    "correlation_id": "corr_art_get_401"
+  }
+}

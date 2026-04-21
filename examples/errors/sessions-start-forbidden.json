@@ -1,0 +1,15 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_start_auth_forbidden_1",
+  "error": {
+    "code": "FORBIDDEN",
+    "message": "Caller lacks write:sessions scope",
+    "retryable": false,
+    "details": {
+      "method": "sessions.start",
+      "runtime_id": "codex_local",
+      "required_scope": "write:sessions"
+    },
+    "correlation_id": "corr_start_403"
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "approval": {
+    "id": "apr_auth_rejected_1",
+    "session_id": "sess_auth_456",
+    "run_id": "run_auth_10",
+    "kind": "network",
+    "status": "pending",
+    "title": "Approve outbound production network access",
+    "description": "Agent wants to contact the production API endpoint",
+    "risk_level": "critical",
+    "payload": {
+      "url": "https://api.example.com/v1/deploy",
+      "method": "POST"
+    },
+    "created_at": "2026-04-22T08:15:00Z",
+    "resolved_at": null
+  },
+  "audit_context": {
+    "actor_id": "user_auth_2",
+    "device_id": "device_desktop_7",
+    "correlation_id": "corr_auth_rejected_1"
+  },
+  "expected_scope": "write:approvals",
+  "request": {
+    "jsonrpc": "2.0",
+    "id": "req_appr_auth_rejected_1",
+    "method": "approvals.respond",
+    "params": {
+      "approval_id": "apr_auth_rejected_1",
+      "decision": "rejected",
+      "note": "Reject production network access until maintenance window starts"
+    }
+  },
+  "response": {
+    "jsonrpc": "2.0",
+    "id": "req_appr_auth_rejected_1",
+    "result": {
+      "approval_id": "apr_auth_rejected_1",
+      "status": "rejected"
+    }
+  },
+  "events": [
+    {
+      "id": "evt_auth_rejected_1",
+      "type": "approval.updated",
+      "ts": "2026-04-22T08:15:18Z",
+      "session_id": "sess_auth_456",
+      "run_id": "run_auth_10",
+      "seq": 512,
+      "payload": {
+        "approval_id": "apr_auth_rejected_1",
+        "changed_fields": [
+          "status"
+        ]
+      }
+    },
+    {
+      "id": "evt_auth_rejected_2",
+      "type": "approval.rejected",
+      "ts": "2026-04-22T08:15:19Z",
+      "session_id": "sess_auth_456",
+      "run_id": "run_auth_10",
+      "seq": 513,
+      "payload": {
+        "approval_id": "apr_auth_rejected_1",
+        "resolved_at": "2026-04-22T08:15:19Z",
+        "actor_id": "user_auth_2",
+        "note": "Reject production network access until maintenance window starts"
+      }
+    }
+  ]
+}

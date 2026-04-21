@@ -1,0 +1,14 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_start_auth_unauth_1",
+  "error": {
+    "code": "UNAUTHORIZED",
+    "message": "Authentication is required to start a session",
+    "retryable": false,
+    "details": {
+      "method": "sessions.start",
+      "runtime_id": "codex_local"
+    },
+    "correlation_id": "corr_start_401"
+  }
+}

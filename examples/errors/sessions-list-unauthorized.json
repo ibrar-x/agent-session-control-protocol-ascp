@@ -1,0 +1,14 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_list_auth_unauth_1",
+  "error": {
+    "code": "UNAUTHORIZED",
+    "message": "Authentication is required to list sessions",
+    "retryable": false,
+    "details": {
+      "method": "sessions.list",
+      "runtime_id": "codex_local"
+    },
+    "correlation_id": "corr_list_401"
+  }
+}
