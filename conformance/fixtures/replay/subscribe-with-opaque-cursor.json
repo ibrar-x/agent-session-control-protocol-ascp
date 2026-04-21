@@ -1,0 +1,93 @@
+{
+  "scenario": "subscribe using an implementation-defined opaque cursor path",
+  "entrypoint": "sessions.subscribe",
+  "request": {
+    "jsonrpc": "2.0",
+    "id": "req_sub_cursor_1",
+    "method": "sessions.subscribe",
+    "params": {
+      "session_id": "sess_replay_1",
+      "include_snapshot": false
+    }
+  },
+  "request_extension": {
+    "kind": "opaque_cursor",
+    "token": "opaque:sess_replay_1:410",
+    "placement": "implementation-defined extension outside the frozen core request params"
+  },
+  "response": {
+    "jsonrpc": "2.0",
+    "id": "req_sub_cursor_1",
+    "result": {
+      "subscription_id": "sub_replay_4",
+      "session_id": "sess_replay_1",
+      "snapshot_emitted": false
+    }
+  },
+  "expectations": {
+    "include_snapshot": false,
+    "replay_marker_required": true,
+    "replayed_event_count": 2,
+    "from_seq": 410,
+    "to_seq": 411,
+    "expected_cursor": "opaque:sess_replay_1:412"
+  },
+  "stream": [
+    {
+      "id": "evt_hist_410",
+      "type": "message.assistant.delta",
+      "ts": "2026-04-22T08:41:00Z",
+      "session_id": "sess_replay_1",
+      "run_id": "run_replay_1",
+      "seq": 410,
+      "payload": {
+        "message_id": "msg_a_410",
+        "delta": "Replaying from the opaque checkpoint token."
+      }
+    },
+    {
+      "id": "evt_hist_411",
+      "type": "message.assistant.completed",
+      "ts": "2026-04-22T08:41:01Z",
+      "session_id": "sess_replay_1",
+      "run_id": "run_replay_1",
+      "seq": 411,
+      "payload": {
+        "message_id": "msg_a_410",
+        "content": "Opaque cursor replay segment completed."
+      }
+    },
+    {
+      "id": "evt_replayed_411",
+      "type": "sync.replayed",
+      "ts": "2026-04-22T08:41:02Z",
+      "session_id": "sess_replay_1",
+      "payload": {
+        "from_seq": 410,
+        "to_seq": 411,
+        "event_count": 2
+      }
+    },
+    {
+      "id": "evt_live_412",
+      "type": "message.assistant.delta",
+      "ts": "2026-04-22T08:41:03Z",
+      "session_id": "sess_replay_1",
+      "run_id": "run_replay_1",
+      "seq": 412,
+      "payload": {
+        "message_id": "msg_a_412",
+        "delta": "Live output resumed after the opaque cursor replay."
+      }
+    },
+    {
+      "id": "evt_cursor_412",
+      "type": "sync.cursor_advanced",
+      "ts": "2026-04-22T08:41:04Z",
+      "session_id": "sess_replay_1",
+      "payload": {
+        "cursor": "opaque:sess_replay_1:412"
+      }
+    }
+  ]
+}

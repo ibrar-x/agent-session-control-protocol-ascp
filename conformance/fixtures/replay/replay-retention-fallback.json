@@ -1,0 +1,34 @@
+{
+  "scenario": "retention-limited replay request returns a retryable replay error",
+  "entrypoint": "sessions.subscribe",
+  "request": {
+    "jsonrpc": "2.0",
+    "id": "req_sub_retention_1",
+    "method": "sessions.subscribe",
+    "params": {
+      "session_id": "sess_replay_1",
+      "from_seq": 12,
+      "include_snapshot": true
+    }
+  },
+  "expected_outcome": "error",
+  "allowed_error_codes": [
+    "TRANSIENT_UNAVAILABLE",
+    "UNSUPPORTED"
+  ],
+  "error_response": {
+    "jsonrpc": "2.0",
+    "id": "req_sub_retention_1",
+    "error": {
+      "code": "TRANSIENT_UNAVAILABLE",
+      "message": "Replay window starting at seq 12 is no longer retained; retry with snapshot-only recovery.",
+      "retryable": true,
+      "details": {
+        "session_id": "sess_replay_1",
+        "requested_from_seq": 12,
+        "oldest_available_seq": 205
+      },
+      "correlation_id": "corr_replay_retention_1"
+    }
+  }
+}

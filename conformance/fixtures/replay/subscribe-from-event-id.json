@@ -1,0 +1,81 @@
+{
+  "scenario": "subscribe from event id resumes after the referenced event",
+  "entrypoint": "sessions.subscribe",
+  "request": {
+    "jsonrpc": "2.0",
+    "id": "req_sub_event_id_1",
+    "method": "sessions.subscribe",
+    "params": {
+      "session_id": "sess_replay_1",
+      "from_event_id": "evt_hist_305",
+      "include_snapshot": false
+    }
+  },
+  "response": {
+    "jsonrpc": "2.0",
+    "id": "req_sub_event_id_1",
+    "result": {
+      "subscription_id": "sub_replay_3",
+      "session_id": "sess_replay_1",
+      "snapshot_emitted": false
+    }
+  },
+  "expectations": {
+    "include_snapshot": false,
+    "replay_marker_required": true,
+    "replayed_event_count": 2,
+    "from_seq": 306,
+    "to_seq": 307,
+    "anchor_event_id": "evt_hist_305",
+    "first_replayed_event_id": "evt_hist_306"
+  },
+  "stream": [
+    {
+      "id": "evt_hist_306",
+      "type": "message.assistant.delta",
+      "ts": "2026-04-22T08:30:06Z",
+      "session_id": "sess_replay_1",
+      "run_id": "run_replay_1",
+      "seq": 306,
+      "payload": {
+        "message_id": "msg_a_306",
+        "delta": "Picking up immediately after the anchored event."
+      }
+    },
+    {
+      "id": "evt_hist_307",
+      "type": "message.assistant.completed",
+      "ts": "2026-04-22T08:30:07Z",
+      "session_id": "sess_replay_1",
+      "run_id": "run_replay_1",
+      "seq": 307,
+      "payload": {
+        "message_id": "msg_a_306",
+        "content": "Replay after the anchored event is complete."
+      }
+    },
+    {
+      "id": "evt_replayed_307",
+      "type": "sync.replayed",
+      "ts": "2026-04-22T08:31:00Z",
+      "session_id": "sess_replay_1",
+      "payload": {
+        "from_seq": 306,
+        "to_seq": 307,
+        "event_count": 2
+      }
+    },
+    {
+      "id": "evt_live_308",
+      "type": "message.assistant.delta",
+      "ts": "2026-04-22T08:31:01Z",
+      "session_id": "sess_replay_1",
+      "run_id": "run_replay_1",
+      "seq": 308,
+      "payload": {
+        "message_id": "msg_a_308",
+        "delta": "Live output resumes after the anchored replay segment."
+      }
+    }
+  ]
+}
