@@ -154,11 +154,27 @@ Do not start with a mobile app, dashboard, or runtime-specific UI. The first pro
 
 Agents working in this repository should use a strict feature workflow:
 
+- Before starting a new feature branch, fetch and pull the latest changes from `main`.
+- Track remote changes actively so the current task is based on the latest repository state.
+- If new upstream changes exist that affect the same area of work, sync them before continuing.
+- Do not start new implementation work on stale local history when a simple sync would prevent future conflicts.
 - Create a new branch for every new feature or materially separate task.
+- Branches should start from the latest up-to-date `main`, not from an outdated local branch.
 - Do not continue unrelated feature work on the current branch just because the conversation kept going.
 - If the conversation starts drifting into a different feature, stop and warn the user that the request appears to be a separate feature based on the current chat history and repository context.
 - Use the current conversation history to judge whether the requested work is still part of the same feature, refinement, or bugfix.
 - If it is clearly a new feature, tell the user and recommend continuing on a new branch so the current work stays coherent.
+
+## Pull And Conflict Prevention
+
+Agents should actively reduce merge conflict risk before and after implementation:
+
+- Fetch remote changes before starting work and again before merging completed work.
+- Check whether `main` has advanced since the feature branch was created.
+- If `main` has advanced, integrate the latest `main` into the feature branch before final merge so conflicts are handled intentionally.
+- Do not wait until the very end of a long task to discover the branch is stale.
+- If conflict risk is high or actual conflicts appear, stop and resolve them carefully instead of pushing uncertain merges.
+- The goal is that each finished task merges cleanly and the next task starts from a fresh, current `main`.
 
 ## Commit And Push Discipline
 
@@ -169,8 +185,23 @@ Agents should treat a completed task as a git checkpoint:
 - Do not bundle unrelated finished work into one catch-all commit.
 - Use meaningful commit messages that describe the completed unit of work.
 - Before committing, confirm that the branch contains only the intended task outcome.
+- After the task branch is pushed and validated, merge it into `main`, push `main`, and checkout `main` again so the local repository is ready for the next task.
 
 This repository should accumulate small, reviewable checkpoints instead of large mixed batches.
+
+## End-Of-Task Repository State
+
+When a task is complete, the repository should be left in a predictable state:
+
+1. commit the completed task
+2. push the feature branch
+3. sync with the latest `main` if needed
+4. merge the completed branch into `main`
+5. push `main`
+6. checkout `main`
+7. pull `main` so the next task starts fresh
+
+If repository rules or conflicts prevent automatic merge, the agent should say so explicitly. Otherwise, the default expectation is to finish on updated `main`, not to leave completed work stranded on a feature branch.
 
 ## Documentation Before Commit
 
