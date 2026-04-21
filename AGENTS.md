@@ -150,6 +150,56 @@ Do not start with a mobile app, dashboard, or runtime-specific UI. The first pro
 - Treat audit fields, actor attribution, and approval history as first-class protocol concerns.
 - Keep repository additions aligned with the suggested layouts from the source documents.
 
+## New Conversation Bootstrap
+
+When a brand new conversation starts in this repository, the agent should bootstrap itself before implementation work begins.
+
+The bootstrap order is:
+
+1. read `AGENTS.md`
+2. read the ASCP source specs
+3. read `plans.md` if it exists
+4. read a status or checkpoint log if it exists
+5. inspect recent git history if more context is needed
+6. determine whether there is an active unfinished task
+7. continue the next logical task or create a new plan if no plan exists yet
+
+If `plans.md` does not exist, the agent should create the initial repository plan before building.
+
+If `plans.md` does exist, the agent should:
+
+- identify the current active feature
+- find the next unfinished task
+- continue that task instead of inventing a new direction
+- warn the user if the new request appears to be a different feature
+
+The goal is that a new tab should automatically recover the next useful task from repository state instead of relying on hidden prior chat context.
+
+## Planning First For New Work
+
+If the repository does not yet have a broken-down project plan, the agent should start in planning mode before writing implementation code.
+
+The first planning pass should:
+
+- divide the ASCP project into smaller parts
+- identify the dependency order between those parts
+- define which parts are independent enough for separate branches
+- produce an actionable task list with acceptance criteria
+- keep the plan protocol-first rather than product-first
+
+This initial planning step should break the project into manageable units such as:
+
+- schema foundation
+- method contracts
+- event contracts
+- replay semantics
+- auth and approvals
+- extensions
+- conformance
+- mock server
+
+Do not jump into implementation until that top-level breakdown exists.
+
 ## Git Workflow Discipline
 
 Agents working in this repository should use a strict feature workflow:
