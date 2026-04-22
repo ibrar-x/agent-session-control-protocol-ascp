@@ -12,69 +12,111 @@ This file tracks the active scoped work for the current branch.
 
 ## Active State
 
-- Feature name: Repository close-out
-- Branch: `main`
-- Goal: leave the ASCP v0.1 protocol workspace in a clean closed-out state on `main`, with documentation that makes protocol completion explicit and with optional downstream work separated into prompt-driven follow-on branches
+- Feature name: Reference client
+- Branch: `feature/reference-client`
+- Goal: add a small deterministic downstream reference client that consumes the frozen ASCP v0.1 schemas, examples, and mock-server surface without redefining protocol behavior
 - Source inputs:
   - `AGENTS.md`
   - `plans.md`
   - `docs/status.md`
+  - `ASCP_Protocol_Detailed_Spec_v0_1.md`
+  - `ASCP_Protocol_PRD_and_Build_Guide.md`
   - `README.md`
   - `docs/repo-operating-system.md`
-  - `docs/prompts/README.md`
-  - current chat request for a `reference-client` starter prompt plus repository close-out cleanup
+  - `docs/protocol-usage-and-dto-generation.md`
+  - `docs/prompts/reference-client.md`
+  - `mock-server/README.md`
+  - `schema/`
+  - `examples/`
+  - `spec/compatibility.md`
+  - `conformance/fixtures/compatibility/`
+  - `mock-server/`
+  - `mock-server/tests/`
+  - `conformance/tests/`
+  - `scripts/`
 
-## Repository State
+## Dependency Check
 
-- The protocol-first ASCP v0.1 build sequence is complete on `main`.
-- Completed repository outputs now include schema foundation, method contracts, event contracts, replay semantics, auth and approvals, extensions, conformance evidence, a deterministic mock server, and documentation for protocol usage plus DTO generation.
-- There is no active unfinished protocol feature on `main`.
-- Any next work should be treated as optional downstream work or an intentional future revision of the ASCP specification.
+- The upstream ASCP protocol workspace is complete and stable enough for downstream client work on this branch.
+- Frozen inputs available for consumption:
+  - canonical schemas under `schema/`
+  - request, response, error, and event examples under `examples/`
+  - compatibility notes and manifests under `spec/compatibility.md` and `conformance/fixtures/compatibility/`
+  - deterministic executable mock surface under `mock-server/`
+  - repeatable validators under `mock-server/tests/`, `conformance/tests/`, and `scripts/`
+- No dependency gap blocks the reference-client slice.
+
+## Planned Files
+
+Files to add:
+
+- `reference-client/README.md`
+- `reference-client/src/reference_client/__init__.py`
+- `reference-client/src/reference_client/client.py`
+- `reference-client/src/reference_client/schema_validation.py`
+- `reference-client/src/reference_client/stdio_transport.py`
+- `reference-client/src/reference_client/demo.py`
+- `reference-client/tests/validate_reference_client.py`
+- `scripts/validate_reference_client.sh`
+
+Files to update:
+
+- `plans.md`
+- `docs/status.md`
+- `README.md`
+- `docs/README.md`
 
 ## Scope
 
-Included in this cleanup:
+Included in this branch:
 
-- add a starter prompt for an optional `feature/reference-client` branch
-- update workflow and repository docs so `main` reads as closed out rather than mid-feature
-- checkpoint the repository state so future sessions do not infer unfinished protocol work from stale planning files
+- a minimal stdio JSON-RPC transport for the existing mock server
+- a small client layer for discovery, session reads, subscribe/replay, approvals, artifacts, and diffs
+- schema-aware validation that proves the client is consuming published ASCP v0.1 contracts
+- a repeatable demo or validator script for downstream usage
+- documentation that explains what the reference client proves and what remains out of scope
 
 Explicitly out of scope:
 
-- new protocol design work
-- reference-client implementation
-- schema, spec, conformance, or mock-server changes beyond documentation needed for close-out
+- protocol redesign
+- new ASCP methods, events, schemas, or extensions
+- a new runtime implementation parallel to the existing mock server
+- production auth stacks
+- multi-language SDK packaging
 
 ## Tasks
 
 | Status | Task | Acceptance Criteria |
 | --- | --- | --- |
-| done | add a `reference-client` starter prompt | `docs/prompts/reference-client.md` exists and scopes the branch as optional downstream consumer work |
-| done | rewrite repository planning state for `main` | `plans.md` reflects closed-out protocol completion on `main` instead of pointing at a completed feature branch |
-| done | update close-out documentation and checkpoint it | repository docs make protocol completion explicit, `docs/status.md` records the close-out checkpoint, and the prompt pack reflects the new downstream option |
+| done | define the downstream client layout and branch plan | `plans.md` reflects this branch, confirms dependency stability, and lists the files plus acceptance criteria for the reference-client slice |
+| done | add schema-aware failing tests for the downstream client flows | `reference-client/tests/validate_reference_client.py` failed first against missing client code and now covers discovery, session inspection, approvals/artifacts/diffs, and subscribe/replay behavior |
+| done | implement the reference client and demo surface | `reference-client/src/reference_client/` talks to the existing mock-server stdio JSON-RPC surface and exposes the scoped flows without redefining ASCP contracts |
+| done | document and validate the feature | `reference-client/README.md` and repo docs describe scope and limitations, `scripts/validate_reference_client.sh` passes, and `docs/status.md` records the completed checkpoint |
 
 ## Acceptance Criteria
 
-The cleanup is complete only when all of the following are true:
+The feature is done only when all of the following are true:
 
-- `main` no longer appears to have an active unfinished protocol feature
-- the prompt pack includes a clear starter prompt for `feature/reference-client`
-- repository-level docs distinguish completed ASCP protocol work from optional downstream work
-- the status log records the close-out so a future session can resume from repository state without hidden chat context
+- the client can fetch capabilities and runtimes from the mock server
+- the client can inspect sessions, approvals, artifacts, and diffs
+- the client can subscribe, observe snapshot plus replay events, and capture the replay cursor
+- the client validates consumed method responses and events against the published ASCP schemas
+- the client remains strictly downstream of the frozen ASCP v0.1 contracts and documents its scope limits
 
 ## Next Likely Step
 
-If new work is desired, start from updated `main` and open a dedicated downstream branch such as `feature/reference-client`. Otherwise, leave the repository on `main` as the closed-out ASCP v0.1 protocol workspace.
+Merge this downstream proof-client slice to `main` and leave the repository clean on updated `main`. Any later follow-on work should stay explicitly downstream, such as richer SDK ergonomics or interoperability experiments.
 
 ## Completion Outcome
 
-- Status: complete on `main`
-- Validation evidence: `./scripts/validate_mock_server.sh` completed successfully after the close-out rewrite and confirmed the mock-server validation suite still passed
+- Status: complete on `feature/reference-client`
+- Validation evidence:
+  - `./scripts/validate_reference_client.sh`
+  - `./scripts/validate_mock_server.sh`
+  - `PYTHONPATH="$PWD/reference-client/src" python3 -m reference_client.demo`
 - Documentation updated:
   - `plans.md`
-  - `README.md`
   - `docs/status.md`
+  - `README.md`
   - `docs/README.md`
-  - `docs/prompts/README.md`
-  - `docs/prompts/reference-client.md`
-- Recommended next branch after completion: `feature/reference-client`, only if downstream consumer work is desired
+  - `reference-client/README.md`
