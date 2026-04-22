@@ -12,111 +12,85 @@ This file tracks the active scoped work for the current branch.
 
 ## Active State
 
-- Feature name: Reference client
-- Branch: `feature/reference-client`
-- Goal: add a small deterministic downstream reference client that consumes the frozen ASCP v0.1 schemas, examples, and mock-server surface without redefining protocol behavior
+- Feature name: Project context reference
+- Branch: `feature/project-context-reference`
+- Goal: add a single comprehensive markdown reference that explains what the ASCP repository contains, what has been completed, how the work is organized, and how a future contributor should navigate it
 - Source inputs:
   - `AGENTS.md`
   - `plans.md`
   - `docs/status.md`
-  - `ASCP_Protocol_Detailed_Spec_v0_1.md`
-  - `ASCP_Protocol_PRD_and_Build_Guide.md`
   - `README.md`
+  - `docs/README.md`
   - `docs/repo-operating-system.md`
   - `docs/protocol-usage-and-dto-generation.md`
-  - `docs/prompts/reference-client.md`
+  - `reference-client/README.md`
   - `mock-server/README.md`
+  - `ASCP_Protocol_Detailed_Spec_v0_1.md`
+  - `ASCP_Protocol_PRD_and_Build_Guide.md`
   - `schema/`
+  - `spec/`
   - `examples/`
-  - `spec/compatibility.md`
-  - `conformance/fixtures/compatibility/`
-  - `mock-server/`
-  - `mock-server/tests/`
-  - `conformance/tests/`
+  - `conformance/`
   - `scripts/`
-
-## Dependency Check
-
-- The upstream ASCP protocol workspace is complete and stable enough for downstream client work on this branch.
-- Frozen inputs available for consumption:
-  - canonical schemas under `schema/`
-  - request, response, error, and event examples under `examples/`
-  - compatibility notes and manifests under `spec/compatibility.md` and `conformance/fixtures/compatibility/`
-  - deterministic executable mock surface under `mock-server/`
-  - repeatable validators under `mock-server/tests/`, `conformance/tests/`, and `scripts/`
-- No dependency gap blocks the reference-client slice.
-
-## Planned Files
-
-Files to add:
-
-- `reference-client/README.md`
-- `reference-client/src/reference_client/__init__.py`
-- `reference-client/src/reference_client/client.py`
-- `reference-client/src/reference_client/schema_validation.py`
-- `reference-client/src/reference_client/stdio_transport.py`
-- `reference-client/src/reference_client/demo.py`
-- `reference-client/tests/validate_reference_client.py`
-- `scripts/validate_reference_client.sh`
-
-Files to update:
-
-- `plans.md`
-- `docs/status.md`
-- `README.md`
-- `docs/README.md`
+  - `.agents/skills/`
+  - recent git history
 
 ## Scope
 
 Included in this branch:
 
-- a minimal stdio JSON-RPC transport for the existing mock server
-- a small client layer for discovery, session reads, subscribe/replay, approvals, artifacts, and diffs
-- schema-aware validation that proves the client is consuming published ASCP v0.1 contracts
-- a repeatable demo or validator script for downstream usage
-- documentation that explains what the reference client proves and what remains out of scope
+- one context-reference markdown file under `docs/`
+- documentation updates that point readers to the new file
+- checkpoint updates so future sessions can discover the new reference from repository state
 
 Explicitly out of scope:
 
-- protocol redesign
-- new ASCP methods, events, schemas, or extensions
-- a new runtime implementation parallel to the existing mock server
-- production auth stacks
-- multi-language SDK packaging
+- protocol behavior changes
+- schema, example, conformance, mock-server, or reference-client implementation changes
+- new downstream features
+
+## Planned Files
+
+Files to add:
+
+- `docs/project-context-reference.md`
+
+Files to update:
+
+- `plans.md`
+- `docs/README.md`
+- `docs/status.md`
 
 ## Tasks
 
 | Status | Task | Acceptance Criteria |
 | --- | --- | --- |
-| done | define the downstream client layout and branch plan | `plans.md` reflects this branch, confirms dependency stability, and lists the files plus acceptance criteria for the reference-client slice |
-| done | add schema-aware failing tests for the downstream client flows | `reference-client/tests/validate_reference_client.py` failed first against missing client code and now covers discovery, session inspection, approvals/artifacts/diffs, and subscribe/replay behavior |
-| done | implement the reference client and demo surface | `reference-client/src/reference_client/` talks to the existing mock-server stdio JSON-RPC surface and exposes the scoped flows without redefining ASCP contracts |
-| done | document and validate the feature | `reference-client/README.md` and repo docs describe scope and limitations, `scripts/validate_reference_client.sh` passes, and `docs/status.md` records the completed checkpoint |
+| done | write the branch plan and define the documentation scope | `plans.md` reflects the dedicated documentation branch and names the new context-reference deliverable |
+| done | add the comprehensive ASCP context reference document | `docs/project-context-reference.md` explains the repository purpose, protocol scope, completed workstreams, directory layout, validation surface, and recommended reading order |
+| done | link and checkpoint the new reference | `docs/README.md` links to the new file and `docs/status.md` records the branch outcome for future sessions |
 
 ## Acceptance Criteria
 
-The feature is done only when all of the following are true:
+The task is done only when all of the following are true:
 
-- the client can fetch capabilities and runtimes from the mock server
-- the client can inspect sessions, approvals, artifacts, and diffs
-- the client can subscribe, observe snapshot plus replay events, and capture the replay cursor
-- the client validates consumed method responses and events against the published ASCP schemas
-- the client remains strictly downstream of the frozen ASCP v0.1 contracts and documents its scope limits
+- the repository contains one clear markdown file that summarizes the full ASCP workspace for future reference
+- the file accurately reflects what exists on disk in `schema/`, `spec/`, `examples/`, `conformance/`, `mock-server/`, `reference-client/`, `docs/`, and `.agents/skills/`
+- the docs index points readers to the new reference file
+- the status log records the new documentation checkpoint
 
 ## Next Likely Step
 
-Merge this downstream proof-client slice to `main` and leave the repository clean on updated `main`. Any later follow-on work should stay explicitly downstream, such as richer SDK ergonomics or interoperability experiments.
+Merge this documentation branch into `main` so the repo-level context reference becomes part of the default bootstrap path for future sessions.
 
 ## Completion Outcome
 
-- Status: complete on `feature/reference-client`
+- Status: complete on `feature/project-context-reference`
 - Validation evidence:
-  - `./scripts/validate_reference_client.sh`
-  - `./scripts/validate_mock_server.sh`
-  - `PYTHONPATH="$PWD/reference-client/src" python3 -m reference_client.demo`
+  - reviewed `docs/project-context-reference.md` against the current repository layout and status log
+  - confirmed the docs index links to the new reference file
+  - `git diff --check`
 - Documentation updated:
   - `plans.md`
-  - `docs/status.md`
-  - `README.md`
+  - `docs/project-context-reference.md`
   - `docs/README.md`
-  - `reference-client/README.md`
+  - `docs/status.md`
