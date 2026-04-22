@@ -39,6 +39,7 @@ This index keeps the protocol workspace navigable without relying on prior chat 
 - [`prompts/extensions.md`](prompts/extensions.md)
 - [`prompts/conformance.md`](prompts/conformance.md)
 - [`prompts/mock-server.md`](prompts/mock-server.md)
+- [`prompts/reference-client.md`](prompts/reference-client.md)
 
 ## Validation And Fixtures
 

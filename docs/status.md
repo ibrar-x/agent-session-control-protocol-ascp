@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-22 - Repository close-out
+
+- Branch: `main`
+- Commit: `not committed`
+- Summary: added an optional downstream `feature/reference-client` starter prompt and rewrote the repository planning and README state so `main` now reads as a closed-out ASCP v0.1 protocol workspace rather than an unfinished protocol branch
+- Documentation updated: `plans.md`, `README.md`, `docs/status.md`, `docs/README.md`, `docs/prompts/README.md`, `docs/prompts/reference-client.md`
+- Next likely step: either leave the repository on `main` as the completed protocol workspace or start `feature/reference-client` from updated `main`
+
 ### 2026-04-22 - Mock server
 
 - Branch: `feature/mock-server`

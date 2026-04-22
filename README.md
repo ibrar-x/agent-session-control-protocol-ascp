@@ -159,4 +159,17 @@ These are intended to help future agents keep protocol work aligned with the dra
 
 ## Current Status
 
-ASCP is still a draft protocol workspace, not a frozen production standard. The detailed spec should be treated as the current source of truth for protocol implementation work until schemas, fixtures, and conformance assets are added.
+The protocol-first ASCP v0.1 workspace is complete on `main` for its intended repository scope.
+
+Completed repository outputs now include:
+
+- canonical schemas under `schema/`
+- request, response, error, and event examples under `examples/`
+- normative method, event, replay, auth, extension, and compatibility specs under `spec/`
+- compatibility fixtures and validators under `conformance/`
+- a deterministic proof implementation under `mock-server/`
+- a docs index and consumer guide under `docs/`
+
+That does not make ASCP a frozen production standard. It means this repository now contains an implementation-ready protocol workspace for the published v0.1 contract set.
+
+Any next branch should be treated as optional downstream work, such as a reference client or interoperability experiments, unless the ASCP spec itself is being intentionally revised.
