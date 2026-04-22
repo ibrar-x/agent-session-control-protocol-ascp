@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-22 - Project context reference
+
+- Branch: `feature/project-context-reference`
+- Commit: `not committed`
+- Summary: added a repository-wide ASCP context reference that explains the purpose, protocol scope, completed workstreams, directory layout, validation commands, and safe continuation model for future contributors
+- Documentation updated: `plans.md`, `docs/project-context-reference.md`, `docs/README.md`, `docs/status.md`
+- Next likely step: merge the documentation branch into `main` so future sessions can bootstrap from the new reference file directly
+
 ### 2026-04-22 - Reference client
 
 - Branch: `feature/reference-client`

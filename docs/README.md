@@ -25,6 +25,7 @@ This index keeps the protocol workspace navigable without relying on prior chat 
 
 ## Guides
 
+- [`project-context-reference.md`](project-context-reference.md): repository-wide context reference covering scope, completed workstreams, directory layout, validation entrypoints, and safe continuation paths
 - [`protocol-usage-and-dto-generation.md`](protocol-usage-and-dto-generation.md): how ASCP can be consumed and how to generate DTOs from the schema files
 - [`schema-foundation.md`](schema-foundation.md): notes from the schema-foundation workstream
 - [`../reference-client/README.md`](../reference-client/README.md): downstream proof-client scope, layout, and validation entrypoints
