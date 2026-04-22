@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-22 - Reference client
+
+- Branch: `feature/reference-client`
+- Commit: `not committed`
+- Summary: added a deterministic downstream ASCP reference client over the existing stdio mock surface, with schema-validated discovery, session inspection, subscribe/replay, approval/artifact/diff reads, a repeatable demo summary, and a branch-specific validator
+- Documentation updated: `plans.md`, `docs/status.md`, `README.md`, `docs/README.md`, `reference-client/README.md`
+- Next likely step: merge the finished downstream proof client into `main` and leave the repository clean on updated `main`
+
 ### 2026-04-22 - Repository close-out
 
 - Branch: `main`

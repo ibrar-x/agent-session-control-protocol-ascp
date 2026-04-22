@@ -27,6 +27,7 @@ This index keeps the protocol workspace navigable without relying on prior chat 
 
 - [`protocol-usage-and-dto-generation.md`](protocol-usage-and-dto-generation.md): how ASCP can be consumed and how to generate DTOs from the schema files
 - [`schema-foundation.md`](schema-foundation.md): notes from the schema-foundation workstream
+- [`../reference-client/README.md`](../reference-client/README.md): downstream proof-client scope, layout, and validation entrypoints
 
 ## Prompt Starters
 
@@ -47,6 +48,7 @@ This index keeps the protocol workspace navigable without relying on prior chat 
 - [`../examples/`](../examples/): schema-valid protocol examples
 - [`../conformance/`](../conformance/): fixtures, validators, and tests for compatibility evidence
 - [`../mock-server/README.md`](../mock-server/README.md): Mock Server usage and scope
+- [`../scripts/validate_reference_client.sh`](../scripts/validate_reference_client.sh): repeatable validator for the downstream reference client
 
 ## Suggested Reading Order
 

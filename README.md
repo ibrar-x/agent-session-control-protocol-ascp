@@ -123,6 +123,7 @@ The repo now includes:
 - [`docs/status.md`](./docs/status.md) for checkpoint logging between sessions
 - [`docs/README.md`](./docs/README.md) for a navigable documentation index
 - [`docs/protocol-usage-and-dto-generation.md`](./docs/protocol-usage-and-dto-generation.md) for consumer guidance and schema-driven DTO generation options
+- [`reference-client/README.md`](./reference-client/README.md) for the downstream proof client that consumes the frozen mock and schemas
 - [`.agents/skills/`](./.agents/skills/) for reusable ASCP build skills
 - [`mock-server/README.md`](./mock-server/README.md) for the deterministic proof mock
 
@@ -168,8 +169,9 @@ Completed repository outputs now include:
 - normative method, event, replay, auth, extension, and compatibility specs under `spec/`
 - compatibility fixtures and validators under `conformance/`
 - a deterministic proof implementation under `mock-server/`
+- a downstream proof client under `reference-client/`
 - a docs index and consumer guide under `docs/`
 
 That does not make ASCP a frozen production standard. It means this repository now contains an implementation-ready protocol workspace for the published v0.1 contract set.
 
-Any next branch should be treated as optional downstream work, such as a reference client or interoperability experiments, unless the ASCP spec itself is being intentionally revised.
+Any next branch should still be treated as optional downstream work or a future ASCP revision, not as unfinished protocol-core work hidden on `main`.
