@@ -68,6 +68,7 @@ Completed local outputs currently include:
 - active task planning in `plans.md`
 - checkpoint logging in `docs/status.md`
 - a docs index and continuation reference under `docs/`
+- a growing set of branch-reference documents for completed SDK work
 - prompt starters for the first SDK workstreams
 - a local skill pack for SDK workflow and TypeScript-first implementation
 - a TypeScript package scaffold with package metadata, compiler/test baselines, authored protocol model barrels, and reserved directories for later validation, transport, replay, and auth work
@@ -184,9 +185,10 @@ These skills are meant to keep future sessions aligned with the TypeScript-first
 1. `AGENTS.md`
 2. `plans.md`
 3. `docs/status.md`
-4. upstream detailed spec and schema/spec/example assets
-5. the relevant SDK implementation plan
-6. the prompt starter for the active feature
+4. the relevant completed branch reference under `docs/branches/` if the active feature builds on one
+5. upstream detailed spec and schema/spec/example assets
+6. the relevant SDK implementation plan
+7. the prompt starter for the active feature
 
 ## Safe Continuation Model
 

@@ -33,3 +33,17 @@ Out of scope:
 ## Goal
 
 Prepare the Dart SDK as a clean second downstream consumer after the TypeScript package establishes the first implementation reference.
+
+## Documentation Requirements
+
+Before closing the branch, document the Dart planning work in enough detail that the eventual implementation branch can start from repository files alone.
+
+Make sure the branch documentation covers:
+
+- how to read and use the planning outputs from the current branch
+- the thought process behind the proposed package shape, async model, codec strategy, and validation approach
+- why the chosen Dart direction was preferred over plausible alternatives
+- which upstream protocol assets and TypeScript SDK learnings were used as inputs
+- assumptions, risks, and unresolved questions that remain acceptable at planning time
+- what validation or review steps were used to judge the plan quality
+- what should be built first when the actual Dart implementation branch starts

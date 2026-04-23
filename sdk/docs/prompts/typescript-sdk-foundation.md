@@ -44,3 +44,18 @@ Produce a clean TypeScript package foundation that makes the model and export st
 - the model strategy is documented
 - the public export surface is clear
 - future validation and transport work does not need to restructure the package immediately
+
+## Documentation Requirements
+
+Before closing the branch, document the foundation work in enough detail that a new contributor can understand both usage and rationale without hidden chat context.
+
+Make sure the branch documentation covers:
+
+- how to install, build, typecheck, and inspect the current TypeScript package scaffold
+- how to use the current exported foundation surface and what it intentionally does not provide yet
+- the thought process behind the package shape, export map, and authored model strategy
+- why this approach was chosen instead of alternatives such as early code generation, premature client wrappers, or transport-coupled models
+- which upstream schemas, examples, and plan inputs directly shaped the implementation
+- what verification commands were run and what they prove about the foundation
+- what limitations remain for later validation, transport, replay, and client work
+- what the next branch should build on top of this foundation without restructuring it
