@@ -147,7 +147,7 @@ Expected outputs:
 - tests for wrapper request and response flow
 
 Status:
-- next active slice after the analytics branch lands
+- complete on `feature/typescript-sdk-client`
 
 ### 6. TypeScript replay and examples
 
@@ -158,6 +158,9 @@ Expected outputs:
 - replay helpers
 - subscribe and reconnect examples
 - integration tests against the mock server
+
+Status:
+- next active slice after the client branch lands
 
 ### 7. Dart SDK
 

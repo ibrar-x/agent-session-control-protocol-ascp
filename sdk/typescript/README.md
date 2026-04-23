@@ -2,7 +2,7 @@
 
 This package is the first downstream SDK target for ASCP.
 
-The current package state includes the foundation, validation, transport, and analytics slices.
+The current package state includes the foundation, validation, transport, analytics, and typed client slices.
 
 For the full branch-level rationale and handoff context, see:
 
@@ -10,6 +10,7 @@ For the full branch-level rationale and handoff context, see:
 - `../docs/branches/typescript-sdk-validation.md`
 - `../docs/branches/typescript-sdk-transport.md`
 - `../docs/branches/typescript-sdk-analytics.md`
+- `../docs/branches/typescript-sdk-client.md`
 
 ## Upstream Inputs
 
@@ -47,12 +48,13 @@ Public exports currently include:
 - `./validation`: runtime-safe parsing and assertion helpers
 - `./analytics`: opt-in analytics event types, recorders, and remediation helpers
 - `./transport`: replaceable request/subscription transports plus normalized transport errors
+- `./client`: typed ASCP core method wrappers plus protocol error normalization
 - `./models`
 - `./methods`
 - `./events`
 - `./errors`
 
-The `client`, `replay`, and `auth` directories remain reserved for later slices so typed client and replay work can extend the package without moving the root layout.
+The `replay` and `auth` directories remain reserved for later slices so replay and auth work can extend the package without moving the root layout.
 
 ## Model Strategy
 
@@ -210,6 +212,65 @@ The current transport design intentionally does not:
 - infer replay cursors beyond the core `from_seq` and `from_event_id` request params
 - validate streamed events as exact core-event payloads by default, because extension-safe transport handling needs the shared envelope shape first
 
+## Client Surface
+
+The typed client layer is published from `ascp-sdk-typescript/client` and re-exported from the package root.
+
+Representative usage against the upstream mock server:
+
+```ts
+import { AscpClient, AscpProtocolError } from "ascp-sdk-typescript/client";
+import { AscpStdioTransport } from "ascp-sdk-typescript/transport";
+
+const transport = new AscpStdioTransport({
+  command: ["python3", "../mock-server/src/mock_server/cli.py"]
+});
+const client = new AscpClient({ transport });
+
+await client.connect();
+
+try {
+  const capabilities = await client.getCapabilities();
+  const sessions = await client.listSessions({ limit: 25 });
+  const subscription = client.events();
+
+  await client.subscribe({
+    session_id: sessions.sessions[0]?.id ?? "sess_abc123",
+    include_snapshot: true,
+    from_seq: 34
+  });
+
+  for await (const event of subscription) {
+    console.log(event.type);
+    break;
+  }
+
+  await subscription.close();
+  console.log(capabilities.protocol_version);
+} catch (error) {
+  if (error instanceof AscpProtocolError) {
+    console.error(error.code, error.correlationId);
+  }
+} finally {
+  await client.close();
+}
+```
+
+What the client helpers do:
+
+- expose every ASCP core method as a typed wrapper on top of `AscpTransport.request`
+- return the protocol `result` object directly on success
+- preserve protocol field names in params and result types instead of introducing SDK-specific DTOs
+- map ASCP error response envelopes into `AscpProtocolError`
+- preserve transport errors such as `AscpTransportError` without wrapping them as protocol failures
+- delegate event streaming to `client.events()` so replay helpers can build on the same transport stream later
+
+The current client design intentionally does not:
+
+- infer replay cursors or implement snapshot-plus-replay orchestration
+- validate exact core-event payloads beyond the transport's base event envelope validation
+- change ASCP method names, params, or result field names for convenience
+
 ## Commands
 
 - `npm install`
@@ -238,9 +299,11 @@ Implemented in the foundation slice:
 - transport analytics hooks for connect, request, stream, and close lifecycle events
 - baseline production package metadata for repository, homepage, bug reporting, and keywords
 - focused runtime and type-level transport tests
+- typed wrappers for every ASCP core method
+- protocol error mapping through `AscpProtocolError`
+- focused runtime and type-level client tests
 
 Deferred to later slices:
 
-- typed client wrappers
 - replay helpers
 - higher-level integration flows that exercise the full typed client surface against the mock server

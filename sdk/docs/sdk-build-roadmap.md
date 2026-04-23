@@ -240,7 +240,7 @@ Done when:
 ## Phase 4 -  TypeScript Typed Client Methods
 
 Status:
-- next active slice after the analytics branch lands
+- complete on `feature/typescript-sdk-client`
 
 Recommended branch:
 - `feature/typescript-sdk-client`

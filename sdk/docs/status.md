@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-24 - TypeScript SDK typed client methods
+
+- Branch: `feature/typescript-sdk-client`
+- Commit: this commit
+- Summary: added the TypeScript SDK client entry point with typed wrappers for every ASCP core method, result unwrapping, request option pass-through, event/lifecycle delegation to transport, and normalized `AscpProtocolError` mapping for ASCP error response envelopes
+- Documentation updated: `plans.md`, `docs/README.md`, `docs/project-context-reference.md`, `docs/sdk-build-roadmap.md`, `docs/status.md`, `docs/branches/typescript-sdk-client.md`, `typescript/README.md`, `typescript/package.json`
+- Next likely step: create `feature/typescript-sdk-replay` from updated `main` and build replay helpers on top of `AscpClient.subscribe`, `AscpClient.unsubscribe`, `AscpClient.events`, the existing transport stream, and the existing analytics/diagnostic conventions without changing typed wrapper result shapes
+
 ### 2026-04-24 - TypeScript SDK analytics and production hardening
 
 - Branch: `feature/typescript-sdk-analytics`
