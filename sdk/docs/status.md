@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-24 - SDK branch documentation discipline
+
+- Branch: `feature/sdk-branch-documentation`
+- Commit: `not committed`
+- Summary: added a dedicated branch reference for the completed TypeScript SDK foundation work and updated the prompt pack plus roadmap so every future SDK branch must document usage, rationale, alternatives, verification evidence, limitations, and handoff context before closeout
+- Documentation updated: `plans.md`, `docs/README.md`, `docs/project-context-reference.md`, `docs/status.md`, `docs/sdk-build-roadmap.md`, `docs/prompts/README.md`, `docs/prompts/typescript-sdk-foundation.md`, `docs/prompts/typescript-sdk-validation.md`, `docs/prompts/typescript-sdk-transport-client.md`, `docs/prompts/dart-sdk-planning.md`, `docs/branches/typescript-sdk-foundation.md`, `typescript/README.md`
+- Next likely step: create `feature/typescript-sdk-validation` from updated `main` and use the new foundation branch reference plus validation prompt to implement schema-backed parsing without restructuring the package
+
 ### 2026-04-23 - TypeScript SDK foundation
 
 - Branch: `feature/typescript-sdk-foundation`

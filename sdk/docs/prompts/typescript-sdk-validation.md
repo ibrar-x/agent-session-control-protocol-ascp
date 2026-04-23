@@ -41,3 +41,18 @@ Make the TypeScript SDK capable of parsing upstream ASCP payloads safely and rep
 - event envelopes validate against upstream event schemas
 - response validation errors are actionable
 - tests prove success and failure behavior
+
+## Documentation Requirements
+
+Before closing the branch, document the validation layer in enough detail that the next contributor understands how to use it, why it is shaped that way, and where its boundaries are.
+
+Make sure the branch documentation covers:
+
+- how to load or invoke the validation surface from the current branch
+- how model, response, and event validation are expected to be used by downstream consumers
+- the thought process behind the schema-loading strategy, validator structure, and error formatting
+- why the chosen validation approach was used instead of plausible alternatives such as looser parsing, ad hoc checks, or a different schema runtime
+- which upstream schema, spec, example, and conformance assets drove the implementation decisions
+- what commands verify the validation behavior and which success and failure paths they cover
+- known limits, strictness choices, extension-handling behavior, and deferred concerns for later branches
+- what the next branch can assume about the validation API and package layout

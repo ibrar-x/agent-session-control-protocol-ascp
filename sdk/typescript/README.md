@@ -4,6 +4,8 @@ This package is the first downstream SDK target for ASCP.
 
 The foundation slice establishes the package shape, export surface, and schema-led model strategy without widening into transport, replay, validation, or typed client implementation yet.
 
+For the full branch-level rationale and handoff context, see `../docs/branches/typescript-sdk-foundation.md`.
+
 ## Upstream Inputs
 
 The package is built from the upstream ASCP assets:

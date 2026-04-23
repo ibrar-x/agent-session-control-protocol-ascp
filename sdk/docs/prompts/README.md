@@ -17,3 +17,18 @@ These prompt starters exist so a new conversation can begin from a clear SDK fea
 - keep the branch scoped to that feature only
 
 These prompts are intentionally narrow. They are meant to reduce drift, not to replace the upstream protocol sources.
+
+## Documentation Expectation For Every Branch
+
+Each prompt starter should be treated as requiring branch-level documentation before commit.
+
+At minimum, the branch documentation should explain:
+
+- what the branch adds and what remains out of scope
+- how to use the current branch output locally
+- what upstream ASCP sources were relied on
+- the implementation thought process and the constraints that shaped the design
+- why the chosen approach was used instead of the most plausible alternatives
+- verification commands and what they prove
+- known limitations, deferred work, and follow-on risks
+- the next likely branch and the clean handoff context for it

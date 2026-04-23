@@ -22,6 +22,19 @@ Before every implementation step:
 5. update docs before commit
 6. add a checkpoint to `docs/status.md`
 
+Before closing any branch, document the branch in enough detail that the next contributor can understand both usage and rationale without hidden chat context.
+
+That branch documentation should explain at minimum:
+
+- what the branch adds and what remains out of scope
+- how to use the current branch output locally
+- what upstream ASCP sources directly informed the work
+- the implementation thought process and the constraints that shaped the design
+- why the chosen approach was used instead of the most plausible alternatives
+- verification commands and what they prove
+- known limitations, deferred work, and follow-on risks
+- the next likely branch and the clean handoff context for it
+
 Global source files for almost every step:
 
 - `../AGENTS.md`
@@ -54,7 +67,7 @@ Main outputs:
 Compact prompt:
 
 ```text
-Bootstrap the ASCP SDK workspace as an SDK-only repository. Read `AGENTS.md`, the parent protocol assets, `../../ASCP_TypeScript_SDK_Implementation_Plan.md`, `../../ASCP_Dart_SDK_Implementation_Plan.md`, and `../../ASCP_Next_Phase_Master_Roadmap.md`. Create or update the repository operating files, docs index, status log, prompt starters, and local skills so future work can start with the TypeScript SDK without hidden chat context.
+Bootstrap the ASCP SDK workspace as an SDK-only repository. Read `AGENTS.md`, the parent protocol assets, `../../ASCP_TypeScript_SDK_Implementation_Plan.md`, `../../ASCP_Dart_SDK_Implementation_Plan.md`, and `../../ASCP_Next_Phase_Master_Roadmap.md`. Create or update the repository operating files, docs index, status log, prompt starters, and local skills so future work can start with the TypeScript SDK without hidden chat context, and document the branch in enough detail that a future session understands how to use the repository state, why the structure was chosen, what alternatives were rejected, what was verified, and what branch should come next.
 ```
 
 ## Phase 1 - TypeScript SDK Foundation
@@ -89,7 +102,7 @@ Deliverables:
 Compact prompt:
 
 ```text
-Build the TypeScript SDK foundation only. Read `sdk/AGENTS.md`, `sdk/plans.md`, `sdk/docs/status.md`, `schema/`, `examples/`, `ASCP_TypeScript_SDK_Implementation_Plan.md`, and `sdk/docs/prompts/typescript-sdk-foundation.md`. On a fresh `feature/typescript-sdk-foundation` branch, scaffold `sdk/typescript/`, define the package structure and public exports, and make the model strategy explicit without widening into transport or client work.
+Build the TypeScript SDK foundation only. Read `sdk/AGENTS.md`, `sdk/plans.md`, `sdk/docs/status.md`, `schema/`, `examples/`, `ASCP_TypeScript_SDK_Implementation_Plan.md`, and `sdk/docs/prompts/typescript-sdk-foundation.md`. On a fresh `feature/typescript-sdk-foundation` branch, scaffold `sdk/typescript/`, define the package structure and public exports, make the model strategy explicit without widening into transport or client work, and document how to use the foundation branch, the thought process behind the package shape, why this approach beat the alternatives, what was verified, and what the validation branch should assume next.
 ```
 
 Done when:
@@ -129,7 +142,7 @@ Deliverables:
 Compact prompt:
 
 ```text
-Implement the TypeScript SDK validation layer only. Read `sdk/AGENTS.md`, `sdk/plans.md`, `sdk/docs/status.md`, `schema/`, `spec/`, `examples/`, `conformance/`, `ASCP_TypeScript_SDK_Implementation_Plan.md`, and `sdk/docs/prompts/typescript-sdk-validation.md`. On a fresh `feature/typescript-sdk-validation` branch, add schema-backed validation with AJV, expose safe parsing helpers, and add focused tests without mixing in transport or full client work.
+Implement the TypeScript SDK validation layer only. Read `sdk/AGENTS.md`, `sdk/plans.md`, `sdk/docs/status.md`, `schema/`, `spec/`, `examples/`, `conformance/`, `ASCP_TypeScript_SDK_Implementation_Plan.md`, and `sdk/docs/prompts/typescript-sdk-validation.md`. On a fresh `feature/typescript-sdk-validation` branch, add schema-backed validation with AJV, expose safe parsing helpers, add focused tests without mixing in transport or full client work, and document how to use the validation surface, why the validator structure and error approach were chosen, what alternatives were rejected, what was verified, and what the next branch can safely build on.
 ```
 
 Done when:
@@ -168,7 +181,7 @@ Deliverables:
 Compact prompt:
 
 ```text
-Implement the TypeScript SDK transport layer only. Read `sdk/AGENTS.md`, `sdk/plans.md`, `sdk/docs/status.md`, `spec/methods.md`, `mock-server/README.md`, `reference-client/README.md`, `ASCP_TypeScript_SDK_Implementation_Plan.md`, and `sdk/docs/prompts/typescript-sdk-transport-client.md`. On `feature/typescript-sdk-transport`, add stdio and WebSocket transports with a replaceable interface and focused tests, without adding the full typed client surface yet.
+Implement the TypeScript SDK transport layer only. Read `sdk/AGENTS.md`, `sdk/plans.md`, `sdk/docs/status.md`, `spec/methods.md`, `mock-server/README.md`, `reference-client/README.md`, `ASCP_TypeScript_SDK_Implementation_Plan.md`, and `sdk/docs/prompts/typescript-sdk-transport-client.md`. On `feature/typescript-sdk-transport`, add stdio and WebSocket transports with a replaceable interface and focused tests, without adding the full typed client surface yet, and document how to use the transport layer, why the abstraction was chosen, what alternatives were rejected, what was verified, and what the client branch should inherit.
 ```
 
 Done when:
@@ -207,7 +220,7 @@ Deliverables:
 Compact prompt:
 
 ```text
-Build the TypeScript typed client surface only. Read `sdk/AGENTS.md`, `sdk/plans.md`, `sdk/docs/status.md`, `spec/methods.md`, `examples/responses/`, `examples/errors/`, `ASCP_TypeScript_SDK_Implementation_Plan.md`, and `sdk/docs/prompts/typescript-sdk-transport-client.md`. On `feature/typescript-sdk-client`, implement typed wrappers for the full ASCP method set on top of the transport layer and validation helpers, without widening into replay convenience work yet.
+Build the TypeScript typed client surface only. Read `sdk/AGENTS.md`, `sdk/plans.md`, `sdk/docs/status.md`, `spec/methods.md`, `examples/responses/`, `examples/errors/`, `ASCP_TypeScript_SDK_Implementation_Plan.md`, and `sdk/docs/prompts/typescript-sdk-transport-client.md`. On `feature/typescript-sdk-client`, implement typed wrappers for the full ASCP method set on top of the transport layer and validation helpers, without widening into replay convenience work yet, and document how to use the client surface, why the wrapper shape and error mapping were chosen, what alternatives were rejected, what was verified, and what the replay branch should inherit.
 ```
 
 Done when:
@@ -246,7 +259,7 @@ Deliverables:
 Compact prompt:
 
 ```text
-Implement the TypeScript replay and event helper layer only. Read `sdk/AGENTS.md`, `sdk/plans.md`, `sdk/docs/status.md`, `spec/replay.md`, `spec/events.md`, `examples/events/`, `conformance/fixtures/replay/`, and `ASCP_TypeScript_SDK_Implementation_Plan.md`. On `feature/typescript-sdk-replay`, add event-stream and replay helpers that preserve ASCP semantics exactly, including cursor handling and snapshot-versus-replay distinctions.
+Implement the TypeScript replay and event helper layer only. Read `sdk/AGENTS.md`, `sdk/plans.md`, `sdk/docs/status.md`, `spec/replay.md`, `spec/events.md`, `examples/events/`, `conformance/fixtures/replay/`, and `ASCP_TypeScript_SDK_Implementation_Plan.md`. On `feature/typescript-sdk-replay`, add event-stream and replay helpers that preserve ASCP semantics exactly, including cursor handling and snapshot-versus-replay distinctions, and document how to use the replay layer, why the chosen helper shape preserves protocol meaning better than the alternatives, what was verified, and what examples/tests work should build next.
 ```
 
 Done when:
@@ -285,7 +298,7 @@ Deliverables:
 Compact prompt:
 
 ```text
-Finish the TypeScript SDK with examples and integration tests. Read `sdk/AGENTS.md`, `sdk/plans.md`, `sdk/docs/status.md`, `mock-server/README.md`, `reference-client/README.md`, `examples/`, `conformance/`, and `ASCP_TypeScript_SDK_Implementation_Plan.md`. On `feature/typescript-sdk-examples-tests`, add end-to-end tests and usage examples that prove the package works against the mock server without hand-written protocol glue.
+Finish the TypeScript SDK with examples and integration tests. Read `sdk/AGENTS.md`, `sdk/plans.md`, `sdk/docs/status.md`, `mock-server/README.md`, `reference-client/README.md`, `examples/`, `conformance/`, and `ASCP_TypeScript_SDK_Implementation_Plan.md`. On `feature/typescript-sdk-examples-tests`, add end-to-end tests and usage examples that prove the package works against the mock server without hand-written protocol glue, and document how to run the examples/tests, why the examples are structured that way, what was verified end to end, and what remains before release-readiness.
 ```
 
 Done when:
@@ -321,7 +334,7 @@ Deliverables:
 Compact prompt:
 
 ```text
-Prepare the TypeScript SDK for release-quality downstream use. Read `sdk/AGENTS.md`, `sdk/plans.md`, `sdk/docs/status.md`, `sdk/typescript/README.md`, `ASCP_TypeScript_SDK_Implementation_Plan.md`, and the docs from the completed TypeScript branches. On `feature/typescript-sdk-release-readiness`, tighten exports, package metadata, docs, and validation evidence without introducing new feature scope.
+Prepare the TypeScript SDK for release-quality downstream use. Read `sdk/AGENTS.md`, `sdk/plans.md`, `sdk/docs/status.md`, `sdk/typescript/README.md`, `ASCP_TypeScript_SDK_Implementation_Plan.md`, and the docs from the completed TypeScript branches. On `feature/typescript-sdk-release-readiness`, tighten exports, package metadata, docs, and validation evidence without introducing new feature scope, and document how to consume the release-ready package, why the final package boundaries were chosen, what final tradeoffs remain, what evidence supports release quality, and what Dart planning should use as downstream reference material.
 ```
 
 Done when:
@@ -359,7 +372,7 @@ Deliverables:
 Compact prompt:
 
 ```text
-Plan the Dart SDK intentionally after the TypeScript SDK is stable. Read `sdk/AGENTS.md`, `sdk/plans.md`, `sdk/docs/status.md`, `sdk/typescript/README.md`, `sdk/dart/README.md`, `ASCP_Dart_SDK_Implementation_Plan.md`, `ASCP_Next_Phase_Master_Roadmap.md`, and `sdk/docs/prompts/dart-sdk-planning.md`. On `feature/dart-sdk-planning`, confirm the Dart package scope, package layout, model strategy, and validation/replay plan without mixing in Flutter UI work.
+Plan the Dart SDK intentionally after the TypeScript SDK is stable. Read `sdk/AGENTS.md`, `sdk/plans.md`, `sdk/docs/status.md`, `sdk/typescript/README.md`, `sdk/dart/README.md`, `ASCP_Dart_SDK_Implementation_Plan.md`, `ASCP_Next_Phase_Master_Roadmap.md`, and `sdk/docs/prompts/dart-sdk-planning.md`. On `feature/dart-sdk-planning`, confirm the Dart package scope, package layout, model strategy, and validation/replay plan without mixing in Flutter UI work, and document how to use the planning outputs, why the chosen Dart direction was preferred over alternatives, what assumptions remain open, and what the first implementation branch should build.
 ```
 
 Done when:
@@ -395,7 +408,7 @@ Deliverables:
 Compact prompt:
 
 ```text
-Build the Dart SDK foundation only. Read `sdk/AGENTS.md`, `sdk/plans.md`, `sdk/docs/status.md`, `schema/`, `examples/`, and `ASCP_Dart_SDK_Implementation_Plan.md`. On `feature/dart-sdk-foundation`, scaffold `sdk/dart/`, define the package structure and model/json strategy, and keep the scope limited to foundation work.
+Build the Dart SDK foundation only. Read `sdk/AGENTS.md`, `sdk/plans.md`, `sdk/docs/status.md`, `schema/`, `examples/`, and `ASCP_Dart_SDK_Implementation_Plan.md`. On `feature/dart-sdk-foundation`, scaffold `sdk/dart/`, define the package structure and model/json strategy, keep the scope limited to foundation work, and document how to use the foundation branch, why the package and codec strategy were chosen, what alternatives were rejected, what was verified, and what the executable Dart branch should inherit.
 ```
 
 ## Phase 10 - Dart Transport, Client, And Replay
@@ -428,7 +441,7 @@ Deliverables:
 Compact prompt:
 
 ```text
-Implement the Dart SDK executable surface. Read `sdk/AGENTS.md`, `sdk/plans.md`, `sdk/docs/status.md`, `spec/`, `examples/`, `mock-server/README.md`, and `ASCP_Dart_SDK_Implementation_Plan.md`. On `feature/dart-sdk-client`, add typed methods, stream-based subscriptions, replay helpers, transport abstraction, validation hooks, and focused tests without pulling in Flutter UI concerns.
+Implement the Dart SDK executable surface. Read `sdk/AGENTS.md`, `sdk/plans.md`, `sdk/docs/status.md`, `spec/`, `examples/`, `mock-server/README.md`, and `ASCP_Dart_SDK_Implementation_Plan.md`. On `feature/dart-sdk-client`, add typed methods, stream-based subscriptions, replay helpers, transport abstraction, validation hooks, and focused tests without pulling in Flutter UI concerns, and document how to use the current Dart SDK surface, why its API shape and transport choices were preferred over alternatives, what was verified, what remains limited, and what the repository should do after Dart reaches parity.
 ```
 
 Done when:
@@ -452,5 +465,5 @@ The SDK effort is effectively complete when:
 Use this only when you want the next agent to select the next unfinished roadmap phase rather than forcing one specific step.
 
 ```text
-Continue the ASCP SDK roadmap from repository state. Read `sdk/AGENTS.md`, `sdk/plans.md`, `sdk/docs/status.md`, `sdk/docs/sdk-build-roadmap.md`, the upstream protocol assets under `schema/`, `spec/`, `examples/`, and `conformance/`, plus the relevant implementation plan file. Identify the next unfinished SDK phase, keep the work scoped to one feature branch, update the plan first, implement only that phase, update docs before commit, and leave a checkpoint in `sdk/docs/status.md`.
+Continue the ASCP SDK roadmap from repository state. Read `sdk/AGENTS.md`, `sdk/plans.md`, `sdk/docs/status.md`, `sdk/docs/sdk-build-roadmap.md`, the upstream protocol assets under `schema/`, `spec/`, `examples/`, and `conformance/`, plus the relevant implementation plan file. Identify the next unfinished SDK phase, keep the work scoped to one feature branch, update the plan first, implement only that phase, update docs before commit, leave a checkpoint in `sdk/docs/status.md`, and document the branch in enough detail that the next contributor understands how to use the branch output, why the chosen approach beat the alternatives, what was verified, what remains limited, and which branch should come next.
 ```

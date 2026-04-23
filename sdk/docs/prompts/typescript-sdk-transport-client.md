@@ -42,3 +42,18 @@ Make the TypeScript SDK usable against the upstream mock server and suitable for
 - core methods are exposed through typed wrappers
 - transport remains replaceable
 - replay and subscription behavior remain protocol-faithful
+
+## Documentation Requirements
+
+Before closing the branch, document the transport and client work in enough detail that future contributors can use the branch output and understand the tradeoffs behind it.
+
+Make sure the branch documentation covers:
+
+- how to instantiate and use the current transport and client surface against the mock server
+- how request, response, subscription, and error flows are expected to work in this branch
+- the thought process behind the transport abstraction, method wrapper design, and error normalization choices
+- why the chosen transport/client shape was used instead of tighter coupling to one runtime, one transport, or one product workflow
+- which upstream specs, mock-server behavior, replay rules, and reference-client patterns informed the implementation
+- what verification commands or integration checks were run and what they prove
+- known limitations, unsupported paths, and what replay or approval work is still deferred
+- what the next branch can extend safely without breaking the current public surface

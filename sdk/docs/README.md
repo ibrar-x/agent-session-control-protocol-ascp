@@ -28,6 +28,10 @@ This index keeps the SDK workspace navigable without relying on hidden chat cont
 - [`project-context-reference.md`](project-context-reference.md): SDK workspace summary, scope, and continuation guidance
 - [`sdk-build-roadmap.md`](sdk-build-roadmap.md): end-to-end build sequence for the TypeScript-first and Dart SDK workstreams, with compact prompts for each phase
 
+## Branch References
+
+- [`branches/typescript-sdk-foundation.md`](branches/typescript-sdk-foundation.md): detailed usage, rationale, alternatives, verification evidence, limitations, and handoff notes for the completed TypeScript foundation branch
+
 ## Prompt Starters
 
 - [`prompts/README.md`](prompts/README.md): prompt pack overview
