@@ -17,6 +17,10 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./validation": {
+      "types": "./dist/validation/index.d.ts",
+      "import": "./dist/validation/index.js"
+    },
     "./models": {
       "types": "./dist/models/index.d.ts",
       "import": "./dist/models/index.js"
@@ -38,10 +42,14 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "clean": "rimraf dist",
-    "build": "npm run clean && tsc -p tsconfig.build.json",
+    "build": "npm run clean && tsc -p tsconfig.build.json && node ./scripts/copy-validation-schemas.mjs",
     "test": "vitest run",
     "test:types": "tsc -p tsconfig.type-tests.json",
     "check": "npm run build && npm run test && npm run test:types"
+  },
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
   },
   "devDependencies": {
     "@types/node": "^24.9.1",

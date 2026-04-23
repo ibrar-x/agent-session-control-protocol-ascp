@@ -1,0 +1,1852 @@
+{
+  "$id": "https://ascp.dev/schema/v0.1/ascp-methods.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ASCP Method Contracts",
+  "description": "Exact request, success-response, and method-specific error contracts for the ASCP core method surface.",
+  "$defs": {
+    "Cursor": {
+      "type": "string",
+      "minLength": 1
+    },
+    "NullableCursor": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Cursor"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "Limit": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "InputKind": {
+      "type": "string",
+      "enum": [
+        "text",
+        "instruction",
+        "reply",
+        "control"
+      ]
+    },
+    "StopMode": {
+      "type": "string",
+      "enum": [
+        "graceful",
+        "force"
+      ]
+    },
+    "ApprovalDecision": {
+      "type": "string",
+      "enum": [
+        "approved",
+        "rejected"
+      ]
+    },
+    "ResolvedApprovalStatus": {
+      "type": "string",
+      "enum": [
+        "approved",
+        "rejected"
+      ]
+    },
+    "CapabilitiesGetParams": {
+      "type": "object",
+      "maxProperties": 0,
+      "additionalProperties": false
+    },
+    "HostsGetParams": {
+      "type": "object",
+      "maxProperties": 0,
+      "additionalProperties": false
+    },
+    "RuntimesListParams": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "adapter_kind": {
+          "type": "string",
+          "enum": [
+            "native",
+            "wrapper",
+            "pty"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SessionsListParams": {
+      "type": "object",
+      "properties": {
+        "runtime_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "status": {
+          "$ref": "ascp-core.schema.json#/$defs/SessionStatus"
+        },
+        "workspace": {
+          "type": "string"
+        },
+        "updated_after": {
+          "$ref": "ascp-core.schema.json#/$defs/TimestampUtc"
+        },
+        "search_text": {
+          "type": "string"
+        },
+        "limit": {
+          "$ref": "#/$defs/Limit"
+        },
+        "cursor": {
+          "$ref": "#/$defs/Cursor"
+        }
+      },
+      "additionalProperties": false
+    },
+    "SessionsGetParams": {
+      "type": "object",
+      "required": [
+        "session_id"
+      ],
+      "properties": {
+        "session_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "include_runs": {
+          "type": "boolean"
+        },
+        "include_pending_approvals": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "SessionsStartParams": {
+      "type": "object",
+      "required": [
+        "runtime_id"
+      ],
+      "properties": {
+        "runtime_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "workspace": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "initial_prompt": {
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "ascp-core.schema.json#/$defs/StringMap"
+        }
+      },
+      "additionalProperties": false
+    },
+    "SessionsResumeParams": {
+      "type": "object",
+      "required": [
+        "session_id"
+      ],
+      "properties": {
+        "session_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "runtime_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        }
+      },
+      "additionalProperties": false
+    },
+    "SessionsStopParams": {
+      "type": "object",
+      "required": [
+        "session_id"
+      ],
+      "properties": {
+        "session_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "mode": {
+          "$ref": "#/$defs/StopMode"
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "SessionsSendInputParams": {
+      "type": "object",
+      "required": [
+        "session_id",
+        "input"
+      ],
+      "properties": {
+        "session_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "input": {
+          "type": "string"
+        },
+        "input_kind": {
+          "$ref": "#/$defs/InputKind"
+        },
+        "metadata": {
+          "$ref": "ascp-core.schema.json#/$defs/FlexibleObject"
+        }
+      },
+      "additionalProperties": false
+    },
+    "SessionsSubscribeParams": {
+      "type": "object",
+      "required": [
+        "session_id"
+      ],
+      "properties": {
+        "session_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "from_seq": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "from_event_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "include_snapshot": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "SessionsUnsubscribeParams": {
+      "type": "object",
+      "required": [
+        "subscription_id"
+      ],
+      "properties": {
+        "subscription_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ApprovalsListParams": {
+      "type": "object",
+      "properties": {
+        "session_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "status": {
+          "$ref": "ascp-core.schema.json#/$defs/ApprovalStatus"
+        },
+        "limit": {
+          "$ref": "#/$defs/Limit"
+        },
+        "cursor": {
+          "$ref": "#/$defs/Cursor"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ApprovalsRespondParams": {
+      "type": "object",
+      "required": [
+        "approval_id",
+        "decision"
+      ],
+      "properties": {
+        "approval_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "decision": {
+          "$ref": "#/$defs/ApprovalDecision"
+        },
+        "note": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ArtifactsListParams": {
+      "type": "object",
+      "required": [
+        "session_id"
+      ],
+      "properties": {
+        "session_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "run_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "kind": {
+          "$ref": "ascp-core.schema.json#/$defs/ArtifactKind"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ArtifactsGetParams": {
+      "type": "object",
+      "required": [
+        "artifact_id"
+      ],
+      "properties": {
+        "artifact_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        }
+      },
+      "additionalProperties": false
+    },
+    "DiffsGetParams": {
+      "type": "object",
+      "required": [
+        "session_id"
+      ],
+      "properties": {
+        "session_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "run_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CapabilitiesGetResult": {
+      "$ref": "ascp-capabilities.schema.json"
+    },
+    "HostsGetResult": {
+      "type": "object",
+      "required": [
+        "host"
+      ],
+      "properties": {
+        "host": {
+          "$ref": "ascp-core.schema.json#/$defs/Host"
+        }
+      },
+      "additionalProperties": false
+    },
+    "RuntimesListResult": {
+      "type": "object",
+      "required": [
+        "runtimes"
+      ],
+      "properties": {
+        "runtimes": {
+          "type": "array",
+          "items": {
+            "$ref": "ascp-core.schema.json#/$defs/Runtime"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "SessionsListResult": {
+      "type": "object",
+      "required": [
+        "sessions",
+        "next_cursor"
+      ],
+      "properties": {
+        "sessions": {
+          "type": "array",
+          "items": {
+            "$ref": "ascp-core.schema.json#/$defs/Session"
+          }
+        },
+        "next_cursor": {
+          "$ref": "#/$defs/NullableCursor"
+        }
+      },
+      "additionalProperties": false
+    },
+    "SessionsGetResult": {
+      "type": "object",
+      "required": [
+        "session"
+      ],
+      "properties": {
+        "session": {
+          "$ref": "ascp-core.schema.json#/$defs/Session"
+        },
+        "runs": {
+          "type": "array",
+          "items": {
+            "$ref": "ascp-core.schema.json#/$defs/Run"
+          }
+        },
+        "pending_approvals": {
+          "type": "array",
+          "items": {
+            "$ref": "ascp-core.schema.json#/$defs/ApprovalRequest"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "SessionsStartResult": {
+      "type": "object",
+      "required": [
+        "session"
+      ],
+      "properties": {
+        "session": {
+          "$ref": "ascp-core.schema.json#/$defs/Session"
+        }
+      },
+      "additionalProperties": false
+    },
+    "SessionsResumeResult": {
+      "type": "object",
+      "required": [
+        "session",
+        "snapshot_emitted",
+        "replay_supported"
+      ],
+      "properties": {
+        "session": {
+          "$ref": "ascp-core.schema.json#/$defs/Session"
+        },
+        "snapshot_emitted": {
+          "type": "boolean"
+        },
+        "replay_supported": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "SessionsStopResult": {
+      "type": "object",
+      "required": [
+        "session_id",
+        "status"
+      ],
+      "properties": {
+        "session_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "status": {
+          "const": "stopped"
+        }
+      },
+      "additionalProperties": false
+    },
+    "SessionsSendInputResult": {
+      "type": "object",
+      "required": [
+        "accepted",
+        "session_id"
+      ],
+      "properties": {
+        "accepted": {
+          "type": "boolean"
+        },
+        "session_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        }
+      },
+      "additionalProperties": false
+    },
+    "SessionsSubscribeResult": {
+      "type": "object",
+      "required": [
+        "subscription_id",
+        "session_id",
+        "snapshot_emitted"
+      ],
+      "properties": {
+        "subscription_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "session_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "snapshot_emitted": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "SessionsUnsubscribeResult": {
+      "type": "object",
+      "required": [
+        "subscription_id",
+        "unsubscribed"
+      ],
+      "properties": {
+        "subscription_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "unsubscribed": {
+          "const": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "ApprovalsListResult": {
+      "type": "object",
+      "required": [
+        "approvals",
+        "next_cursor"
+      ],
+      "properties": {
+        "approvals": {
+          "type": "array",
+          "items": {
+            "$ref": "ascp-core.schema.json#/$defs/ApprovalRequest"
+          }
+        },
+        "next_cursor": {
+          "$ref": "#/$defs/NullableCursor"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ApprovalsRespondResult": {
+      "type": "object",
+      "required": [
+        "approval_id",
+        "status"
+      ],
+      "properties": {
+        "approval_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "status": {
+          "$ref": "#/$defs/ResolvedApprovalStatus"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ArtifactsListResult": {
+      "type": "object",
+      "required": [
+        "artifacts"
+      ],
+      "properties": {
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "$ref": "ascp-core.schema.json#/$defs/Artifact"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "ArtifactsGetResult": {
+      "type": "object",
+      "required": [
+        "artifact"
+      ],
+      "properties": {
+        "artifact": {
+          "$ref": "ascp-core.schema.json#/$defs/Artifact"
+        }
+      },
+      "additionalProperties": false
+    },
+    "DiffsGetResult": {
+      "type": "object",
+      "required": [
+        "diff"
+      ],
+      "properties": {
+        "diff": {
+          "$ref": "ascp-core.schema.json#/$defs/DiffSummary"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CapabilitiesGetErrorCode": {
+      "type": "string",
+      "enum": [
+        "INVALID_REQUEST",
+        "UNAUTHORIZED",
+        "INTERNAL_ERROR"
+      ]
+    },
+    "HostsGetErrorCode": {
+      "type": "string",
+      "enum": [
+        "INVALID_REQUEST",
+        "UNAUTHORIZED",
+        "INTERNAL_ERROR"
+      ]
+    },
+    "RuntimesListErrorCode": {
+      "type": "string",
+      "enum": [
+        "INVALID_REQUEST",
+        "UNAUTHORIZED",
+        "ADAPTER_ERROR",
+        "INTERNAL_ERROR"
+      ]
+    },
+    "SessionsListErrorCode": {
+      "type": "string",
+      "enum": [
+        "INVALID_REQUEST",
+        "UNAUTHORIZED",
+        "FORBIDDEN",
+        "ADAPTER_ERROR",
+        "INTERNAL_ERROR"
+      ]
+    },
+    "SessionsGetErrorCode": {
+      "type": "string",
+      "enum": [
+        "INVALID_REQUEST",
+        "UNAUTHORIZED",
+        "FORBIDDEN",
+        "NOT_FOUND",
+        "ADAPTER_ERROR",
+        "INTERNAL_ERROR"
+      ]
+    },
+    "SessionsStartErrorCode": {
+      "type": "string",
+      "enum": [
+        "INVALID_REQUEST",
+        "UNAUTHORIZED",
+        "FORBIDDEN",
+        "UNSUPPORTED",
+        "ADAPTER_ERROR",
+        "RUNTIME_ERROR",
+        "INTERNAL_ERROR"
+      ]
+    },
+    "SessionsResumeErrorCode": {
+      "type": "string",
+      "enum": [
+        "INVALID_REQUEST",
+        "UNAUTHORIZED",
+        "FORBIDDEN",
+        "NOT_FOUND",
+        "UNSUPPORTED",
+        "ADAPTER_ERROR",
+        "RUNTIME_ERROR",
+        "INTERNAL_ERROR"
+      ]
+    },
+    "SessionsStopErrorCode": {
+      "type": "string",
+      "enum": [
+        "INVALID_REQUEST",
+        "UNAUTHORIZED",
+        "FORBIDDEN",
+        "NOT_FOUND",
+        "UNSUPPORTED",
+        "CONFLICT",
+        "RUNTIME_ERROR",
+        "INTERNAL_ERROR"
+      ]
+    },
+    "SessionsSendInputErrorCode": {
+      "type": "string",
+      "enum": [
+        "INVALID_REQUEST",
+        "UNAUTHORIZED",
+        "FORBIDDEN",
+        "NOT_FOUND",
+        "UNSUPPORTED",
+        "RUNTIME_ERROR",
+        "INTERNAL_ERROR"
+      ]
+    },
+    "SessionsSubscribeErrorCode": {
+      "type": "string",
+      "enum": [
+        "INVALID_REQUEST",
+        "UNAUTHORIZED",
+        "FORBIDDEN",
+        "NOT_FOUND",
+        "UNSUPPORTED",
+        "TRANSIENT_UNAVAILABLE",
+        "INTERNAL_ERROR"
+      ]
+    },
+    "SessionsUnsubscribeErrorCode": {
+      "type": "string",
+      "enum": [
+        "INVALID_REQUEST",
+        "UNAUTHORIZED",
+        "FORBIDDEN",
+        "NOT_FOUND",
+        "UNSUPPORTED",
+        "INTERNAL_ERROR"
+      ]
+    },
+    "ApprovalsListErrorCode": {
+      "type": "string",
+      "enum": [
+        "INVALID_REQUEST",
+        "UNAUTHORIZED",
+        "FORBIDDEN",
+        "UNSUPPORTED",
+        "ADAPTER_ERROR",
+        "INTERNAL_ERROR"
+      ]
+    },
+    "ApprovalsRespondErrorCode": {
+      "type": "string",
+      "enum": [
+        "INVALID_REQUEST",
+        "UNAUTHORIZED",
+        "FORBIDDEN",
+        "NOT_FOUND",
+        "CONFLICT",
+        "RUNTIME_ERROR",
+        "INTERNAL_ERROR"
+      ]
+    },
+    "ArtifactsListErrorCode": {
+      "type": "string",
+      "enum": [
+        "INVALID_REQUEST",
+        "UNAUTHORIZED",
+        "FORBIDDEN",
+        "NOT_FOUND",
+        "UNSUPPORTED",
+        "ADAPTER_ERROR",
+        "INTERNAL_ERROR"
+      ]
+    },
+    "ArtifactsGetErrorCode": {
+      "type": "string",
+      "enum": [
+        "INVALID_REQUEST",
+        "UNAUTHORIZED",
+        "FORBIDDEN",
+        "NOT_FOUND",
+        "UNSUPPORTED",
+        "ADAPTER_ERROR",
+        "INTERNAL_ERROR"
+      ]
+    },
+    "DiffsGetErrorCode": {
+      "type": "string",
+      "enum": [
+        "INVALID_REQUEST",
+        "UNAUTHORIZED",
+        "FORBIDDEN",
+        "NOT_FOUND",
+        "UNSUPPORTED",
+        "ADAPTER_ERROR",
+        "INTERNAL_ERROR"
+      ]
+    },
+    "CapabilitiesGetErrorObject": {
+      "allOf": [
+        {
+          "$ref": "ascp-errors.schema.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "$ref": "#/$defs/CapabilitiesGetErrorCode"
+            }
+          }
+        }
+      ]
+    },
+    "HostsGetErrorObject": {
+      "allOf": [
+        {
+          "$ref": "ascp-errors.schema.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "$ref": "#/$defs/HostsGetErrorCode"
+            }
+          }
+        }
+      ]
+    },
+    "RuntimesListErrorObject": {
+      "allOf": [
+        {
+          "$ref": "ascp-errors.schema.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "$ref": "#/$defs/RuntimesListErrorCode"
+            }
+          }
+        }
+      ]
+    },
+    "SessionsListErrorObject": {
+      "allOf": [
+        {
+          "$ref": "ascp-errors.schema.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "$ref": "#/$defs/SessionsListErrorCode"
+            }
+          }
+        }
+      ]
+    },
+    "SessionsGetErrorObject": {
+      "allOf": [
+        {
+          "$ref": "ascp-errors.schema.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "$ref": "#/$defs/SessionsGetErrorCode"
+            }
+          }
+        }
+      ]
+    },
+    "SessionsStartErrorObject": {
+      "allOf": [
+        {
+          "$ref": "ascp-errors.schema.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "$ref": "#/$defs/SessionsStartErrorCode"
+            }
+          }
+        }
+      ]
+    },
+    "SessionsResumeErrorObject": {
+      "allOf": [
+        {
+          "$ref": "ascp-errors.schema.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "$ref": "#/$defs/SessionsResumeErrorCode"
+            }
+          }
+        }
+      ]
+    },
+    "SessionsStopErrorObject": {
+      "allOf": [
+        {
+          "$ref": "ascp-errors.schema.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "$ref": "#/$defs/SessionsStopErrorCode"
+            }
+          }
+        }
+      ]
+    },
+    "SessionsSendInputErrorObject": {
+      "allOf": [
+        {
+          "$ref": "ascp-errors.schema.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "$ref": "#/$defs/SessionsSendInputErrorCode"
+            }
+          }
+        }
+      ]
+    },
+    "SessionsSubscribeErrorObject": {
+      "allOf": [
+        {
+          "$ref": "ascp-errors.schema.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "$ref": "#/$defs/SessionsSubscribeErrorCode"
+            }
+          }
+        }
+      ]
+    },
+    "SessionsUnsubscribeErrorObject": {
+      "allOf": [
+        {
+          "$ref": "ascp-errors.schema.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "$ref": "#/$defs/SessionsUnsubscribeErrorCode"
+            }
+          }
+        }
+      ]
+    },
+    "ApprovalsListErrorObject": {
+      "allOf": [
+        {
+          "$ref": "ascp-errors.schema.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "$ref": "#/$defs/ApprovalsListErrorCode"
+            }
+          }
+        }
+      ]
+    },
+    "ApprovalsRespondErrorObject": {
+      "allOf": [
+        {
+          "$ref": "ascp-errors.schema.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "$ref": "#/$defs/ApprovalsRespondErrorCode"
+            }
+          }
+        }
+      ]
+    },
+    "ArtifactsListErrorObject": {
+      "allOf": [
+        {
+          "$ref": "ascp-errors.schema.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "$ref": "#/$defs/ArtifactsListErrorCode"
+            }
+          }
+        }
+      ]
+    },
+    "ArtifactsGetErrorObject": {
+      "allOf": [
+        {
+          "$ref": "ascp-errors.schema.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "$ref": "#/$defs/ArtifactsGetErrorCode"
+            }
+          }
+        }
+      ]
+    },
+    "DiffsGetErrorObject": {
+      "allOf": [
+        {
+          "$ref": "ascp-errors.schema.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "$ref": "#/$defs/DiffsGetErrorCode"
+            }
+          }
+        }
+      ]
+    },
+    "CapabilitiesGetRequest": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/RequestEnvelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "jsonrpc",
+            "id",
+            "method",
+            "params"
+          ],
+          "properties": {
+            "method": {
+              "const": "capabilities.get"
+            },
+            "params": {
+              "$ref": "#/$defs/CapabilitiesGetParams"
+            }
+          }
+        }
+      ]
+    },
+    "HostsGetRequest": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/RequestEnvelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "jsonrpc",
+            "id",
+            "method",
+            "params"
+          ],
+          "properties": {
+            "method": {
+              "const": "hosts.get"
+            },
+            "params": {
+              "$ref": "#/$defs/HostsGetParams"
+            }
+          }
+        }
+      ]
+    },
+    "RuntimesListRequest": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/RequestEnvelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "jsonrpc",
+            "id",
+            "method",
+            "params"
+          ],
+          "properties": {
+            "method": {
+              "const": "runtimes.list"
+            },
+            "params": {
+              "$ref": "#/$defs/RuntimesListParams"
+            }
+          }
+        }
+      ]
+    },
+    "SessionsListRequest": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/RequestEnvelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "jsonrpc",
+            "id",
+            "method",
+            "params"
+          ],
+          "properties": {
+            "method": {
+              "const": "sessions.list"
+            },
+            "params": {
+              "$ref": "#/$defs/SessionsListParams"
+            }
+          }
+        }
+      ]
+    },
+    "SessionsGetRequest": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/RequestEnvelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "jsonrpc",
+            "id",
+            "method",
+            "params"
+          ],
+          "properties": {
+            "method": {
+              "const": "sessions.get"
+            },
+            "params": {
+              "$ref": "#/$defs/SessionsGetParams"
+            }
+          }
+        }
+      ]
+    },
+    "SessionsStartRequest": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/RequestEnvelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "jsonrpc",
+            "id",
+            "method",
+            "params"
+          ],
+          "properties": {
+            "method": {
+              "const": "sessions.start"
+            },
+            "params": {
+              "$ref": "#/$defs/SessionsStartParams"
+            }
+          }
+        }
+      ]
+    },
+    "SessionsResumeRequest": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/RequestEnvelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "jsonrpc",
+            "id",
+            "method",
+            "params"
+          ],
+          "properties": {
+            "method": {
+              "const": "sessions.resume"
+            },
+            "params": {
+              "$ref": "#/$defs/SessionsResumeParams"
+            }
+          }
+        }
+      ]
+    },
+    "SessionsStopRequest": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/RequestEnvelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "jsonrpc",
+            "id",
+            "method",
+            "params"
+          ],
+          "properties": {
+            "method": {
+              "const": "sessions.stop"
+            },
+            "params": {
+              "$ref": "#/$defs/SessionsStopParams"
+            }
+          }
+        }
+      ]
+    },
+    "SessionsSendInputRequest": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/RequestEnvelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "jsonrpc",
+            "id",
+            "method",
+            "params"
+          ],
+          "properties": {
+            "method": {
+              "const": "sessions.send_input"
+            },
+            "params": {
+              "$ref": "#/$defs/SessionsSendInputParams"
+            }
+          }
+        }
+      ]
+    },
+    "SessionsSubscribeRequest": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/RequestEnvelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "jsonrpc",
+            "id",
+            "method",
+            "params"
+          ],
+          "properties": {
+            "method": {
+              "const": "sessions.subscribe"
+            },
+            "params": {
+              "$ref": "#/$defs/SessionsSubscribeParams"
+            }
+          }
+        }
+      ]
+    },
+    "SessionsUnsubscribeRequest": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/RequestEnvelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "jsonrpc",
+            "id",
+            "method",
+            "params"
+          ],
+          "properties": {
+            "method": {
+              "const": "sessions.unsubscribe"
+            },
+            "params": {
+              "$ref": "#/$defs/SessionsUnsubscribeParams"
+            }
+          }
+        }
+      ]
+    },
+    "ApprovalsListRequest": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/RequestEnvelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "jsonrpc",
+            "id",
+            "method",
+            "params"
+          ],
+          "properties": {
+            "method": {
+              "const": "approvals.list"
+            },
+            "params": {
+              "$ref": "#/$defs/ApprovalsListParams"
+            }
+          }
+        }
+      ]
+    },
+    "ApprovalsRespondRequest": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/RequestEnvelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "jsonrpc",
+            "id",
+            "method",
+            "params"
+          ],
+          "properties": {
+            "method": {
+              "const": "approvals.respond"
+            },
+            "params": {
+              "$ref": "#/$defs/ApprovalsRespondParams"
+            }
+          }
+        }
+      ]
+    },
+    "ArtifactsListRequest": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/RequestEnvelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "jsonrpc",
+            "id",
+            "method",
+            "params"
+          ],
+          "properties": {
+            "method": {
+              "const": "artifacts.list"
+            },
+            "params": {
+              "$ref": "#/$defs/ArtifactsListParams"
+            }
+          }
+        }
+      ]
+    },
+    "ArtifactsGetRequest": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/RequestEnvelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "jsonrpc",
+            "id",
+            "method",
+            "params"
+          ],
+          "properties": {
+            "method": {
+              "const": "artifacts.get"
+            },
+            "params": {
+              "$ref": "#/$defs/ArtifactsGetParams"
+            }
+          }
+        }
+      ]
+    },
+    "DiffsGetRequest": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/RequestEnvelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "jsonrpc",
+            "id",
+            "method",
+            "params"
+          ],
+          "properties": {
+            "method": {
+              "const": "diffs.get"
+            },
+            "params": {
+              "$ref": "#/$defs/DiffsGetParams"
+            }
+          }
+        }
+      ]
+    },
+    "CapabilitiesGetSuccessResponse": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/SuccessResponseEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "result": {
+              "$ref": "#/$defs/CapabilitiesGetResult"
+            }
+          }
+        }
+      ]
+    },
+    "HostsGetSuccessResponse": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/SuccessResponseEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "result": {
+              "$ref": "#/$defs/HostsGetResult"
+            }
+          }
+        }
+      ]
+    },
+    "RuntimesListSuccessResponse": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/SuccessResponseEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "result": {
+              "$ref": "#/$defs/RuntimesListResult"
+            }
+          }
+        }
+      ]
+    },
+    "SessionsListSuccessResponse": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/SuccessResponseEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "result": {
+              "$ref": "#/$defs/SessionsListResult"
+            }
+          }
+        }
+      ]
+    },
+    "SessionsGetSuccessResponse": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/SuccessResponseEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "result": {
+              "$ref": "#/$defs/SessionsGetResult"
+            }
+          }
+        }
+      ]
+    },
+    "SessionsStartSuccessResponse": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/SuccessResponseEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "result": {
+              "$ref": "#/$defs/SessionsStartResult"
+            }
+          }
+        }
+      ]
+    },
+    "SessionsResumeSuccessResponse": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/SuccessResponseEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "result": {
+              "$ref": "#/$defs/SessionsResumeResult"
+            }
+          }
+        }
+      ]
+    },
+    "SessionsStopSuccessResponse": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/SuccessResponseEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "result": {
+              "$ref": "#/$defs/SessionsStopResult"
+            }
+          }
+        }
+      ]
+    },
+    "SessionsSendInputSuccessResponse": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/SuccessResponseEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "result": {
+              "$ref": "#/$defs/SessionsSendInputResult"
+            }
+          }
+        }
+      ]
+    },
+    "SessionsSubscribeSuccessResponse": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/SuccessResponseEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "result": {
+              "$ref": "#/$defs/SessionsSubscribeResult"
+            }
+          }
+        }
+      ]
+    },
+    "SessionsUnsubscribeSuccessResponse": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/SuccessResponseEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "result": {
+              "$ref": "#/$defs/SessionsUnsubscribeResult"
+            }
+          }
+        }
+      ]
+    },
+    "ApprovalsListSuccessResponse": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/SuccessResponseEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "result": {
+              "$ref": "#/$defs/ApprovalsListResult"
+            }
+          }
+        }
+      ]
+    },
+    "ApprovalsRespondSuccessResponse": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/SuccessResponseEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "result": {
+              "$ref": "#/$defs/ApprovalsRespondResult"
+            }
+          }
+        }
+      ]
+    },
+    "ArtifactsListSuccessResponse": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/SuccessResponseEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "result": {
+              "$ref": "#/$defs/ArtifactsListResult"
+            }
+          }
+        }
+      ]
+    },
+    "ArtifactsGetSuccessResponse": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/SuccessResponseEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "result": {
+              "$ref": "#/$defs/ArtifactsGetResult"
+            }
+          }
+        }
+      ]
+    },
+    "DiffsGetSuccessResponse": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/SuccessResponseEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "result": {
+              "$ref": "#/$defs/DiffsGetResult"
+            }
+          }
+        }
+      ]
+    },
+    "CapabilitiesGetErrorResponse": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/ErrorResponseEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "error": {
+              "$ref": "#/$defs/CapabilitiesGetErrorObject"
+            }
+          }
+        }
+      ]
+    },
+    "HostsGetErrorResponse": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/ErrorResponseEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "error": {
+              "$ref": "#/$defs/HostsGetErrorObject"
+            }
+          }
+        }
+      ]
+    },
+    "RuntimesListErrorResponse": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/ErrorResponseEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "error": {
+              "$ref": "#/$defs/RuntimesListErrorObject"
+            }
+          }
+        }
+      ]
+    },
+    "SessionsListErrorResponse": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/ErrorResponseEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "error": {
+              "$ref": "#/$defs/SessionsListErrorObject"
+            }
+          }
+        }
+      ]
+    },
+    "SessionsGetErrorResponse": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/ErrorResponseEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "error": {
+              "$ref": "#/$defs/SessionsGetErrorObject"
+            }
+          }
+        }
+      ]
+    },
+    "SessionsStartErrorResponse": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/ErrorResponseEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "error": {
+              "$ref": "#/$defs/SessionsStartErrorObject"
+            }
+          }
+        }
+      ]
+    },
+    "SessionsResumeErrorResponse": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/ErrorResponseEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "error": {
+              "$ref": "#/$defs/SessionsResumeErrorObject"
+            }
+          }
+        }
+      ]
+    },
+    "SessionsStopErrorResponse": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/ErrorResponseEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "error": {
+              "$ref": "#/$defs/SessionsStopErrorObject"
+            }
+          }
+        }
+      ]
+    },
+    "SessionsSendInputErrorResponse": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/ErrorResponseEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "error": {
+              "$ref": "#/$defs/SessionsSendInputErrorObject"
+            }
+          }
+        }
+      ]
+    },
+    "SessionsSubscribeErrorResponse": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/ErrorResponseEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "error": {
+              "$ref": "#/$defs/SessionsSubscribeErrorObject"
+            }
+          }
+        }
+      ]
+    },
+    "SessionsUnsubscribeErrorResponse": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/ErrorResponseEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "error": {
+              "$ref": "#/$defs/SessionsUnsubscribeErrorObject"
+            }
+          }
+        }
+      ]
+    },
+    "ApprovalsListErrorResponse": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/ErrorResponseEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "error": {
+              "$ref": "#/$defs/ApprovalsListErrorObject"
+            }
+          }
+        }
+      ]
+    },
+    "ApprovalsRespondErrorResponse": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/ErrorResponseEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "error": {
+              "$ref": "#/$defs/ApprovalsRespondErrorObject"
+            }
+          }
+        }
+      ]
+    },
+    "ArtifactsListErrorResponse": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/ErrorResponseEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "error": {
+              "$ref": "#/$defs/ArtifactsListErrorObject"
+            }
+          }
+        }
+      ]
+    },
+    "ArtifactsGetErrorResponse": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/ErrorResponseEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "error": {
+              "$ref": "#/$defs/ArtifactsGetErrorObject"
+            }
+          }
+        }
+      ]
+    },
+    "DiffsGetErrorResponse": {
+      "allOf": [
+        {
+          "$ref": "ascp-core.schema.json#/$defs/ErrorResponseEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "error": {
+              "$ref": "#/$defs/DiffsGetErrorObject"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

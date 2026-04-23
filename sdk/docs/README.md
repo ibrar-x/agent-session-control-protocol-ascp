@@ -31,6 +31,7 @@ This index keeps the SDK workspace navigable without relying on hidden chat cont
 ## Branch References
 
 - [`branches/typescript-sdk-foundation.md`](branches/typescript-sdk-foundation.md): detailed usage, rationale, alternatives, verification evidence, limitations, and handoff notes for the completed TypeScript foundation branch
+- [`branches/typescript-sdk-validation.md`](branches/typescript-sdk-validation.md): detailed usage, schema strategy, validation API rationale, verification evidence, limitations, and handoff notes for the TypeScript validation branch
 
 ## Prompt Starters
 

@@ -1,0 +1,58 @@
+{
+  "$id": "https://ascp.dev/schema/v0.1/ascp-errors.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ASCP Error Object",
+  "$defs": {
+    "ErrorCode": {
+      "type": "string",
+      "enum": [
+        "INVALID_REQUEST",
+        "UNAUTHORIZED",
+        "FORBIDDEN",
+        "NOT_FOUND",
+        "CONFLICT",
+        "UNSUPPORTED",
+        "RATE_LIMITED",
+        "ADAPTER_ERROR",
+        "RUNTIME_ERROR",
+        "TRANSIENT_UNAVAILABLE",
+        "INTERNAL_ERROR"
+      ]
+    },
+    "ErrorObject": {
+      "type": "object",
+      "required": [
+        "code",
+        "message",
+        "retryable"
+      ],
+      "properties": {
+        "code": {
+          "$ref": "#/$defs/ErrorCode"
+        },
+        "message": {
+          "type": "string"
+        },
+        "retryable": {
+          "type": "boolean"
+        },
+        "details": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": true
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "correlation_id": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "$ref": "#/$defs/ErrorObject"
+}

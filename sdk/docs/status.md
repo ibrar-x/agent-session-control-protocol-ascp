@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-24 - TypeScript SDK validation layer
+
+- Branch: `feature/typescript-sdk-validation`
+- Commit: `not committed`
+- Summary: added an AJV-backed validation entry point for the TypeScript SDK, vendored the upstream ASCP schema set into the package, exposed safe parse and assert helpers for core entities, method responses, and event envelopes, and covered the new surface with focused runtime and type-level tests
+- Documentation updated: `plans.md`, `docs/README.md`, `docs/project-context-reference.md`, `docs/status.md`, `docs/branches/typescript-sdk-validation.md`, `typescript/README.md`
+- Next likely step: create `feature/typescript-sdk-transport` from updated `main` and build stdio plus WebSocket transport primitives on top of `ascp-sdk-typescript/validation` instead of re-implementing payload checks
+
 ### 2026-04-24 - SDK branch documentation discipline
 
 - Branch: `feature/sdk-branch-documentation`

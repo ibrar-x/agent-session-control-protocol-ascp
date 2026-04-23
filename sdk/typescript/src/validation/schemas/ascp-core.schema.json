@@ -1,0 +1,625 @@
+{
+  "$id": "https://ascp.dev/schema/v0.1/ascp-core.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ASCP Core Entities And Shared Envelopes",
+  "description": "Canonical ASCP objects and transport-neutral shared envelope material for the schema foundation slice.",
+  "$defs": {
+    "Id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "RequestId": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "integer"
+        }
+      ]
+    },
+    "TimestampUtc": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?Z$"
+    },
+    "StringMap": {
+      "type": "object",
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      }
+    },
+    "FlexibleObject": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "Transport": {
+      "type": "string",
+      "enum": [
+        "websocket",
+        "http_sse",
+        "unix_socket",
+        "named_pipe",
+        "stdio",
+        "relay"
+      ]
+    },
+    "Capabilities": {
+      "type": "object",
+      "properties": {
+        "session_list": {
+          "type": "boolean"
+        },
+        "session_resume": {
+          "type": "boolean"
+        },
+        "session_start": {
+          "type": "boolean"
+        },
+        "session_stop": {
+          "type": "boolean"
+        },
+        "stream_events": {
+          "type": "boolean"
+        },
+        "transcript_read": {
+          "type": "boolean"
+        },
+        "message_send": {
+          "type": "boolean"
+        },
+        "approval_requests": {
+          "type": "boolean"
+        },
+        "approval_respond": {
+          "type": "boolean"
+        },
+        "artifacts": {
+          "type": "boolean"
+        },
+        "diffs": {
+          "type": "boolean"
+        },
+        "terminal_passthrough": {
+          "type": "boolean"
+        },
+        "notifications": {
+          "type": "boolean"
+        },
+        "checkpoints": {
+          "type": "boolean"
+        },
+        "replay": {
+          "type": "boolean"
+        },
+        "multi_workspace": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": true
+    },
+    "Host": {
+      "type": "object",
+      "required": [
+        "id",
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "name": {
+          "type": "string"
+        },
+        "platform": {
+          "type": "string"
+        },
+        "arch": {
+          "type": "string"
+        },
+        "labels": {
+          "$ref": "#/$defs/StringMap"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "online",
+            "offline",
+            "degraded",
+            "unknown"
+          ]
+        },
+        "transports": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Transport"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "Runtime": {
+      "type": "object",
+      "required": [
+        "id",
+        "kind",
+        "display_name",
+        "version"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "display_name": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "adapter_kind": {
+          "type": "string",
+          "enum": [
+            "native",
+            "wrapper",
+            "pty"
+          ]
+        },
+        "capabilities": {
+          "$ref": "#/$defs/Capabilities"
+        }
+      },
+      "additionalProperties": true
+    },
+    "SessionStatus": {
+      "type": "string",
+      "enum": [
+        "idle",
+        "running",
+        "waiting_input",
+        "waiting_approval",
+        "completed",
+        "failed",
+        "stopped",
+        "disconnected"
+      ]
+    },
+    "Session": {
+      "type": "object",
+      "required": [
+        "id",
+        "runtime_id",
+        "status",
+        "created_at",
+        "updated_at"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "runtime_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "title": {
+          "type": "string"
+        },
+        "workspace": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/SessionStatus"
+        },
+        "created_at": {
+          "$ref": "#/$defs/TimestampUtc"
+        },
+        "updated_at": {
+          "$ref": "#/$defs/TimestampUtc"
+        },
+        "last_activity_at": {
+          "$ref": "#/$defs/TimestampUtc"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "active_run_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "metadata": {
+          "$ref": "#/$defs/StringMap"
+        }
+      },
+      "additionalProperties": true
+    },
+    "RunStatus": {
+      "type": "string",
+      "enum": [
+        "starting",
+        "running",
+        "paused",
+        "completed",
+        "failed",
+        "cancelled"
+      ]
+    },
+    "Run": {
+      "type": "object",
+      "required": [
+        "id",
+        "session_id",
+        "status",
+        "started_at"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "session_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "status": {
+          "$ref": "#/$defs/RunStatus"
+        },
+        "started_at": {
+          "$ref": "#/$defs/TimestampUtc"
+        },
+        "ended_at": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TimestampUtc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "exit_code": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "ApprovalKind": {
+      "type": "string",
+      "enum": [
+        "command",
+        "file_write",
+        "network",
+        "tool",
+        "generic"
+      ]
+    },
+    "ApprovalStatus": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "expired",
+        "cancelled"
+      ]
+    },
+    "RiskLevel": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ]
+    },
+    "ApprovalRequest": {
+      "type": "object",
+      "required": [
+        "id",
+        "session_id",
+        "kind",
+        "status",
+        "created_at"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "session_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "run_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "kind": {
+          "$ref": "#/$defs/ApprovalKind"
+        },
+        "status": {
+          "$ref": "#/$defs/ApprovalStatus"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "risk_level": {
+          "$ref": "#/$defs/RiskLevel"
+        },
+        "payload": {
+          "$ref": "#/$defs/FlexibleObject"
+        },
+        "created_at": {
+          "$ref": "#/$defs/TimestampUtc"
+        },
+        "resolved_at": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TimestampUtc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "ArtifactKind": {
+      "type": "string",
+      "enum": [
+        "file",
+        "diff",
+        "patch",
+        "image",
+        "log",
+        "report",
+        "other"
+      ]
+    },
+    "Artifact": {
+      "type": "object",
+      "required": [
+        "id",
+        "session_id",
+        "kind",
+        "created_at"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "session_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "run_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "kind": {
+          "$ref": "#/$defs/ArtifactKind"
+        },
+        "name": {
+          "type": "string"
+        },
+        "uri": {
+          "type": "string"
+        },
+        "mime_type": {
+          "type": "string"
+        },
+        "size_bytes": {
+          "type": "integer"
+        },
+        "created_at": {
+          "$ref": "#/$defs/TimestampUtc"
+        },
+        "metadata": {
+          "$ref": "#/$defs/StringMap"
+        }
+      },
+      "additionalProperties": true
+    },
+    "DiffFile": {
+      "type": "object",
+      "required": [
+        "path",
+        "change_type"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "change_type": {
+          "type": "string",
+          "enum": [
+            "added",
+            "modified",
+            "deleted",
+            "renamed"
+          ]
+        },
+        "insertions": {
+          "type": "integer"
+        },
+        "deletions": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": true
+    },
+    "DiffSummary": {
+      "type": "object",
+      "required": [
+        "session_id",
+        "files_changed"
+      ],
+      "properties": {
+        "session_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "run_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "files_changed": {
+          "type": "integer"
+        },
+        "insertions": {
+          "type": "integer"
+        },
+        "deletions": {
+          "type": "integer"
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DiffFile"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "EventEnvelope": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "ts",
+        "session_id",
+        "payload"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "type": {
+          "type": "string"
+        },
+        "ts": {
+          "$ref": "#/$defs/TimestampUtc"
+        },
+        "session_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "run_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "seq": {
+          "type": "integer"
+        },
+        "payload": {
+          "$ref": "#/$defs/FlexibleObject"
+        }
+      },
+      "additionalProperties": true
+    },
+    "RequestEnvelope": {
+      "type": "object",
+      "required": [
+        "jsonrpc",
+        "method"
+      ],
+      "properties": {
+        "jsonrpc": {
+          "const": "2.0"
+        },
+        "id": {
+          "$ref": "#/$defs/RequestId"
+        },
+        "method": {
+          "type": "string",
+          "minLength": 1
+        },
+        "params": {
+          "$ref": "#/$defs/FlexibleObject"
+        }
+      },
+      "additionalProperties": true
+    },
+    "SuccessResponseEnvelope": {
+      "type": "object",
+      "required": [
+        "jsonrpc",
+        "id",
+        "result"
+      ],
+      "properties": {
+        "jsonrpc": {
+          "const": "2.0"
+        },
+        "id": {
+          "$ref": "#/$defs/RequestId"
+        },
+        "result": {
+          "$ref": "#/$defs/FlexibleObject"
+        }
+      },
+      "allOf": [
+        {
+          "not": {
+            "required": [
+              "error"
+            ]
+          }
+        }
+      ],
+      "additionalProperties": true
+    },
+    "ErrorResponseEnvelope": {
+      "type": "object",
+      "required": [
+        "jsonrpc",
+        "id",
+        "error"
+      ],
+      "properties": {
+        "jsonrpc": {
+          "const": "2.0"
+        },
+        "id": {
+          "$ref": "#/$defs/RequestId"
+        },
+        "error": {
+          "$ref": "ascp-errors.schema.json"
+        }
+      },
+      "allOf": [
+        {
+          "not": {
+            "required": [
+              "result"
+            ]
+          }
+        }
+      ],
+      "additionalProperties": true
+    },
+    "ResponseEnvelope": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/SuccessResponseEnvelope"
+        },
+        {
+          "$ref": "#/$defs/ErrorResponseEnvelope"
+        }
+      ]
+    }
+  }
+}
