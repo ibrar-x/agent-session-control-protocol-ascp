@@ -7,10 +7,10 @@ Use this prompt when starting the first implementation slice for the TypeScript 
 1. `AGENTS.md`
 2. `plans.md`
 3. `docs/status.md`
-4. `../../ASCP_Protocol_Detailed_Spec_v0_1.md`
-5. `../../schema/`
-6. `../../examples/`
-7. `../../../ASCP_TypeScript_SDK_Implementation_Plan.md`
+4. `../../../ASCP_Protocol_Detailed_Spec_v0_1.md`
+5. `../../../schema/`
+6. `../../../examples/`
+7. `../../../../ASCP_TypeScript_SDK_Implementation_Plan.md`
 8. `../project-context-reference.md`
 
 ## Feature Boundary

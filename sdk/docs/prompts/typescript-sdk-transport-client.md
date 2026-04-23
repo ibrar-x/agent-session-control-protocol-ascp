@@ -7,11 +7,11 @@ Use this prompt when the TypeScript foundation and validation layers exist and t
 1. `AGENTS.md`
 2. `plans.md`
 3. `docs/status.md`
-4. `../../spec/methods.md`
-5. `../../spec/replay.md`
-6. `../../mock-server/README.md`
-7. `../../reference-client/README.md`
-8. `../../../ASCP_TypeScript_SDK_Implementation_Plan.md`
+4. `../../../spec/methods.md`
+5. `../../../spec/replay.md`
+6. `../../../mock-server/README.md`
+7. `../../../reference-client/README.md`
+8. `../../../../ASCP_TypeScript_SDK_Implementation_Plan.md`
 
 ## Feature Boundary
 
