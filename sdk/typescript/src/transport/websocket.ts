@@ -1,9 +1,11 @@
+import type { AscpInstrumentedTransportOptions } from "./types.js";
 import WebSocket, { type RawData } from "ws";
 
 import { BaseAscpTransport } from "./base.js";
 import { createTransportError } from "./errors.js";
 
-export interface AscpWebSocketTransportOptions {
+export interface AscpWebSocketTransportOptions
+  extends AscpInstrumentedTransportOptions {
   handshakeTimeoutMs?: number;
   headers?: Record<string, string>;
   protocols?: string | string[];
@@ -15,7 +17,7 @@ export class AscpWebSocketTransport extends BaseAscpTransport {
   private socket: WebSocket | null = null;
 
   constructor(options: AscpWebSocketTransportOptions) {
-    super("websocket");
+    super("websocket", options.analytics);
     this.options = options;
   }
 

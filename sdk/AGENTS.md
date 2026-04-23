@@ -79,6 +79,8 @@ For SDK work, that means:
 - keep method and event names exactly aligned with ASCP
 - keep transport replaceable
 - keep parsing and validation schema-led
+- keep production observability opt-in, structured, and safe by default rather than silently emitting telemetry
+- keep runtime diagnostics actionable enough that downstream consumers can tell what failed, where it failed, and the next likely fix
 - preserve unknown extension fields unless strict behavior is explicitly requested
 - avoid SDK behavior that invents protocol semantics not present upstream
 - keep typed helpers thin enough that consumers can still reason about the underlying ASCP payloads
@@ -91,11 +93,12 @@ Follow this order unless a strong implementation reason requires a narrower refi
 2. TypeScript SDK foundation
 3. TypeScript validation layer
 4. TypeScript transport layer
-5. TypeScript typed client surface
-6. TypeScript replay helpers
-7. TypeScript examples and integration tests
-8. Dart SDK planning refresh if needed
-9. Dart SDK implementation
+5. TypeScript analytics and production hardening
+6. TypeScript typed client surface
+7. TypeScript replay helpers
+8. TypeScript examples and integration tests
+9. Dart SDK planning refresh if needed
+10. Dart SDK implementation
 
 Do not start Dart implementation before the TypeScript SDK establishes the first downstream reference package unless the user explicitly changes priorities.
 
@@ -108,6 +111,7 @@ The TypeScript SDK should provide:
 - event envelope parsing
 - JSON Schema-backed validation
 - stdio and WebSocket transport support
+- opt-in analytics and observability hooks for production debugging
 - replay helpers
 - auth header and metadata hooks
 - integration examples against the parent mock server
@@ -116,6 +120,7 @@ The TypeScript SDK should not become:
 
 - a runtime adapter
 - a host daemon
+- a bundled vendor analytics client
 - a product service
 - a UI toolkit
 - a giant abstraction over every implementation detail
@@ -209,6 +214,7 @@ Recommended branch sequence:
 - `feature/typescript-sdk-foundation`
 - `feature/typescript-sdk-validation`
 - `feature/typescript-sdk-transport`
+- `feature/typescript-sdk-analytics`
 - `feature/typescript-sdk-client`
 - `feature/typescript-sdk-replay`
 - `feature/typescript-sdk-examples-tests`
@@ -223,6 +229,7 @@ Before claiming a task is complete:
 - update the relevant docs
 - keep workflow and rationale in dedicated markdown files where possible
 - make sure examples and validation guidance reflect the actual SDK behavior
+- if runtime-facing package code changed, update the relevant prompt starter or AGENTS guidance when future branches need to preserve the new behavior automatically
 - leave enough written state that another session can resume without hidden context
 
 Useful documentation locations:

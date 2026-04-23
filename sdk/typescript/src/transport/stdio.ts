@@ -1,10 +1,11 @@
+import type { AscpInstrumentedTransportOptions } from "./types.js";
 import { createInterface, type Interface as ReadLineInterface } from "node:readline";
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 
 import { BaseAscpTransport } from "./base.js";
 import { createTransportError } from "./errors.js";
 
-export interface AscpStdioTransportOptions {
+export interface AscpStdioTransportOptions extends AscpInstrumentedTransportOptions {
   command: readonly string[];
   cwd?: string;
   env?: NodeJS.ProcessEnv;
@@ -17,7 +18,7 @@ export class AscpStdioTransport extends BaseAscpTransport {
   private stderrBuffer = "";
 
   constructor(options: AscpStdioTransportOptions) {
-    super("stdio");
+    super("stdio", options.analytics);
     this.options = options;
   }
 

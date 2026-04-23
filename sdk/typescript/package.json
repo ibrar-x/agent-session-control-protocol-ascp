@@ -2,8 +2,28 @@
   "name": "ascp-sdk-typescript",
   "version": "0.1.0",
   "description": "TypeScript SDK for the Agent Session & Control Protocol (ASCP).",
+  "homepage": "https://github.com/ibrar-x/agent-session-control-protocol-ascp/tree/main/sdk/typescript#readme",
+  "bugs": {
+    "url": "https://github.com/ibrar-x/agent-session-control-protocol-ascp/issues"
+  },
   "license": "MIT",
   "type": "module",
+  "keywords": [
+    "ascp",
+    "agent-session-control-protocol",
+    "sdk",
+    "typescript",
+    "json-rpc",
+    "transport",
+    "validation",
+    "analytics",
+    "observability"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ibrar-x/agent-session-control-protocol-ascp.git",
+    "directory": "sdk/typescript"
+  },
   "sideEffects": false,
   "files": [
     "dist",
@@ -36,6 +56,10 @@
     "./errors": {
       "types": "./dist/errors/index.d.ts",
       "import": "./dist/errors/index.js"
+    },
+    "./analytics": {
+      "types": "./dist/analytics/index.d.ts",
+      "import": "./dist/analytics/index.js"
     },
     "./transport": {
       "types": "./dist/transport/index.d.ts",

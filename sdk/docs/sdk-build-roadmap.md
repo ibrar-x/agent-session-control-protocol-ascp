@@ -22,6 +22,12 @@ Before every implementation step:
 5. update docs before commit
 6. add a checkpoint to `docs/status.md`
 
+For runtime-facing TypeScript work, also preserve these cross-cutting package rules:
+
+- keep analytics and observability opt-in rather than silent
+- keep diagnostics structured enough to tell what failed, where it failed, and the next likely fix
+- keep production-facing package metadata current when the published surface changes
+
 Before closing any branch, document the branch in enough detail that the next contributor can understand both usage and rationale without hidden chat context.
 
 That branch documentation should explain at minimum:
@@ -193,10 +199,48 @@ Done when:
 - WebSocket transport shape exists for future host use
 - transport stays independent from business logic
 
-## Phase 4 - TypeScript Typed Client Methods
+## Phase 3.5 - TypeScript Analytics And Production Hardening
 
 Status:
-- next active slice after the transport branch lands
+- done on `feature/typescript-sdk-analytics`
+
+Goal:
+- add opt-in analytics hooks, actionable diagnostics, and baseline production package metadata without changing ASCP semantics
+
+Read first:
+
+- `../AGENTS.md`
+- `../plans.md`
+- `status.md`
+- `../docs/branches/typescript-sdk-transport.md`
+- `../../../ASCP_TypeScript_SDK_Implementation_Plan.md`
+- `prompts/typescript-sdk-transport-client.md`
+
+Deliverables:
+
+- analytics entry point
+- opt-in transport instrumentation
+- remediation helpers for validation and transport failures
+- production package metadata
+- AGENTS and prompt updates so future branches inherit the new rules
+
+Compact prompt:
+
+```text
+Implement opt-in analytics and production hardening for the TypeScript SDK only. Read `sdk/AGENTS.md`, `sdk/plans.md`, `sdk/docs/status.md`, `sdk/docs/branches/typescript-sdk-transport.md`, `ASCP_TypeScript_SDK_Implementation_Plan.md`, and `sdk/docs/prompts/typescript-sdk-transport-client.md`. On `feature/typescript-sdk-analytics`, add structured analytics hooks and actionable diagnostics to the existing runtime surfaces, add baseline production package metadata, avoid bundled vendor telemetry, and update AGENTS plus the prompt pack so later branches preserve the new observability rules automatically.
+```
+
+Done when:
+
+- analytics remain opt-in
+- existing runtime surfaces can emit useful debugging events without changing ASCP semantics
+- remediation helpers explain what failed, where it failed, and the next likely fix
+- future prompts and AGENTS guidance preserve the observability rules automatically
+
+## Phase 4 -  TypeScript Typed Client Methods
+
+Status:
+- next active slice after the analytics branch lands
 
 Recommended branch:
 - `feature/typescript-sdk-client`

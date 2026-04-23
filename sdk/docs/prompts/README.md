@@ -18,6 +18,12 @@ These prompt starters exist so a new conversation can begin from a clear SDK fea
 
 These prompts are intentionally narrow. They are meant to reduce drift, not to replace the upstream protocol sources.
 
+For runtime-facing TypeScript branches, prompt starters should also be treated as preserving the repository-wide observability rules from `AGENTS.md`:
+
+- keep analytics and observability opt-in rather than silent
+- keep diagnostics actionable enough to identify failure location and likely remediation
+- keep production-facing package metadata current when the published package surface changes
+
 ## Documentation Expectation For Every Branch
 
 Each prompt starter should be treated as requiring branch-level documentation before commit.

@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-24 - TypeScript SDK analytics and production hardening
+
+- Branch: `feature/typescript-sdk-analytics`
+- Commit: `not committed`
+- Summary: added an analytics entry point for the TypeScript SDK with opt-in recorder contracts, instrumented the existing transport layer with structured lifecycle events, exposed remediation helpers for transport and validation errors, added baseline production package metadata, and updated AGENTS plus the prompt pack so future branches preserve observability automatically
+- Documentation updated: `AGENTS.md`, `plans.md`, `README.md`, `docs/README.md`, `docs/project-context-reference.md`, `docs/prompts/README.md`, `docs/prompts/typescript-sdk-transport-client.md`, `docs/sdk-build-roadmap.md`, `docs/status.md`, `docs/branches/typescript-sdk-analytics.md`, `typescript/README.md`, `typescript/package.json`
+- Next likely step: create `feature/typescript-sdk-client` from updated `main` and build typed ASCP method wrappers on top of `ascp-sdk-typescript/transport`, `ascp-sdk-typescript/validation`, and `ascp-sdk-typescript/analytics` so client methods inherit observability instead of re-implementing it
+
 ### 2026-04-24 - TypeScript SDK transport layer
 
 - Branch: `feature/typescript-sdk-transport`

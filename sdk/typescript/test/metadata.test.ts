@@ -14,6 +14,7 @@ describe("foundation metadata", () => {
   it("describes the upstream schema inputs used for model generation", () => {
     expect(ASCP_MODEL_STRATEGY.generator).toBeNull();
     expect(ASCP_MODEL_STRATEGY.authoring).toBe("hand-authored-schema-indexed");
+    expect(ASCP_MODEL_STRATEGY.publicBarrels).toContain("analytics");
     expect(ASCP_SCHEMA_MODULES).toEqual([
       "ascp-core",
       "ascp-capabilities",

@@ -2,13 +2,14 @@
 
 This package is the first downstream SDK target for ASCP.
 
-The current package state includes the foundation, validation, and transport slices.
+The current package state includes the foundation, validation, transport, and analytics slices.
 
 For the full branch-level rationale and handoff context, see:
 
 - `../docs/branches/typescript-sdk-foundation.md`
 - `../docs/branches/typescript-sdk-validation.md`
 - `../docs/branches/typescript-sdk-transport.md`
+- `../docs/branches/typescript-sdk-analytics.md`
 
 ## Upstream Inputs
 
@@ -30,6 +31,7 @@ typescript/
     methods/
     events/
     errors/
+    analytics/
     validation/
     client/
     transport/
@@ -43,6 +45,7 @@ Public exports currently include:
 
 - package root: metadata plus type exports
 - `./validation`: runtime-safe parsing and assertion helpers
+- `./analytics`: opt-in analytics event types, recorders, and remediation helpers
 - `./transport`: replaceable request/subscription transports plus normalized transport errors
 - `./models`
 - `./methods`
@@ -115,6 +118,46 @@ At runtime the validation layer loads those packaged schema snapshots relative t
 
 This strategy was chosen over reading the parent repository directly because the SDK package needs to remain installable outside this monorepo while still staying visibly schema-led.
 
+## Analytics Surface
+
+The analytics layer is published from `ascp-sdk-typescript/analytics`.
+
+Representative usage:
+
+```ts
+import {
+  createBufferedAnalyticsRecorder,
+  describeTransportError
+} from "ascp-sdk-typescript/analytics";
+import { AscpStdioTransport } from "ascp-sdk-typescript/transport";
+
+const recorder = createBufferedAnalyticsRecorder();
+const transport = new AscpStdioTransport({
+  command: ["python3", "../mock-server/src/mock_server/cli.py"],
+  analytics: recorder
+});
+
+await transport.connect();
+await transport.request("capabilities.get");
+await transport.close();
+
+console.log(recorder.events.map((event) => event.name));
+```
+
+What the analytics helpers do:
+
+- provide explicit recorder contracts instead of silent telemetry
+- emit structured transport lifecycle events when a recorder is configured
+- avoid capturing raw params, raw results, and arbitrary payload bodies by default
+- expose remediation helpers for `AscpTransportError` and `AscpValidationError`
+
+The current analytics design intentionally does not:
+
+- send telemetry anywhere unless the consumer wires a recorder
+- bundle a third-party analytics vendor
+- replace the existing transport or validation error types
+- guess at product-specific dashboards or alerting flows
+
 ## Transport Surface
 
 The transport layer is published from `ascp-sdk-typescript/transport`.
@@ -183,6 +226,7 @@ Implemented in the foundation slice:
 - TypeScript compiler baseline
 - Vitest baseline
 - authored model, method, event, and error barrels
+- opt-in analytics event types, recorder helpers, and remediation helpers
 - AJV-backed validation registry
 - packaged schema snapshot loading and build-copy support
 - safe parse, parse, and assert helpers for entities, method responses, and events
@@ -191,6 +235,8 @@ Implemented in the foundation slice:
 - a persistent stdio transport for line-delimited JSON-RPC hosts such as the upstream mock server
 - a WebSocket transport with the same request/subscription contract for future host use
 - normalized `AscpTransportError` handling for transport-level failures
+- transport analytics hooks for connect, request, stream, and close lifecycle events
+- baseline production package metadata for repository, homepage, bug reporting, and keywords
 - focused runtime and type-level transport tests
 
 Deferred to later slices:

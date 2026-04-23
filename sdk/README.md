@@ -52,6 +52,6 @@ The SDK planning inputs live one level above the parent repository:
 
 ## Current State
 
-This workspace now contains the TypeScript SDK foundation, validation, and transport slices under [`typescript/`](./typescript/).
+This workspace now contains the TypeScript SDK foundation, validation, transport, and analytics slices under [`typescript/`](./typescript/).
 
-The next logical step is to build the TypeScript typed client slice on its own branch, using the existing validation and transport entry points instead of re-implementing request execution or response parsing.
+The next logical step is to build the TypeScript typed client slice on its own branch, using the existing validation, transport, and analytics entry points instead of re-implementing request execution, diagnostics, or response parsing.

@@ -33,6 +33,7 @@ This index keeps the SDK workspace navigable without relying on hidden chat cont
 - [`branches/typescript-sdk-foundation.md`](branches/typescript-sdk-foundation.md): detailed usage, rationale, alternatives, verification evidence, limitations, and handoff notes for the completed TypeScript foundation branch
 - [`branches/typescript-sdk-validation.md`](branches/typescript-sdk-validation.md): detailed usage, schema strategy, validation API rationale, verification evidence, limitations, and handoff notes for the TypeScript validation branch
 - [`branches/typescript-sdk-transport.md`](branches/typescript-sdk-transport.md): detailed usage, transport-contract rationale, verification evidence, limitations, and handoff notes for the TypeScript transport branch
+- [`branches/typescript-sdk-analytics.md`](branches/typescript-sdk-analytics.md): detailed usage, opt-in analytics rationale, production-hardening notes, verification evidence, limitations, and handoff notes for the TypeScript analytics branch
 
 ## Prompt Starters
 

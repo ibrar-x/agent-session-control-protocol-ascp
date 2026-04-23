@@ -22,6 +22,7 @@ Included:
 - stdio transport for mock-server integration
 - WebSocket transport for future host use
 - normalized request, response, and subscription interfaces
+- opt-in analytics hooks and production diagnostics for runtime-facing surfaces
 - typed wrappers for core methods
 - error normalization aligned to upstream error semantics
 
@@ -51,6 +52,7 @@ Make sure the branch documentation covers:
 
 - how to instantiate and use the current transport and client surface against the mock server
 - how request, response, subscription, and error flows are expected to work in this branch
+- how existing analytics hooks and remediation diagnostics should be preserved or extended without introducing silent telemetry
 - the thought process behind the transport abstraction, method wrapper design, and error normalization choices
 - why the chosen transport/client shape was used instead of tighter coupling to one runtime, one transport, or one product workflow
 - which upstream specs, mock-server behavior, replay rules, and reference-client patterns informed the implementation

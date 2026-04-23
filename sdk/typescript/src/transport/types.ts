@@ -1,3 +1,4 @@
+import type { AscpAnalyticsRecorder } from "../analytics/index.js";
 import type { CoreMethodName } from "../methods/types.js";
 import type {
   ApprovalsListParams,
@@ -42,6 +43,10 @@ export interface CoreMethodParamsMap {
 export interface AscpTransportRequestOptions {
   signal?: AbortSignal;
   timeoutMs?: number;
+}
+
+export interface AscpInstrumentedTransportOptions {
+  analytics?: AscpAnalyticsRecorder;
 }
 
 export interface AscpTransportSubscription extends AsyncIterable<EventEnvelope> {
