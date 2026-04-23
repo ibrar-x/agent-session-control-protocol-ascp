@@ -153,6 +153,9 @@ Done when:
 
 ## Phase 3 - TypeScript Transport Layer
 
+Status:
+- done on `feature/typescript-sdk-transport`
+
 Recommended branch:
 - `feature/typescript-sdk-transport`
 
@@ -191,6 +194,9 @@ Done when:
 - transport stays independent from business logic
 
 ## Phase 4 - TypeScript Typed Client Methods
+
+Status:
+- next active slice after the transport branch lands
 
 Recommended branch:
 - `feature/typescript-sdk-client`

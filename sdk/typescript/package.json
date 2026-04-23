@@ -1,7 +1,7 @@
 {
   "name": "ascp-sdk-typescript",
   "version": "0.1.0",
-  "description": "TypeScript SDK foundation for the Agent Session & Control Protocol (ASCP).",
+  "description": "TypeScript SDK for the Agent Session & Control Protocol (ASCP).",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
@@ -37,6 +37,10 @@
       "types": "./dist/errors/index.d.ts",
       "import": "./dist/errors/index.js"
     },
+    "./transport": {
+      "types": "./dist/transport/index.d.ts",
+      "import": "./dist/transport/index.js"
+    },
     "./package.json": "./package.json"
   },
   "types": "./dist/index.d.ts",
@@ -49,10 +53,12 @@
   },
   "dependencies": {
     "ajv": "^8.17.1",
-    "ajv-formats": "^3.0.1"
+    "ajv-formats": "^3.0.1",
+    "ws": "^8.20.0"
   },
   "devDependencies": {
     "@types/node": "^24.9.1",
+    "@types/ws": "^8.18.1",
     "rimraf": "^6.1.0",
     "typescript": "^5.9.3",
     "vitest": "^3.2.4"

@@ -2,12 +2,13 @@
 
 This package is the first downstream SDK target for ASCP.
 
-The current package state includes the foundation slice plus the validation layer.
+The current package state includes the foundation, validation, and transport slices.
 
 For the full branch-level rationale and handoff context, see:
 
 - `../docs/branches/typescript-sdk-foundation.md`
 - `../docs/branches/typescript-sdk-validation.md`
+- `../docs/branches/typescript-sdk-transport.md`
 
 ## Upstream Inputs
 
@@ -42,12 +43,13 @@ Public exports currently include:
 
 - package root: metadata plus type exports
 - `./validation`: runtime-safe parsing and assertion helpers
+- `./transport`: replaceable request/subscription transports plus normalized transport errors
 - `./models`
 - `./methods`
 - `./events`
 - `./errors`
 
-The `client`, `transport`, `replay`, and `auth` directories remain reserved for later slices so transport and client work can extend the package without moving the root layout.
+The `client`, `replay`, and `auth` directories remain reserved for later slices so typed client and replay work can extend the package without moving the root layout.
 
 ## Model Strategy
 
@@ -113,6 +115,58 @@ At runtime the validation layer loads those packaged schema snapshots relative t
 
 This strategy was chosen over reading the parent repository directly because the SDK package needs to remain installable outside this monorepo while still staying visibly schema-led.
 
+## Transport Surface
+
+The transport layer is published from `ascp-sdk-typescript/transport`.
+
+Representative usage against the upstream mock server:
+
+```ts
+import {
+  AscpStdioTransport,
+  AscpTransportError
+} from "ascp-sdk-typescript/transport";
+
+const transport = new AscpStdioTransport({
+  command: ["python3", "../mock-server/src/mock_server/cli.py"]
+});
+
+await transport.connect();
+
+const events = transport.subscribe();
+const capabilities = await transport.request("capabilities.get");
+const subscribeResponse = await transport.request("sessions.subscribe", {
+  session_id: "sess_abc123",
+  include_snapshot: true,
+  from_seq: 34
+});
+
+for await (const event of events) {
+  console.log(event.type);
+
+  if (event.type === "sync.replayed") {
+    break;
+  }
+}
+
+await events.close();
+await transport.close();
+```
+
+What the transport helpers do:
+
+- keep connection logic replaceable through a shared `AscpTransport` contract
+- validate method responses with `safeParseMethodResponse` before resolving `request`
+- validate streamed messages as base `EventEnvelope` objects before broadcasting them to local subscribers
+- normalize connection, framing, timeout, abort, and IO failures into `AscpTransportError`
+- keep subscription handling transport-level only, so the later typed client branch can decide how to map `sessions.subscribe` and `sessions.unsubscribe`
+
+The current transport design intentionally does not:
+
+- wrap ASCP core methods in convenience client functions
+- infer replay cursors beyond the core `from_seq` and `from_event_id` request params
+- validate streamed events as exact core-event payloads by default, because extension-safe transport handling needs the shared envelope shape first
+
 ## Commands
 
 - `npm install`
@@ -133,10 +187,14 @@ Implemented in the foundation slice:
 - packaged schema snapshot loading and build-copy support
 - safe parse, parse, and assert helpers for entities, method responses, and events
 - focused runtime and type-level validation tests
+- a shared transport contract with `connect`, `close`, `request`, and `subscribe`
+- a persistent stdio transport for line-delimited JSON-RPC hosts such as the upstream mock server
+- a WebSocket transport with the same request/subscription contract for future host use
+- normalized `AscpTransportError` handling for transport-level failures
+- focused runtime and type-level transport tests
 
 Deferred to later slices:
 
-- stdio and WebSocket transports
 - typed client wrappers
 - replay helpers
-- integration tests against the mock server
+- higher-level integration flows that exercise the full typed client surface against the mock server

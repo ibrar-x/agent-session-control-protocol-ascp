@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-24 - TypeScript SDK transport layer
+
+- Branch: `feature/typescript-sdk-transport`
+- Commit: `not committed`
+- Summary: added a transport entry point for the TypeScript SDK with shared request and subscription contracts, implemented persistent stdio and WebSocket adapters, normalized transport-level failures into `AscpTransportError`, and covered the new surface with focused runtime and type-level tests including stdio mock-server integration
+- Documentation updated: `plans.md`, `README.md`, `docs/README.md`, `docs/project-context-reference.md`, `docs/sdk-build-roadmap.md`, `docs/status.md`, `docs/branches/typescript-sdk-transport.md`, `typescript/README.md`, `typescript/package.json`
+- Next likely step: create `feature/typescript-sdk-client` from updated `main` and build typed ASCP method wrappers on top of `ascp-sdk-typescript/transport` plus `ascp-sdk-typescript/validation` instead of re-implementing request execution or transport error handling
+
 ### 2026-04-24 - TypeScript SDK validation layer
 
 - Branch: `feature/typescript-sdk-validation`
