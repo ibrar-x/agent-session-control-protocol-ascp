@@ -1,0 +1,23 @@
+# ASCP SDK Status Log
+
+Use this file as a session-to-session checkpoint log. Each completed task should add a concise entry.
+
+## Entry Template
+
+### YYYY-MM-DD - Short Task Name
+
+- Branch:
+- Commit:
+- Summary:
+- Documentation updated:
+- Next likely step:
+
+## Entries
+
+### 2026-04-22 - SDK repository bootstrap
+
+- Branch: `feature/sdk-repo-bootstrap`
+- Commit: `not committed`
+- Summary: bootstrapped the downstream ASCP SDK workspace with SDK-only repository rules, an active plan, a resumable status log, a docs index, an end-to-end SDK delivery roadmap, prompt starters for the first workstreams, a local SDK skill pack, and placeholder roots for the TypeScript-first package layout
+- Documentation updated: `AGENTS.md`, `README.md`, `plans.md`, `docs/README.md`, `docs/project-context-reference.md`, `docs/repo-operating-system.md`, `docs/sdk-build-roadmap.md`, `docs/status.md`, `docs/prompts/README.md`, `docs/prompts/typescript-sdk-foundation.md`, `docs/prompts/typescript-sdk-validation.md`, `docs/prompts/typescript-sdk-transport-client.md`, `docs/prompts/dart-sdk-planning.md`, `typescript/README.md`, `dart/README.md`
+- Next likely step: create `feature/typescript-sdk-foundation` from updated `main` and scaffold the initial TypeScript package structure, model strategy, and public exports without widening into transport or client work
