@@ -52,6 +52,6 @@ The SDK planning inputs live one level above the parent repository:
 
 ## Current State
 
-This workspace is bootstrapped for SDK work but does not yet contain an implemented package.
+This workspace now contains the TypeScript SDK foundation scaffold under [`typescript/`](./typescript/).
 
-The next logical step is to start the TypeScript SDK foundation slice on its own feature branch and scaffold the package in a way that stays aligned with the upstream schemas, examples, and mock server.
+The next logical step is to build the TypeScript validation slice on its own branch, using the existing package layout and public barrels instead of restructuring the foundation.

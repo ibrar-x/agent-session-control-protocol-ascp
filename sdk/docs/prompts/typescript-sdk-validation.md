@@ -7,11 +7,11 @@ Use this prompt when the TypeScript package scaffold exists and the next task is
 1. `AGENTS.md`
 2. `plans.md`
 3. `docs/status.md`
-4. `../../schema/`
-5. `../../spec/`
-6. `../../examples/`
-7. `../../conformance/`
-8. `../../../ASCP_TypeScript_SDK_Implementation_Plan.md`
+4. `../../../schema/`
+5. `../../../spec/`
+6. `../../../examples/`
+7. `../../../conformance/`
+8. `../../../../ASCP_TypeScript_SDK_Implementation_Plan.md`
 
 ## Feature Boundary
 

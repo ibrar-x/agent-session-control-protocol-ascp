@@ -7,10 +7,10 @@ Use this prompt when the TypeScript SDK is sufficiently established and the next
 1. `AGENTS.md`
 2. `plans.md`
 3. `docs/status.md`
-4. `../../schema/`
-5. `../../spec/`
-6. `../../../ASCP_Dart_SDK_Implementation_Plan.md`
-7. `../../../ASCP_Next_Phase_Master_Roadmap.md`
+4. `../../../schema/`
+5. `../../../spec/`
+6. `../../../../ASCP_Dart_SDK_Implementation_Plan.md`
+7. `../../../../ASCP_Next_Phase_Master_Roadmap.md`
 
 ## Feature Boundary
 

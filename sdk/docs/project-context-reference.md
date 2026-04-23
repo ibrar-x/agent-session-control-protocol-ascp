@@ -60,7 +60,7 @@ Conflict rule:
 
 ## Current Status
 
-The workspace is bootstrapped for SDK development but does not yet contain a built package.
+The workspace is bootstrapped for SDK development and now contains the TypeScript SDK foundation scaffold.
 
 Completed local outputs currently include:
 
@@ -70,7 +70,8 @@ Completed local outputs currently include:
 - a docs index and continuation reference under `docs/`
 - prompt starters for the first SDK workstreams
 - a local skill pack for SDK workflow and TypeScript-first implementation
-- placeholder roots for `typescript/` and `dart/`
+- a TypeScript package scaffold with package metadata, compiler/test baselines, authored protocol model barrels, and reserved directories for later validation, transport, replay, and auth work
+- a placeholder root for `dart/`
 
 ## Planned Workstreams
 
@@ -99,6 +100,9 @@ Expected outputs:
 - documented generation or authoring strategy for typed models
 - public export surface for protocol nouns and method DTOs
 
+Status:
+- complete
+
 ### 3. TypeScript validation
 
 Purpose:
@@ -109,6 +113,9 @@ Expected outputs:
 - AJV-backed validators
 - clear validation error formatting
 - tests for validation success and failure paths
+
+Status:
+- next active slice
 
 ### 4. TypeScript transport and client
 

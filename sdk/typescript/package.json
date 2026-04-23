@@ -1,0 +1,52 @@
+{
+  "name": "ascp-sdk-typescript",
+  "version": "0.1.0",
+  "description": "TypeScript SDK foundation for the Agent Session & Control Protocol (ASCP).",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./models": {
+      "types": "./dist/models/index.d.ts",
+      "import": "./dist/models/index.js"
+    },
+    "./methods": {
+      "types": "./dist/methods/index.d.ts",
+      "import": "./dist/methods/index.js"
+    },
+    "./events": {
+      "types": "./dist/events/index.d.ts",
+      "import": "./dist/events/index.js"
+    },
+    "./errors": {
+      "types": "./dist/errors/index.d.ts",
+      "import": "./dist/errors/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "npm run clean && tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "test:types": "tsc -p tsconfig.type-tests.json",
+    "check": "npm run build && npm run test && npm run test:types"
+  },
+  "devDependencies": {
+    "@types/node": "^24.9.1",
+    "rimraf": "^6.1.0",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  }
+}

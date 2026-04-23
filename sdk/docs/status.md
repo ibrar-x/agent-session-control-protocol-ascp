@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-23 - TypeScript SDK foundation
+
+- Branch: `feature/typescript-sdk-foundation`
+- Commit: `not committed`
+- Summary: scaffolded the TypeScript SDK package with an installable package baseline, explicit root and subpath exports, authored core protocol models and request/event/error surfaces, reserved directories for later validation/transport/replay/auth work, and baseline runtime plus type-level checks
+- Documentation updated: `plans.md`, `README.md`, `docs/project-context-reference.md`, `docs/status.md`, `docs/prompts/typescript-sdk-foundation.md`, `docs/prompts/typescript-sdk-validation.md`, `docs/prompts/typescript-sdk-transport-client.md`, `docs/prompts/dart-sdk-planning.md`, `typescript/README.md`
+- Next likely step: create `feature/typescript-sdk-validation` from updated `main` and add schema loading, AJV-backed validators, and validation error formatting on top of the existing foundation package shape
+
 ### 2026-04-22 - SDK repository bootstrap
 
 - Branch: `feature/sdk-repo-bootstrap`
