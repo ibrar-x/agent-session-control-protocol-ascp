@@ -395,6 +395,9 @@ Done when:
 
 ## Phase 8 - Dart SDK Planning Refresh
 
+Status:
+- complete on `feature/dart-sdk-planning`
+
 Recommended branch:
 - `feature/dart-sdk-planning`
 
@@ -443,6 +446,7 @@ Read first:
 - `../AGENTS.md`
 - `../plans.md`
 - `status.md`
+- `branches/dart-sdk-planning.md`
 - `../../schema/`
 - `../../examples/`
 - `../../../ASCP_Dart_SDK_Implementation_Plan.md`
@@ -458,7 +462,7 @@ Deliverables:
 Compact prompt:
 
 ```text
-Build the Dart SDK foundation only. Read `sdk/AGENTS.md`, `sdk/plans.md`, `sdk/docs/status.md`, `schema/`, `examples/`, and `ASCP_Dart_SDK_Implementation_Plan.md`. On `feature/dart-sdk-foundation`, scaffold `sdk/dart/`, define the package structure and model/json strategy, keep the scope limited to foundation work, and document how to use the foundation branch, why the package and codec strategy were chosen, what alternatives were rejected, what was verified, and what the executable Dart branch should inherit.
+Build the Dart SDK foundation only. Read `sdk/AGENTS.md`, `sdk/plans.md`, `sdk/docs/status.md`, `sdk/docs/branches/dart-sdk-planning.md`, `schema/`, `examples/`, and `ASCP_Dart_SDK_Implementation_Plan.md`. On `feature/dart-sdk-foundation`, scaffold `sdk/dart/`, define the package structure and model/json strategy, keep the scope limited to foundation work, and document how to use the foundation branch, why the package and codec strategy were chosen, what alternatives were rejected, what was verified, and what the executable Dart branch should inherit.
 ```
 
 ## Phase 10 - Dart Transport, Client, And Replay

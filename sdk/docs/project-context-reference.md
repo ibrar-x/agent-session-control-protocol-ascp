@@ -60,7 +60,7 @@ Conflict rule:
 
 ## Current Status
 
-The workspace is bootstrapped for SDK development and now contains the TypeScript SDK foundation, validation layer, transport layer, analytics layer, typed client layer, and replay helper layer.
+The workspace is bootstrapped for SDK development and now contains the full TypeScript reference package plus a dedicated Dart planning handoff.
 
 Completed local outputs currently include:
 
@@ -77,7 +77,9 @@ Completed local outputs currently include:
 - an analytics entry point with opt-in recorder contracts, remediation helpers, and baseline production package metadata
 - a typed client entry point with wrappers for every ASCP core method and normalized protocol-error mapping
 - a replay entry point with replay request builders, snapshot-versus-replay stream classification, opaque cursor pass-through, and focused fixture-driven replay tests
-- a placeholder root for `dart/`
+- end-to-end examples and integration tests against the upstream mock server
+- release-readiness documentation that locks the TypeScript package boundary as the first downstream reference package
+- a Dart planning branch reference that defines the Dart package scope, layout, model and codec strategy, and replay-aware implementation handoff
 
 ## Planned Workstreams
 
@@ -175,9 +177,37 @@ Expected outputs:
 - integration tests against the mock server
 
 Status:
-- next active slice after the replay branch lands
+- complete on `feature/typescript-sdk-examples-tests`
 
-### 8. Dart SDK
+### 8. TypeScript release readiness
+
+Purpose:
+- lock the TypeScript package boundary, release policy, and downstream-consumer guidance before Dart starts
+
+Expected outputs:
+- documented root-versus-subpath package boundary
+- release notes and packaged docs
+- release-check evidence
+
+Status:
+- complete on `feature/typescript-sdk-release-readiness`
+
+### 9. Dart SDK planning
+
+Purpose:
+- start Dart intentionally after the TypeScript package proves the first downstream boundary
+
+Expected outputs:
+- package scope confirmation
+- package layout decision
+- model and codec strategy
+- validation, subscription, and replay plan
+- first implementation branch handoff
+
+Status:
+- complete on `feature/dart-sdk-planning`
+
+### 10. Dart SDK
 
 Purpose:
 - create a second consumer package after TypeScript proves the downstream shape
@@ -187,6 +217,9 @@ Expected outputs:
 - stream-friendly subscription surface
 - replay helpers
 - integration guidance for Flutter consumers
+
+Status:
+- next likely implementation slice is `feature/dart-sdk-foundation`
 
 ## Local Directory Layout
 

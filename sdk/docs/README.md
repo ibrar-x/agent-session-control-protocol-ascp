@@ -38,6 +38,7 @@ This index keeps the SDK workspace navigable without relying on hidden chat cont
 - [`branches/typescript-sdk-replay.md`](branches/typescript-sdk-replay.md): detailed usage, replay-shape rationale, cursor-preservation notes, verification evidence, limitations, and handoff notes for the TypeScript replay branch
 - [`branches/typescript-sdk-examples-tests.md`](branches/typescript-sdk-examples-tests.md): detailed usage, end-to-end proof scope, example-structure rationale, verification evidence, limitations, and handoff notes for the TypeScript examples/tests branch
 - [`branches/typescript-sdk-release-readiness.md`](branches/typescript-sdk-release-readiness.md): final package-boundary rationale, versioning decision, release evidence, remaining tradeoffs, and Dart-planning handoff notes for the TypeScript release-readiness branch
+- [`branches/dart-sdk-planning.md`](branches/dart-sdk-planning.md): Dart package-scope confirmation, package layout decision, model and codec strategy, subscription and replay plan, alternatives, open assumptions, and the `feature/dart-sdk-foundation` handoff
 
 ## Prompt Starters
 
@@ -50,7 +51,7 @@ This index keeps the SDK workspace navigable without relying on hidden chat cont
 ## Language Package Roots
 
 - [`../typescript/README.md`](../typescript/README.md): TypeScript package intent and expected scope
-- [`../dart/README.md`](../dart/README.md): Dart package placeholder and sequencing note
+- [`../dart/README.md`](../dart/README.md): compact Dart package summary and the first implementation-branch handoff
 
 ## Local Skills
 

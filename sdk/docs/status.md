@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-25 - Dart SDK planning refresh
+
+- Branch: `feature/dart-sdk-planning`
+- Commit: `not committed`
+- Summary: refreshed the Dart SDK plan after the TypeScript package reached release-ready stability, locked the Dart package as one pure SDK package with explicit secondary libraries, chose generated immutable models plus hand-authored envelope dispatch, and documented the stream-first replay surface plus the `feature/dart-sdk-foundation` handoff
+- Documentation updated: `plans.md`, `README.md`, `docs/README.md`, `docs/project-context-reference.md`, `docs/sdk-build-roadmap.md`, `docs/status.md`, `docs/branches/dart-sdk-planning.md`, `dart/README.md`
+- Next likely step: create `feature/dart-sdk-foundation` from updated `main` and scaffold the Dart package, library entrypoints, generated model and codec workflow, shared envelope types, and example-backed baseline tests
+
 ### 2026-04-25 - TypeScript SDK release readiness
 
 - Branch: `feature/typescript-sdk-release-readiness`

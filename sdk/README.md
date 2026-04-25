@@ -52,6 +52,8 @@ The SDK planning inputs live one level above the parent repository:
 
 ## Current State
 
-This workspace now contains the TypeScript SDK foundation, validation, transport, and analytics slices under [`typescript/`](./typescript/).
+This workspace now contains the full TypeScript reference package under [`typescript/`](./typescript/), including foundation, validation, transport, analytics, typed client, replay, integration examples, and release-readiness documentation.
 
-The next logical step is to build the TypeScript typed client slice on its own branch, using the existing validation, transport, and analytics entry points instead of re-implementing request execution, diagnostics, or response parsing.
+The active downstream handoff is the Dart planning output under [`dart/README.md`](./dart/README.md) and [`docs/branches/dart-sdk-planning.md`](./docs/branches/dart-sdk-planning.md).
+
+The next logical implementation step is `feature/dart-sdk-foundation`, which should scaffold the pure Dart package, root and secondary library seams, generated model and codec workflow, and example-backed baseline tests without mixing in Flutter UI work.
