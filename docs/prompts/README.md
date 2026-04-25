@@ -36,6 +36,7 @@ Every prompt in this directory assumes the agent reads these files first:
 - `conformance.md`
 - `mock-server.md`
 - `reference-client.md`
+- `codex-adapter.md`
 
 ## Status
 
@@ -44,3 +45,5 @@ The protocol-first ASCP v0.1 workspace is complete on `main`.
 Use the first eight prompts to reproduce or extend the protocol build sequence only if the repository is being reopened intentionally.
 
 Use `reference-client.md` only for optional downstream consumer work that builds on the finished protocol workspace without reopening the ASCP contracts.
+
+Use `codex-adapter.md` only for optional downstream runtime-integration work that maps the frozen ASCP v0.1 surface onto a real Codex runtime without reopening protocol-core behavior.

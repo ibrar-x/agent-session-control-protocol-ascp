@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-26 - Codex adapter planning pack
+
+- Branch: `feature/codex-adapter-planning`
+- Commit: `not committed`
+- Summary: translated the external Codex adapter implementation brief into repository-native planning assets by scoping a dedicated planning branch, adding a reusable Codex adapter starter prompt, adding a detailed superpowers implementation plan, and wiring those assets into the docs index and context reference
+- Documentation updated: `plans.md`, `README.md`, `docs/README.md`, `docs/project-context-reference.md`, `docs/prompts/README.md`, `docs/prompts/codex-adapter.md`, `docs/superpowers/plans/2026-04-26-codex-adapter.md`, `docs/status.md`
+- Next likely step: create `feature/codex-adapter` from updated `main` and use the new prompt plus plan to implement the adapter as optional downstream runtime integration work
+
 ### 2026-04-22 - Project context reference
 
 - Branch: `feature/project-context-reference`

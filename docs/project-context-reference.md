@@ -15,6 +15,7 @@ At this point the repository contains:
 - conformance fixtures and validators
 - a deterministic mock server
 - a downstream reference client
+- an optional downstream Codex adapter planning pack
 - repository workflow documents and prompt starters for future work
 
 ## What ASCP Is
@@ -143,10 +144,11 @@ Purpose:
 
 Main outputs:
 - `docs/prompts/README.md`
-- prompt starters for schema foundation, method contracts, event contracts, replay semantics, auth and approvals, extensions, conformance, mock server, and reference client
+- prompt starters for schema foundation, method contracts, event contracts, replay semantics, auth and approvals, extensions, conformance, mock server, reference client, and Codex adapter
 
 What it established:
 - future conversations can start from an explicit feature boundary instead of reconstructing intent manually
+- optional downstream runtime-integration work can now bootstrap from a dedicated Codex adapter prompt instead of re-deriving its dependency gates
 
 ### 3. Schema foundation
 
@@ -535,4 +537,13 @@ If you are starting a new task:
 
 ## Short Status Statement
 
-The ASCP repository currently contains an implementation-ready protocol workspace for the published v0.1 contract set, a deterministic executable mock, and a small downstream reference client. The next work, if any, should be treated as optional downstream consumer work or a deliberate future revision of the ASCP specification.
+The ASCP repository currently contains an implementation-ready protocol workspace for the published v0.1 contract set, a deterministic executable mock, a small downstream reference client, and planning assets for an optional Codex runtime adapter. The next work, if any, should be treated as optional downstream consumer or adapter work, or as a deliberate future revision of the ASCP specification.
+
+## Optional Downstream Follow-On Work
+
+The protocol-core workspace is complete on `main`, but the repository now also contains planning assets for one optional downstream runtime-integration branch:
+
+- `docs/prompts/codex-adapter.md`
+- `docs/superpowers/plans/2026-04-26-codex-adapter.md`
+
+That work should stay clearly downstream of the frozen ASCP v0.1 contracts. It is intended to prove real-runtime mapping against Codex, not to reopen method, event, replay, or approval semantics.

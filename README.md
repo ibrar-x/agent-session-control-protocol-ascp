@@ -124,6 +124,7 @@ The repo now includes:
 - [`docs/README.md`](./docs/README.md) for a navigable documentation index
 - [`docs/protocol-usage-and-dto-generation.md`](./docs/protocol-usage-and-dto-generation.md) for consumer guidance and schema-driven DTO generation options
 - [`reference-client/README.md`](./reference-client/README.md) for the downstream proof client that consumes the frozen mock and schemas
+- [`docs/prompts/codex-adapter.md`](./docs/prompts/codex-adapter.md) and [`docs/superpowers/plans/2026-04-26-codex-adapter.md`](./docs/superpowers/plans/2026-04-26-codex-adapter.md) for the optional downstream Codex runtime adapter workstream
 - [`.agents/skills/`](./.agents/skills/) for reusable ASCP build skills
 - [`mock-server/README.md`](./mock-server/README.md) for the deterministic proof mock
 
@@ -170,6 +171,7 @@ Completed repository outputs now include:
 - compatibility fixtures and validators under `conformance/`
 - a deterministic proof implementation under `mock-server/`
 - a downstream proof client under `reference-client/`
+- a downstream Codex adapter planning pack that can bootstrap a real runtime-integration branch without reopening protocol-core work
 - a docs index and consumer guide under `docs/`
 
 That does not make ASCP a frozen production standard. It means this repository now contains an implementation-ready protocol workspace for the published v0.1 contract set.

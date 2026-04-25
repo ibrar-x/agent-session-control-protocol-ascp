@@ -42,6 +42,11 @@ This index keeps the protocol workspace navigable without relying on prior chat 
 - [`prompts/conformance.md`](prompts/conformance.md)
 - [`prompts/mock-server.md`](prompts/mock-server.md)
 - [`prompts/reference-client.md`](prompts/reference-client.md)
+- [`prompts/codex-adapter.md`](prompts/codex-adapter.md)
+
+## Planning Assets
+
+- [`superpowers/plans/2026-04-26-codex-adapter.md`](superpowers/plans/2026-04-26-codex-adapter.md): detailed task-by-task implementation plan for the optional downstream Codex adapter branch
 
 ## Validation And Fixtures
 
