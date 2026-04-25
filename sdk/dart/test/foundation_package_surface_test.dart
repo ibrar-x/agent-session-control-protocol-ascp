@@ -15,14 +15,14 @@ import 'package:test/test.dart';
 void main() {
   group('Dart SDK foundation package surface', () {
     test('all planned libraries are importable', () {
-      expect(client_library.AscpClientLibrary.foundationOnly, isTrue);
+      expect(client_library.AscpClient, isNotNull);
       expect(errors_library.AscpProtocolError, isNotNull);
       expect(events_library.AscpSyncSnapshotEvent, isNotNull);
       expect(methods_library.AscpSessionSubscriptionAccepted, isNotNull);
       expect(models_library.AscpSession, isNotNull);
-      expect(replay_library.AscpReplayLibrary.foundationOnly, isTrue);
-      expect(transport_library.AscpTransportLibrary.foundationOnly, isTrue);
-      expect(validation_library.AscpValidationLibrary.foundationOnly, isTrue);
+      expect(replay_library.replayFromSeq, isNotNull);
+      expect(transport_library.AscpTransportSuccessResponse, isNotNull);
+      expect(validation_library.AscpValidationHooks, isNotNull);
     });
 
     test(

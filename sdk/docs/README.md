@@ -40,6 +40,7 @@ This index keeps the SDK workspace navigable without relying on hidden chat cont
 - [`branches/typescript-sdk-release-readiness.md`](branches/typescript-sdk-release-readiness.md): final package-boundary rationale, versioning decision, release evidence, remaining tradeoffs, and Dart-planning handoff notes for the TypeScript release-readiness branch
 - [`branches/dart-sdk-planning.md`](branches/dart-sdk-planning.md): Dart package-scope confirmation, package layout decision, model and codec strategy, subscription and replay plan, alternatives, open assumptions, and the `feature/dart-sdk-foundation` handoff
 - [`branches/dart-sdk-foundation.md`](branches/dart-sdk-foundation.md): Dart package usage, package-shape rationale, generated codec workflow, verification evidence, deferred work, and the `feature/dart-sdk-client` handoff
+- [`branches/dart-sdk-client.md`](branches/dart-sdk-client.md): Dart executable-surface usage, API and transport rationale, verification evidence, remaining limits, and the post-parity repository handoff
 
 ## Prompt Starters
 

@@ -81,6 +81,7 @@ Completed local outputs currently include:
 - release-readiness documentation that locks the TypeScript package boundary as the first downstream reference package
 - a Dart planning branch reference that defines the Dart package scope, layout, model and codec strategy, and replay-aware implementation handoff
 - a Dart foundation package with installable metadata, explicit library seams, generated immutable DTOs, shared envelopes, and example-backed codec tests
+- a Dart executable SDK surface with typed core-method wrappers, stdio and WebSocket transport primitives, replay helpers, validation hooks, auth hooks, focused tests, and a mock-server example
 
 ## Planned Workstreams
 
@@ -235,7 +236,7 @@ Expected outputs:
 - integration guidance for Flutter consumers
 
 Status:
-- next likely implementation slice is `feature/dart-sdk-client`
+- complete on `feature/dart-sdk-client`
 
 ## Local Directory Layout
 

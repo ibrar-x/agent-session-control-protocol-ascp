@@ -54,6 +54,6 @@ The SDK planning inputs live one level above the parent repository:
 
 This workspace now contains the full TypeScript reference package under [`typescript/`](./typescript/), including foundation, validation, transport, analytics, typed client, replay, integration examples, and release-readiness documentation.
 
-It also now contains the Dart foundation package under [`dart/`](./dart/), with installable package metadata, explicit library seams, generated immutable DTOs, shared envelopes, and example-backed codec tests documented in [`docs/branches/dart-sdk-foundation.md`](./docs/branches/dart-sdk-foundation.md).
+It also now contains the Dart executable SDK under [`dart/`](./dart/), with typed method wrappers, stdio and WebSocket transport primitives, replay helpers, validation hooks, auth hooks, focused tests, and a mock-server example documented in [`docs/branches/dart-sdk-client.md`](./docs/branches/dart-sdk-client.md).
 
-The next logical implementation step is `feature/dart-sdk-client`, which should preserve the current Dart package layout and codec workflow while adding typed methods, subscription lifecycle handling, replay helpers, validation helpers, and the first justified transport implementations.
+The next logical repository step after this branch is shared SDK maintenance and parity follow-up rather than a broad new Dart feature branch.

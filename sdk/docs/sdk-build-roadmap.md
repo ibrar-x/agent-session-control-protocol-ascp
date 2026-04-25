@@ -470,6 +470,9 @@ Build the Dart SDK foundation only. Read `sdk/AGENTS.md`, `sdk/plans.md`, `sdk/d
 
 ## Phase 10 - Dart Transport, Client, And Replay
 
+Status:
+- complete on `feature/dart-sdk-client`
+
 Recommended branch:
 - `feature/dart-sdk-client`
 

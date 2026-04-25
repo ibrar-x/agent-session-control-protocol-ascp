@@ -1,13 +1,13 @@
 # ASCP Dart SDK
 
-This package is the Dart foundation for ASCP.
+This package is the Dart executable SDK for ASCP.
 
-The current package state is intentionally limited to foundation work: installable package metadata, explicit library seams, generated immutable models, shared JSON envelopes, selected typed method and event payloads, and example-backed codec tests.
+It preserves the foundation branch layout and now adds the runtime surface that downstream Dart or Flutter-adjacent consumers need without turning the package into a UI toolkit, daemon, or protocol-core fork.
 
 For the branch-level rationale and handoff context, see:
 
-- `../docs/branches/dart-sdk-planning.md`
 - `../docs/branches/dart-sdk-foundation.md`
+- `../docs/branches/dart-sdk-client.md`
 
 ## Install
 
@@ -15,151 +15,137 @@ Requirements:
 
 - Dart SDK `>=3.8.0 <4.0.0`
 
-Install dependencies locally:
+From `sdk/dart/`:
 
 ```bash
 dart pub get
-```
-
-Generate model and codec code:
-
-```bash
 dart run build_runner build --delete-conflicting-outputs
-```
-
-Verify the foundation branch:
-
-```bash
 dart analyze
 dart test
 ```
 
-## Current Scope
+## Current Surface
 
-This foundation package currently provides:
+The current package provides:
 
-- generated immutable core DTOs for ASCP entities such as `Host`, `Runtime`, `Session`, `Run`, `ApprovalRequest`, `Artifact`, and `DiffSummary`
-- shared JSON-RPC and event-envelope models
-- a typed `sessions.subscribe` success result model
-- a typed `sync.snapshot` event model
-- one root library plus explicit secondary libraries for later client, transport, validation, replay, model, method, event, and error work
+- immutable ASCP core DTOs and shared JSON-RPC envelopes
+- typed request and result models for the ASCP core method set
+- a thin `AscpClient` that wraps every core ASCP method
+- replaceable stdio and WebSocket transports
+- stream-based event access through `AscpTransport.events` and `AscpClient.events`
+- replay helpers for `from_seq`, `from_event_id`, and opaque cursor pass-through
+- validation hooks for outgoing params, incoming method results, and streamed events
+- transport auth hooks for environment injection on stdio and header injection on WebSocket
+- focused tests plus a mock-server example
 
-This branch intentionally does not provide:
+This package intentionally does not provide:
 
-- live transport implementations
-- typed method wrappers for the full ASCP method set
-- replay helpers
-- runtime validation helpers
-- Flutter UI concerns or app-level networking policy
+- Flutter widgets or app-state helpers
+- HTTP/SSE/relay transport implementations
+- schema-generated validation against the full upstream schema set
+- vendor-specific auth protocols or token refresh logic
+- caching or local persistence layers
 
-## Package Layout
+## Public Libraries
 
-```text
-dart/
-  pubspec.yaml
-  analysis_options.yaml
-  lib/
-    ascp_sdk_dart.dart
-    client.dart
-    replay.dart
-    transport.dart
-    validation.dart
-    models.dart
-    methods.dart
-    events.dart
-    errors.dart
-    src/
-      auth/
-      client/
-      errors/
-      events/
-      methods/
-      models/
-      replay/
-      transport/
-      validation/
-  test/
-  example/
-  tool/
-```
-
-Current public libraries:
-
-- `package:ascp_sdk_dart/ascp_sdk_dart.dart`: root foundation exports for models, methods, events, and errors
+- `package:ascp_sdk_dart/ascp_sdk_dart.dart`
+- `package:ascp_sdk_dart/client.dart`
+- `package:ascp_sdk_dart/transport.dart`
+- `package:ascp_sdk_dart/replay.dart`
+- `package:ascp_sdk_dart/validation.dart`
 - `package:ascp_sdk_dart/models.dart`
 - `package:ascp_sdk_dart/methods.dart`
 - `package:ascp_sdk_dart/events.dart`
 - `package:ascp_sdk_dart/errors.dart`
-- `package:ascp_sdk_dart/client.dart`
-- `package:ascp_sdk_dart/transport.dart`
-- `package:ascp_sdk_dart/validation.dart`
-- `package:ascp_sdk_dart/replay.dart`
-
-The `client`, `transport`, `validation`, and `replay` libraries are foundation-only markers in this branch so later implementation can extend the already-published seams without moving package boundaries.
-
-## Model And Codec Strategy
-
-The foundation follows the direction locked in `feature/dart-sdk-planning`:
-
-- use `freezed` for immutable value types
-- use `json_serializable` for JSON conversion
-- keep public barrel files hand-authored
-- keep ASCP field names unchanged instead of introducing Dart aliases
-- keep the raw event-envelope shape available at the root surface
-- add typed method and event dispatch incrementally instead of generating every protocol layer at once
-
-This means the package stays close to the upstream ASCP schema and example assets while still fitting normal Dart and Flutter-adjacent tooling.
 
 ## Example
 
 ```dart
-import 'package:ascp_sdk_dart/ascp_sdk_dart.dart';
+import 'package:ascp_sdk_dart/client.dart';
+import 'package:ascp_sdk_dart/replay.dart';
+import 'package:ascp_sdk_dart/transport.dart';
 
-void main() {
-  final session = AscpSession.fromJson(<String, Object?>{
-    'id': 'sess_abc123',
-    'runtime_id': 'codex_local',
-    'status': 'running',
-    'created_at': '2026-04-21T10:00:00Z',
-    'updated_at': '2026-04-21T10:12:00Z',
-  });
+Future<void> main() async {
+  final transport = AscpStdioTransport(
+    command: const <String>[
+      'python3',
+      '../mock-server/src/mock_server/cli.py',
+    ],
+    workingDirectory: '/path/to/repo/sdk',
+  );
+  final client = AscpClient(transport: transport);
 
-  final event = AscpEventEnvelope.fromJson(<String, Object?>{
-    'id': 'evt_9001',
-    'type': 'message.assistant.delta',
-    'ts': '2026-04-21T10:07:00Z',
-    'session_id': session.id,
-    'payload': <String, Object?>{
-      'message_id': 'msg_12',
-      'delta': 'I found the failing assertion...'
-    },
-  });
+  await client.connect();
 
-  print(session.toJson());
-  print(event.toJson());
+  try {
+    final capabilities = await client.getCapabilities();
+    print(capabilities.host.name);
+
+    final replaySubscription = await subscribeWithReplay(
+      client: client,
+      request: replayFromSeq(
+        sessionId: 'sess_abc123',
+        fromSeq: 34,
+        includeSnapshot: true,
+      ),
+    );
+
+    try {
+      await for (final item in replaySubscription.stream.take(4)) {
+        print('${item.kind}: ${item.event.type}');
+      }
+    } finally {
+      await replaySubscription.close();
+    }
+  } finally {
+    await client.close();
+  }
 }
 ```
 
-## Upstream Inputs
+The runnable version of this example lives at `example/mock_server_client.dart`.
 
-This package depends on the upstream ASCP assets:
+## API Shape Notes
 
-- `../../../ASCP_Dart_SDK_Implementation_Plan.md`
-- `../../ASCP_Protocol_Detailed_Spec_v0_1.md`
-- `../../schema/`
-- `../../spec/`
-- `../../examples/`
+The Dart surface keeps a few deliberate boundaries:
 
-The schema, spec, and example assets remain the protocol truth. The Dart package is a downstream translation layer, not a place to redefine ASCP semantics.
+- the client stays thin and method-oriented instead of hiding ASCP behind session caches or repositories
+- transports own connection concerns and expose one event stream rather than having the client re-implement transport lifecycle
+- replay remains an explicit helper layer on top of `sessions.subscribe` so snapshot, replay, and live boundaries stay visible
+- validation hooks are opt-in callbacks rather than a hard-coded schema runtime
+- auth hooks stay transport-specific because the upstream ASCP auth model explicitly leaves credential exchange outside protocol-core semantics
 
-## Next Branch
+These choices were preferred over fatter abstractions because they preserve protocol fidelity and keep downstream consumers close to the actual ASCP payloads and recovery rules.
 
-The expected next branch is `feature/dart-sdk-client`.
+## Verification
 
-That branch should preserve the current package layout and code-generation strategy, then add:
+The current Dart executable surface was verified with:
 
-- typed method wrappers
-- subscription lifecycle handling
-- replay helpers
-- validation helpers
-- the first justified transport implementations
+```bash
+dart run build_runner build --delete-conflicting-outputs
+dart analyze
+dart test
+dart run example/mock_server_client.dart
+```
+
+What these commands prove:
+
+- generated DTO and JSON code still match the authored Dart surface
+- the analyzer accepts the exported package surface cleanly
+- the typed client, replay helpers, validation hooks, and transport layer pass focused tests
+- the stdio transport, typed client, and replay helpers can reach the upstream mock server end to end
+
+## Current Limits
+
+- WebSocket transport shape exists and auth headers are wired, but end-to-end WebSocket host coverage is still limited to local transport tests
+- validation hooks are callback-based; the Dart package does not yet embed the full upstream schema registry
+- replay helpers classify stream boundaries explicitly, but they do not add persistence or reconnect state storage
+- the package remains one SDK package and does not yet have Dart-specific release-readiness automation comparable to the TypeScript package
+
+## After Dart Parity
+
+The repository should move back to shared SDK maintenance after this branch:
+
+- keep Dart and TypeScript surfaces aligned where upstream ASCP allows it
+- add Dart release-readiness and packaging polish only where it materially improves downstream adoption
+- document any protocol ambiguities discovered here as upstream follow-up instead of redefining them in SDK code

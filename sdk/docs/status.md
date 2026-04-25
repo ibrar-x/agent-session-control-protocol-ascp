@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-25 - Dart SDK transport, client, and replay
+
+- Branch: `feature/dart-sdk-client`
+- Commit: `not committed`
+- Summary: replaced the Dart foundation markers with an executable SDK surface by adding typed ASCP core-method wrappers, replaceable stdio and WebSocket transports, stream-based event access, replay helpers, validation hooks, transport auth hooks, focused tests, and a runnable mock-server example without widening into Flutter UI or protocol-core work
+- Documentation updated: `plans.md`, `README.md`, `docs/README.md`, `docs/project-context-reference.md`, `docs/sdk-build-roadmap.md`, `docs/status.md`, `docs/branches/dart-sdk-client.md`, `dart/README.md`
+- Next likely step: keep the repository on shared SDK maintenance and parity follow-up, and only add Dart-specific release-readiness or packaging polish where it materially improves downstream use
+
 ### 2026-04-25 - Dart SDK foundation
 
 - Branch: `feature/dart-sdk-foundation`
