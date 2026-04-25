@@ -17,10 +17,10 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 ### 2026-04-26 - Production-grade monorepo restructure
 
 - Branch: `branch-ascp-monorepo-structure`
-- Commit: `not committed`
-- Summary: converted the repository into the requested monorepo layout by moving protocol truth into `protocol/`, SDKs into `sdks/`, the reference client into `apps/reference-client/`, the mock server into `services/mock-server/`, adding root workspace scaffolding, adding placeholder package and adapter boundaries, and updating scripts/tests/docs to execute from the new structure
+- Commit: `c0a8732`
+- Summary: converted the repository into the requested monorepo layout by moving protocol truth into `protocol/`, SDKs into `sdks/`, the reference client into `apps/reference-client/`, the mock server into `services/mock-server/`, adding root workspace scaffolding, adding placeholder package and adapter boundaries, updating scripts/tests/docs to execute from the new structure, and merging the feature branch back into `main`
 - Documentation updated: `plans.md`, `README.md`, `AGENTS.md`, `docs/status.md`, `docs/README.md`, `docs/project-context-reference.md`, `docs/architecture/system-design.md`, `docs/architecture/dependency-graph.md`, `protocol/ASCP_Protocol_PRD_and_Build_Guide.md`, `protocol/ASCP_Protocol_Detailed_Spec_v0_1.md`, `packages/README.md`, `adapters/README.md`, `apps/README.md`, `services/README.md`, `tooling/README.md`
-- Next likely step: commit the validated migration, push `branch-ascp-monorepo-structure`, merge it into `main`, push `main`, and continue future shared-package, adapter, or app work from the monorepo baseline
+- Next likely step: continue future shared-package, adapter, app, or service work from updated `main` using the monorepo baseline
 
 ### 2026-04-26 - Codex adapter planning pack
 

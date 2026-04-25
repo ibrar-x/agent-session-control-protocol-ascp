@@ -100,7 +100,7 @@ Files to move and update:
 | done | move the repository into the target monorepo layout | the repository contains `protocol/`, `packages/`, `sdks/`, `adapters/`, `apps/`, `services/`, `tooling/`, and `docs/` with existing code/assets relocated conservatively |
 | done | add root workspace scaffolding and placeholder module boundaries | root `package.json`, `turbo.json`, and `melos.yaml` exist and future module placeholders document the dependency direction without leaking reverse dependencies |
 | done | update path-sensitive code, scripts, and docs | validation scripts, SDK tests/examples, mock-server fixtures, and repository docs all point at the new locations |
-| in_progress | checkpoint and close out the branch | `docs/status.md` records the monorepo migration, validation evidence is captured, and the branch is ready to commit, push, merge, and return to `main` |
+| done | checkpoint and close out the branch | `docs/status.md` records the monorepo migration, validation evidence is captured, and the branch is committed, pushed, merged, and closed out on `main` |
 
 ## Acceptance Criteria
 
@@ -117,11 +117,11 @@ The task is done only when all of the following are true:
 
 ## Next Likely Step
 
-Commit the validated monorepo migration, push `branch-ascp-monorepo-structure`, merge it back into updated `main`, push `main`, and leave the repository ready for the next downstream module.
+Start the next shared-package, adapter, app, or service feature from updated `main` using the monorepo layout as the new repository baseline.
 
 ## Completion Outcome
 
-- Status: validated and ready to commit on `branch-ascp-monorepo-structure`
+- Status: complete and merged to `main` from `branch-ascp-monorepo-structure`
 - Validation evidence:
   - `git diff --check`
   - `bash tooling/scripts/validate_method_contracts.sh`
