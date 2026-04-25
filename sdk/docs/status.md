@@ -14,6 +14,15 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-25 - Dart SDK release readiness
+
+- Branch: `feature/dart-sdk-release-readiness`
+- Commit: this commit
+- Summary: tightened the Dart package for sustained downstream use by refreshing release metadata, adding package license and changelog guidance, documenting the `0.1.0` version policy, adding public package-boundary verification, and clarifying release checks without adding new SDK behavior
+- Documentation updated: `plans.md`, `README.md`, `docs/README.md`, `docs/project-context-reference.md`, `docs/sdk-build-roadmap.md`, `docs/status.md`, `docs/branches/dart-sdk-release-readiness.md`, `dart/README.md`, `dart/CHANGELOG.md`, `dart/tool/README.md`
+- Verification: `dart pub get`; `dart run build_runner build --delete-conflicting-outputs`; `dart format --output=none --set-exit-if-changed lib test example tool`; `dart run tool/check_package_boundary.dart`; `dart analyze`; `dart test`; `dart run example/foundation_decode.dart`; `dart run example/mock_server_client.dart`; `dart pub publish --dry-run`; `git diff --check`
+- Next likely step: move to shared SDK maintenance, CI/release automation, and parity evidence cleanup across TypeScript and Dart instead of adding broad new Dart SDK behavior
+
 ### 2026-04-25 - Dart SDK transport, client, and replay
 
 - Branch: `feature/dart-sdk-client`

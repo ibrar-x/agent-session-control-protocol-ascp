@@ -56,11 +56,11 @@ Conflict rule:
 - use the detailed spec, schemas, specs, examples, and conformance assets for exact protocol truth
 - use the TypeScript implementation plan for the first SDK package shape and phased order
 - use the roadmap for sequencing across workstreams
-- use the Dart plan only for future Dart work
+- use the Dart plan for Dart package maintenance and any future Dart refinements
 
 ## Current Status
 
-The workspace is bootstrapped for SDK development and now contains the full TypeScript reference package plus a Dart foundation package built from the dedicated Dart planning handoff.
+The workspace is bootstrapped for SDK development and now contains the full TypeScript reference package plus a release-ready Dart package built from the dedicated Dart planning, foundation, and executable-surface handoffs.
 
 Completed local outputs currently include:
 
@@ -82,6 +82,7 @@ Completed local outputs currently include:
 - a Dart planning branch reference that defines the Dart package scope, layout, model and codec strategy, and replay-aware implementation handoff
 - a Dart foundation package with installable metadata, explicit library seams, generated immutable DTOs, shared envelopes, and example-backed codec tests
 - a Dart executable SDK surface with typed core-method wrappers, stdio and WebSocket transport primitives, replay helpers, validation hooks, auth hooks, focused tests, and a mock-server example
+- Dart release-readiness docs, package metadata, changelog/license files, package-boundary verification, and publish dry-run guidance
 
 ## Planned Workstreams
 
@@ -238,6 +239,21 @@ Expected outputs:
 Status:
 - complete on `feature/dart-sdk-client`
 
+### 12. Dart release readiness
+
+Purpose:
+- lock the Dart package boundary, release metadata, versioning guidance, and verification commands for sustained downstream use
+
+Expected outputs:
+- release-accurate package metadata
+- changelog and license files
+- public library boundary verification
+- package README and branch documentation
+- publish dry-run and example verification guidance
+
+Status:
+- complete on `feature/dart-sdk-release-readiness`
+
 ## Local Directory Layout
 
 The intended local structure is:
@@ -284,7 +300,7 @@ When continuing work here:
 
 - keep one feature per branch
 - keep work SDK-only
-- prefer the TypeScript SDK unless the active plan says otherwise
+- prefer shared SDK maintenance unless the active plan says a specific language package needs a focused refinement
 - validate against the parent mock server and examples whenever practical
 - document before commit
 - leave a checkpoint in `docs/status.md`

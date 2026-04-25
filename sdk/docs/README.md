@@ -41,6 +41,7 @@ This index keeps the SDK workspace navigable without relying on hidden chat cont
 - [`branches/dart-sdk-planning.md`](branches/dart-sdk-planning.md): Dart package-scope confirmation, package layout decision, model and codec strategy, subscription and replay plan, alternatives, open assumptions, and the `feature/dart-sdk-foundation` handoff
 - [`branches/dart-sdk-foundation.md`](branches/dart-sdk-foundation.md): Dart package usage, package-shape rationale, generated codec workflow, verification evidence, deferred work, and the `feature/dart-sdk-client` handoff
 - [`branches/dart-sdk-client.md`](branches/dart-sdk-client.md): Dart executable-surface usage, API and transport rationale, verification evidence, remaining limits, and the post-parity repository handoff
+- [`branches/dart-sdk-release-readiness.md`](branches/dart-sdk-release-readiness.md): Dart package-boundary rationale, versioning decision, release evidence, remaining limits, and shared SDK maintenance handoff
 
 ## Prompt Starters
 
@@ -53,7 +54,7 @@ This index keeps the SDK workspace navigable without relying on hidden chat cont
 ## Language Package Roots
 
 - [`../typescript/README.md`](../typescript/README.md): TypeScript package intent and expected scope
-- [`../dart/README.md`](../dart/README.md): install and usage guidance for the current Dart foundation package plus the executable-branch handoff
+- [`../dart/README.md`](../dart/README.md): install, usage, public library, verification, and release-readiness guidance for the Dart package
 
 ## Local Skills
 

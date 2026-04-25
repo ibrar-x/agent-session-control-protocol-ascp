@@ -510,6 +510,51 @@ Done when:
 - subscriptions and replay work
 - the package remains SDK-only
 
+## Phase 11 - Dart Release Readiness
+
+Status:
+- complete on `feature/dart-sdk-release-readiness`
+
+Recommended branch:
+- `feature/dart-sdk-release-readiness`
+
+Goal:
+- tighten the Dart package for sustained downstream use after the client/replay branch without adding SDK behavior
+
+Read first:
+
+- `../AGENTS.md`
+- `../plans.md`
+- `status.md`
+- `branches/dart-sdk-client.md`
+- `branches/typescript-sdk-release-readiness.md`
+- `../dart/README.md`
+- `../dart/pubspec.yaml`
+- `../../spec/`
+- `../../examples/`
+- `../../mock-server/README.md`
+- `../../../ASCP_Dart_SDK_Implementation_Plan.md`
+
+Deliverables:
+
+- release-facing Dart package metadata
+- changelog and license package files
+- public package-boundary verification
+- README and branch documentation updates
+- explicit build, analyze, test, example, boundary, and publish dry-run verification commands
+
+Compact prompt:
+
+```text
+Tighten Dart SDK release readiness without widening the SDK scope. Read `sdk/AGENTS.md`, `sdk/plans.md`, `sdk/docs/status.md`, `sdk/docs/branches/dart-sdk-client.md`, `sdk/docs/branches/typescript-sdk-release-readiness.md`, `sdk/docs/sdk-build-roadmap.md`, `sdk/dart/README.md`, `sdk/dart/pubspec.yaml`, `spec/`, `examples/`, `mock-server/README.md`, and `ASCP_Dart_SDK_Implementation_Plan.md`. On `feature/dart-sdk-release-readiness`, keep the package SDK-only and focus on release-facing polish for the current Dart surface: package metadata, changelog/versioning guidance, export/package-boundary checks, verification commands, and any missing README or branch docs needed for downstream consumers. Do not add new transport types, UI concerns, caching, or protocol-core behavior.
+```
+
+Done when:
+
+- the Dart package surface is documented and stable
+- verification for build, analyze, test, examples, package boundary, and publish dry-run is explicit
+- release-facing gaps are closed without adding new SDK behavior
+
 ## Final End State
 
 The SDK effort is effectively complete when:
@@ -519,6 +564,8 @@ The SDK effort is effectively complete when:
 - the Dart SDK exists with typed models, method wrappers, event subscriptions, replay helpers, and validation hooks
 - both packages stay faithful to upstream ASCP contracts
 - repository docs, plans, and status logs make continuation obvious
+
+After Phase 11, new work should default to shared SDK maintenance rather than new SDK scope. Good next branches are CI/release automation, parity evidence cleanup, or upstream protocol ambiguity documentation.
 
 ## If You Want One Short Master Prompt
 
