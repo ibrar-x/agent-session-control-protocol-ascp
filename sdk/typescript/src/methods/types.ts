@@ -97,7 +97,6 @@ export interface SessionsSubscribeParams extends FlexibleObject {
   session_id: Id;
   from_seq?: number;
   from_event_id?: Id;
-  cursor?: Cursor;
   include_snapshot?: boolean;
 }
 

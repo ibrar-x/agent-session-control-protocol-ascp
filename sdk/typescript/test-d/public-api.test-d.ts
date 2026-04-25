@@ -1,9 +1,12 @@
 import type {
+  AscpReplayRequest,
+  AscpReplaySubscription,
   ErrorObject,
   EventEnvelope,
   Session,
   SessionsListParams
 } from "../src/index.js";
+import { replayFromSeq } from "../src/index.js";
 
 const session: Session = {
   id: "sess_123",
@@ -36,6 +39,16 @@ const errorObject: ErrorObject = {
   retryable: false
 };
 
+const replayRequest: AscpReplayRequest = replayFromSeq({
+  session_id: "sess_123",
+  from_seq: 34,
+  include_snapshot: true
+});
+
+declare const replaySubscription: AscpReplaySubscription;
+
 void params;
 void event;
 void errorObject;
+void replayRequest;
+void replaySubscription;

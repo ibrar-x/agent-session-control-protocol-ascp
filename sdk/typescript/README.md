@@ -2,7 +2,7 @@
 
 This package is the first downstream SDK target for ASCP.
 
-The current package state includes the foundation, validation, transport, analytics, and typed client slices.
+The current package state includes the foundation, validation, transport, analytics, typed client, and replay slices.
 
 For the full branch-level rationale and handoff context, see:
 
@@ -11,6 +11,7 @@ For the full branch-level rationale and handoff context, see:
 - `../docs/branches/typescript-sdk-transport.md`
 - `../docs/branches/typescript-sdk-analytics.md`
 - `../docs/branches/typescript-sdk-client.md`
+- `../docs/branches/typescript-sdk-replay.md`
 
 ## Upstream Inputs
 
@@ -49,12 +50,13 @@ Public exports currently include:
 - `./analytics`: opt-in analytics event types, recorders, and remediation helpers
 - `./transport`: replaceable request/subscription transports plus normalized transport errors
 - `./client`: typed ASCP core method wrappers plus protocol error normalization
+- `./replay`: replay request builders, snapshot/replay stream helpers, and cursor-preserving subscription utilities
 - `./models`
 - `./methods`
 - `./events`
 - `./errors`
 
-The `replay` and `auth` directories remain reserved for later slices so replay and auth work can extend the package without moving the root layout.
+The `auth` directory remains reserved for a later slice so auth work can extend the package without moving the root layout.
 
 ## Model Strategy
 
@@ -271,6 +273,69 @@ The current client design intentionally does not:
 - validate exact core-event payloads beyond the transport's base event envelope validation
 - change ASCP method names, params, or result field names for convenience
 
+## Replay Surface
+
+The replay layer is published from `ascp-sdk-typescript/replay` and re-exported from the package root.
+
+Representative usage:
+
+```ts
+import {
+  replayFromSeq,
+  subscribeWithReplay
+} from "ascp-sdk-typescript/replay";
+import { AscpClient } from "ascp-sdk-typescript/client";
+import { AscpStdioTransport } from "ascp-sdk-typescript/transport";
+
+const client = new AscpClient({
+  transport: new AscpStdioTransport({
+    command: ["python3", "../mock-server/src/mock_server/cli.py"]
+  })
+});
+
+await client.connect();
+
+const subscription = await subscribeWithReplay(
+  client,
+  replayFromSeq({
+    session_id: "sess_abc123",
+    from_seq: 205,
+    include_snapshot: true
+  })
+);
+
+for await (const item of subscription) {
+  console.log(item.kind, item.event.type);
+
+  if (item.kind === "cursor_advanced") {
+    console.log(item.cursor);
+  }
+
+  if (item.kind === "live_event") {
+    break;
+  }
+}
+
+await subscription.close();
+await client.close();
+```
+
+What the replay helpers do:
+
+- provide explicit request builders for `from_seq` and `from_event_id`
+- keep opaque cursor handling additive through `replayWithOpaqueCursor(...)`
+- classify the stream into `snapshot`, `replay_event`, `replay_complete`, `live_event`, and `cursor_advanced`
+- preserve the original `EventEnvelope` on every stream item
+- track host-provided opaque cursor values only when `sync.cursor_advanced` is emitted
+- unsubscribe cleanly through `sessions.unsubscribe` when the replay subscription closes
+
+The current replay design intentionally does not:
+
+- add a synthetic "recovery state" object that hides protocol events
+- infer opaque cursor values from `seq`
+- change transport subscription behavior below the client layer
+- replace fixture-driven or mock-server integration examples that still belong to the later examples/tests branch
+
 ## Commands
 
 - `npm install`
@@ -302,8 +367,10 @@ Implemented in the foundation slice:
 - typed wrappers for every ASCP core method
 - protocol error mapping through `AscpProtocolError`
 - focused runtime and type-level client tests
+- replay request builders and cursor-preserving replay subscriptions
+- focused runtime and type-level replay tests
 
 Deferred to later slices:
 
-- replay helpers
 - higher-level integration flows that exercise the full typed client surface against the mock server
+- dedicated auth hooks

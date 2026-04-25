@@ -60,7 +60,7 @@ Conflict rule:
 
 ## Current Status
 
-The workspace is bootstrapped for SDK development and now contains the TypeScript SDK foundation, validation layer, transport layer, and analytics layer.
+The workspace is bootstrapped for SDK development and now contains the TypeScript SDK foundation, validation layer, transport layer, analytics layer, typed client layer, and replay helper layer.
 
 Completed local outputs currently include:
 
@@ -75,6 +75,8 @@ Completed local outputs currently include:
 - a validation entry point with AJV-backed schema validation, vendored schema snapshots, and focused runtime plus type-level tests
 - a transport entry point with replaceable stdio and WebSocket adapters, shared request/subscription contracts, and normalized transport errors
 - an analytics entry point with opt-in recorder contracts, remediation helpers, and baseline production package metadata
+- a typed client entry point with wrappers for every ASCP core method and normalized protocol-error mapping
+- a replay entry point with replay request builders, snapshot-versus-replay stream classification, opaque cursor pass-through, and focused fixture-driven replay tests
 - a placeholder root for `dart/`
 
 ## Planned Workstreams
@@ -149,20 +151,33 @@ Expected outputs:
 Status:
 - complete on `feature/typescript-sdk-client`
 
-### 6. TypeScript replay and examples
+### 6. TypeScript replay
 
 Purpose:
-- prove the event and replay surface end to end
+- make the event and replay surface usable downstream without hiding protocol meaning
 
 Expected outputs:
 - replay helpers
+- request builders for `from_seq`, `from_event_id`, and opaque cursor pass-through
+- snapshot-versus-replay event classification
+- focused replay tests against upstream fixtures
+
+Status:
+- complete on `feature/typescript-sdk-replay`
+
+### 7. TypeScript examples and integration tests
+
+Purpose:
+- prove the typed client plus replay surface end to end against executable ASCP hosts
+
+Expected outputs:
 - subscribe and reconnect examples
 - integration tests against the mock server
 
 Status:
-- next active slice after the client branch lands
+- next active slice after the replay branch lands
 
-### 7. Dart SDK
+### 8. Dart SDK
 
 Purpose:
 - create a second consumer package after TypeScript proves the downstream shape

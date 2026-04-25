@@ -12,9 +12,9 @@ This file tracks the active scoped work for the current branch.
 
 ## Active State
 
-- Feature name: TypeScript typed client methods
-- Branch: `feature/typescript-sdk-client`
-- Goal: expose the complete ASCP core method catalog through typed client wrappers on top of the existing transport, validation, and analytics surfaces without widening into replay convenience helpers
+- Feature name: TypeScript replay and event helpers
+- Branch: `feature/typescript-sdk-replay`
+- Goal: make downstream subscriptions and reconnect/replay handling usable on top of the existing typed client and transport layers without hiding snapshot, replay-boundary, or opaque-cursor semantics
 - Active language target: TypeScript SDK
 - Source inputs:
   - `AGENTS.md`
@@ -24,45 +24,42 @@ This file tracks the active scoped work for the current branch.
   - `README.md`
   - `plans.md`
   - `docs/status.md`
-  - `docs/prompts/typescript-sdk-transport-client.md`
-  - `docs/branches/typescript-sdk-transport.md`
-  - `docs/branches/typescript-sdk-analytics.md`
+  - `docs/branches/typescript-sdk-client.md`
   - `typescript/README.md`
   - `typescript/package.json`
-  - `typescript/src/models/types.ts`
-  - `typescript/src/methods/types.ts`
+  - `typescript/src/client/`
   - `typescript/src/events/types.ts`
-  - `typescript/src/errors/types.ts`
-  - `typescript/src/validation/index.ts`
+  - `typescript/src/methods/types.ts`
+  - `typescript/src/models/types.ts`
+  - `typescript/src/replay/`
   - `typescript/src/transport/`
-  - `typescript/src/analytics/`
-  - `typescript/src/validation/types.ts`
-  - `../spec/methods.md`
+  - `typescript/src/validation/index.ts`
   - `../spec/events.md`
   - `../spec/replay.md`
-  - `../examples/responses/`
-  - `../examples/errors/`
-  - `../mock-server/README.md`
+  - `../examples/events/`
+  - `../conformance/fixtures/replay/`
   - `../../ASCP_TypeScript_SDK_Implementation_Plan.md`
 
 ## Scope
 
 Included in this branch:
 
-- a `client` entry point published from the TypeScript package
-- typed wrappers for every ASCP core method named in `../spec/methods.md`
-- protocol-faithful params and result types that reuse `typescript/src/methods/types.ts`
-- normalized protocol error mapping that preserves the original ASCP error object and response envelope
-- request option pass-through to the existing transport layer
-- focused runtime and type-level tests that prove wrapper dispatch, result unwrapping, protocol-error mapping, and public API typing
-- branch documentation that explains usage, wrapper shape, alternatives rejected, verification evidence, limits, and replay handoff context
+- a published `replay` entry point for the TypeScript package
+- replay request builders for `from_seq` and `from_event_id`
+- opaque replay-cursor pass-through that stays additive to the frozen core subscribe params
+- a snapshot-plus-replay subscription helper built on `AscpClient.subscribe`, `AscpClient.unsubscribe`, and `AscpClient.events`
+- replay stream items that keep original event envelopes visible while classifying snapshot, historical replay, replay-boundary, live, and cursor-advance events
+- cursor tracking that preserves host-provided opaque cursor values instead of inferring them from `seq`
+- focused runtime and type-level tests that prove request shaping, snapshot-versus-replay distinctions, cursor preservation, unsubscribe cleanup, and public API typing against upstream replay fixtures
+- branch documentation that explains usage, replay shape rationale, alternatives rejected, verification evidence, limits, and what the examples/tests branch should build next
 
 Explicitly out of scope:
 
-- replay helper ergonomics such as cursor carry-forward or snapshot-plus-replay orchestration
 - new transport adapters or changes to stdio/WebSocket framing
 - protocol-core schema or spec changes
-- bundled telemetry vendors or silent analytics behavior
+- hiding ASCP replay boundaries behind synthetic combined DTOs
+- inferring opaque cursor values from `seq` or other local heuristics
+- full mock-server integration workflows and end-to-end examples beyond focused replay tests
 - adapter, daemon, product UI, or runtime-specific behavior
 - Dart SDK work
 
@@ -70,42 +67,42 @@ Explicitly out of scope:
 
 Files to add:
 
-- client implementation files under `typescript/src/client/`
-- client tests under `typescript/test/`
-- client type tests under `typescript/test-d/`
-- client branch documentation under `docs/branches/`
+- replay implementation files under `typescript/src/replay/`
+- replay tests under `typescript/test/`
+- replay type tests under `typescript/test-d/`
+- replay branch documentation under `docs/branches/`
 
 ## Tasks
 
 | Status | Task | Acceptance Criteria |
 | --- | --- | --- |
-| done | add failing typed-client tests for the new public surface | tests prove all core wrappers dispatch the exact method names, return success results, pass request options through, and normalize ASCP error responses before implementation is added |
-| done | implement the typed client contracts and protocol-error class | the package exposes a replaceable-transport client with every core method wrapper and a protocol error type that preserves method, ASCP error object, response envelope, retryability, and correlation id |
-| done | export the client surface from the package | root and `./client` exports expose runtime client helpers and public types without moving existing model, method, validation, transport, or analytics import paths |
-| done | document the client branch in detail | branch docs and package docs explain usage, wrapper shape, error mapping, alternatives rejected, verification evidence, limits, and what the replay branch should inherit |
-| done | leave a checkpoint for the client branch | `docs/status.md` records the branch, summary, updated docs, and next likely step |
+| done | add failing replay tests for the new public surface | tests prove `from_seq`, `from_event_id`, snapshot ordering, replay-boundary handling, opaque cursor pass-through, and unsubscribe cleanup against upstream replay fixtures before implementation is added |
+| done | implement replay request builders and subscription helpers | the package exposes thin replay helpers on top of the existing client surface without changing ASCP method or event semantics |
+| done | export the replay surface from the package | root and `./replay` exports expose replay helpers and public types without moving existing client, transport, validation, or analytics import paths |
+| done | document the replay branch in detail | branch docs and package docs explain usage, why the helper shape preserves protocol meaning, alternatives rejected, verification evidence, limits, and what the examples/tests branch should build next |
+| done | leave a checkpoint for the replay branch | `docs/status.md` records the branch, summary, updated docs, and next likely step |
 
 ## Acceptance Criteria
 
 The task is done only when all of the following are true:
 
-- every core ASCP method is wrapped by a typed public client method
-- wrappers reuse the existing transport request path and do not reimplement JSON-RPC framing or response validation
-- successful responses unwrap to protocol result objects without hiding ASCP field names
-- error responses throw a normalized protocol error that preserves the original error object and envelope
-- request options such as timeout and abort signals pass through to transport requests
-- focused tests cover dispatch, result unwrapping, option pass-through, error mapping, root exports, and type-level method signatures
-- documentation explains how to use the client surface and what replay work remains deferred
+- replay helpers exist for `from_seq`, `from_event_id`, and opaque cursor pass-through
+- snapshot events stay distinct from replayed historical events and from resumed live events
+- replay boundary handling matches the upstream `sync.replayed` semantics
+- host-provided cursor information is preserved only when explicitly emitted instead of being guessed from `seq`
+- helpers reuse `AscpClient.subscribe`, `AscpClient.unsubscribe`, and `AscpClient.events` rather than reimplementing transport or JSON-RPC behavior
+- focused tests cover fixture-aligned replay classification, request shaping, cleanup, exports, and type-level API expectations
+- documentation explains how to use the replay layer and what examples/integration work remains for the next branch
 
 ## Next Likely Step
 
-Create `feature/typescript-sdk-replay` from updated `main` after this branch lands and build replay helpers on top of the typed client, `sessions.subscribe`, and the existing transport subscription stream without changing the wrapper result shapes.
+Create `feature/typescript-sdk-examples-tests` from updated `main` after this branch lands and add end-to-end examples plus mock-server integration coverage that exercises the new replay helpers against executable upstream flows.
 
 ## Completion Outcome
 
-- Status: complete on `feature/typescript-sdk-client`
-- Client evidence:
-  - `npm test -- client.test.ts` in `typescript/`
+- Status: complete on `feature/typescript-sdk-replay`
+- Replay evidence:
+  - `npm test -- replay.test.ts` in `typescript/`
   - `npm run test:types` in `typescript/`
   - `npm run build` in `typescript/`
   - `npm test` in `typescript/`
@@ -115,8 +112,7 @@ Create `feature/typescript-sdk-replay` from updated `main` after this branch lan
   - `plans.md`
   - `docs/README.md`
   - `docs/project-context-reference.md`
-  - `docs/sdk-build-roadmap.md`
   - `docs/status.md`
-  - `docs/branches/typescript-sdk-client.md`
+  - `docs/branches/typescript-sdk-replay.md`
   - `typescript/README.md`
   - `typescript/package.json`

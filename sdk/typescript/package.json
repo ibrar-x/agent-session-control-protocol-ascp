@@ -69,6 +69,10 @@
       "types": "./dist/client/index.d.ts",
       "import": "./dist/client/index.js"
     },
+    "./replay": {
+      "types": "./dist/replay/index.d.ts",
+      "import": "./dist/replay/index.js"
+    },
     "./package.json": "./package.json"
   },
   "types": "./dist/index.d.ts",

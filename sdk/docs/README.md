@@ -35,6 +35,7 @@ This index keeps the SDK workspace navigable without relying on hidden chat cont
 - [`branches/typescript-sdk-transport.md`](branches/typescript-sdk-transport.md): detailed usage, transport-contract rationale, verification evidence, limitations, and handoff notes for the TypeScript transport branch
 - [`branches/typescript-sdk-analytics.md`](branches/typescript-sdk-analytics.md): detailed usage, opt-in analytics rationale, production-hardening notes, verification evidence, limitations, and handoff notes for the TypeScript analytics branch
 - [`branches/typescript-sdk-client.md`](branches/typescript-sdk-client.md): detailed usage, wrapper-shape rationale, protocol-error mapping notes, verification evidence, limitations, and handoff notes for the TypeScript client branch
+- [`branches/typescript-sdk-replay.md`](branches/typescript-sdk-replay.md): detailed usage, replay-shape rationale, cursor-preservation notes, verification evidence, limitations, and handoff notes for the TypeScript replay branch
 
 ## Prompt Starters
 

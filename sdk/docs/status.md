@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-24 - TypeScript SDK replay helpers
+
+- Branch: `feature/typescript-sdk-replay`
+- Commit: `not committed`
+- Summary: added a replay entry point for the TypeScript SDK with `from_seq` and `from_event_id` request builders, additive opaque cursor pass-through, a snapshot-versus-replay subscription helper on top of the typed client, cursor tracking from `sync.cursor_advanced`, and focused runtime plus type-level replay tests driven by the upstream replay fixtures
+- Documentation updated: `plans.md`, `docs/README.md`, `docs/project-context-reference.md`, `docs/status.md`, `docs/branches/typescript-sdk-replay.md`, `typescript/README.md`, `typescript/package.json`
+- Next likely step: create `feature/typescript-sdk-examples-tests` from updated `main` and add end-to-end examples plus mock-server integration coverage that exercises the typed client and replay helpers together
+
 ### 2026-04-24 - TypeScript SDK typed client methods
 
 - Branch: `feature/typescript-sdk-client`
