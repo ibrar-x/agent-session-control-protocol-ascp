@@ -16,8 +16,8 @@ Every prompt in this directory assumes the agent reads these files first:
 - `AGENTS.md`
 - `plans.md`
 - `docs/status.md`
-- `ASCP_Protocol_Detailed_Spec_v0_1.md`
-- `ASCP_Protocol_PRD_and_Build_Guide.md`
+- `protocol/ASCP_Protocol_Detailed_Spec_v0_1.md`
+- `protocol/ASCP_Protocol_PRD_and_Build_Guide.md`
 
 ## Dependency Discipline
 

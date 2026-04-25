@@ -58,10 +58,10 @@ Possible documentation locations:
 - `README.md`
 - `AGENTS.md`
 - `docs/`
-- `spec/`
-- `schema/`
-- `examples/`
-- `conformance/`
+- `protocol/spec/`
+- `protocol/schema/`
+- `protocol/examples/`
+- `protocol/conformance/`
 
 Code should not be the only place where important behavior is explained.
 

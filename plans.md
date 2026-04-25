@@ -12,9 +12,9 @@ This file tracks the active scoped work for the current branch.
 
 ## Active State
 
-- Feature name: Codex adapter planning pack
-- Branch: `feature/codex-adapter-planning`
-- Goal: translate the external Codex adapter implementation brief into repository-native planning assets so a future implementation branch can start from explicit prompts, a detailed task plan, and updated repo bootstrap docs without reopening protocol-core scope
+- Feature name: Production-grade monorepo restructure
+- Branch: `branch-ascp-monorepo-structure`
+- Goal: convert the repository from a protocol-first single-workspace layout into a production-grade ASCP monorepo with strict dependency boundaries, conservative file moves, root workspace orchestration, and updated documentation while preserving the existing protocol and SDK outputs
 - Source inputs:
   - `AGENTS.md`
   - `plans.md`
@@ -22,88 +22,130 @@ This file tracks the active scoped work for the current branch.
   - `README.md`
   - `docs/README.md`
   - `docs/project-context-reference.md`
-  - `docs/prompts/README.md`
-  - `docs/prompts/reference-client.md`
-  - `reference-client/README.md`
-  - `mock-server/README.md`
-  - `ASCP_Protocol_Detailed_Spec_v0_1.md`
-  - `ASCP_Protocol_PRD_and_Build_Guide.md`
-  - `ASCP_Codex_Adapter_Implementation_Plan.md`
-  - `schema/`
-  - `spec/`
-  - `examples/`
-  - `conformance/`
+  - `protocol/ASCP_Protocol_Detailed_Spec_v0_1.md`
+  - `protocol/ASCP_Protocol_PRD_and_Build_Guide.md`
+  - the user-provided "ASCP Monorepo — Production-Grade Structure"
+  - `protocol/schema/`
+  - `protocol/spec/`
+  - `protocol/examples/`
+  - `protocol/conformance/`
+  - `services/mock-server/`
+  - `apps/reference-client/`
+  - `sdks/`
   - recent git history
 
 ## Scope
 
 Included in this branch:
 
-- rewrite repository state around a new optional downstream Codex adapter planning feature
-- add a reusable starter prompt for the future `feature/codex-adapter` implementation branch
-- add a detailed superpowers implementation plan that breaks the adapter work into concrete downstream tasks
-- update the docs index and checkpoint log so future sessions can discover the Codex adapter planning assets from repository state
+- move the repository into the target monorepo layout under `protocol/`, `packages/`, `sdks/`, `adapters/`, `apps/`, `services/`, `tooling/`, and `docs/`
+- preserve ASCP protocol contracts while relocating protocol truth into `protocol/`
+- preserve the existing TypeScript and Dart SDKs while relocating them under `sdks/`
+- preserve the existing reference client and mock server while relocating them under `apps/` and `services/`
+- add root workspace scaffolding with npm workspaces, `turbo.json`, and `melos.yaml`
+- scaffold placeholder package directories for future shared packages, adapters, and apps
+- update scripts, docs, tests, and path references so the moved repository remains coherent
 
 Explicitly out of scope:
 
-- implementing the Codex adapter itself
-- changing frozen ASCP protocol contracts, schemas, examples, or conformance rules
-- SDK package work under `sdk/`
-- speculative product UI or vendor-specific runtime behavior beyond the existing adapter brief
+- changing ASCP core method, event, schema, replay, auth, extension, or compatibility semantics
+- implementing the Codex adapter or any other new runtime adapter
+- building product UI beyond placeholder module scaffolds
+- widening the protocol scope beyond the current source documents
 
 ## Planned Files
 
 Files to add:
 
-- `docs/prompts/codex-adapter.md`
-- `docs/superpowers/plans/2026-04-26-codex-adapter.md`
+- `package.json`
+- `turbo.json`
+- `melos.yaml`
+- `packages/README.md`
+- `packages/core/README.md`
+- `packages/transport/README.md`
+- `packages/event-engine/README.md`
+- `packages/auth/README.md`
+- `packages/utils/README.md`
+- `adapters/README.md`
+- `adapters/codex/README.md`
+- `adapters/claude/README.md`
+- `adapters/gemini/README.md`
+- `apps/README.md`
+- `apps/web/README.md`
+- `services/README.md`
+- `tooling/README.md`
+- `tooling/scripts/README.md`
+- `tooling/generators/README.md`
+- `docs/architecture/system-design.md`
+- `docs/architecture/dependency-graph.md`
 
-Files to update:
+Files to move and update:
 
-- `plans.md`
-- `docs/status.md`
-- `docs/README.md`
-- `docs/prompts/README.md`
-- `docs/project-context-reference.md`
-- `README.md`
+- `schema/` -> `protocol/schema/`
+- `spec/` -> `protocol/spec/`
+- `examples/` -> `protocol/examples/`
+- `conformance/` -> `protocol/conformance/`
+- `mock-server/` -> `services/mock-server/`
+- `reference-client/` -> `apps/reference-client/`
+- `sdk/` -> `sdks/`
+- `scripts/` -> `tooling/scripts/`
+- root protocol source docs -> `protocol/`
+- root and repo docs that reference old paths
 
 ## Tasks
 
 | Status | Task | Acceptance Criteria |
 | --- | --- | --- |
-| done | rewrite the active plan for the Codex adapter planning branch | `plans.md` scopes the branch to planning assets only and names the external Codex adapter brief as a source input |
-| done | add the Codex adapter starter prompt | `docs/prompts/codex-adapter.md` gives a future implementation branch explicit bootstrap reads, dependency gates, feature boundaries, deliverables, and pre-coding reporting requirements |
-| done | add the detailed Codex adapter implementation plan | `docs/superpowers/plans/2026-04-26-codex-adapter.md` breaks the adapter work into concrete tasks, files, and validation expectations for a future implementation agent |
-| done | wire the new planning assets into repository docs | `docs/README.md`, `docs/prompts/README.md`, `docs/project-context-reference.md`, and `README.md` point future contributors to the Codex adapter planning assets without implying the adapter is already implemented |
-| done | checkpoint the planning branch | `docs/status.md` records the planning outcome and the next likely step points at `feature/codex-adapter` implementation from updated `main` |
+| done | rewrite the active plan for the monorepo migration branch | `plans.md` scopes the branch to repository architecture only and names the user monorepo structure plus ASCP source docs as inputs |
+| done | move the repository into the target monorepo layout | the repository contains `protocol/`, `packages/`, `sdks/`, `adapters/`, `apps/`, `services/`, `tooling/`, and `docs/` with existing code/assets relocated conservatively |
+| done | add root workspace scaffolding and placeholder module boundaries | root `package.json`, `turbo.json`, and `melos.yaml` exist and future module placeholders document the dependency direction without leaking reverse dependencies |
+| done | update path-sensitive code, scripts, and docs | validation scripts, SDK tests/examples, mock-server fixtures, and repository docs all point at the new locations |
+| in_progress | checkpoint and close out the branch | `docs/status.md` records the monorepo migration, validation evidence is captured, and the branch is ready to commit, push, merge, and return to `main` |
 
 ## Acceptance Criteria
 
 The task is done only when all of the following are true:
 
-- the repository contains one reusable starter prompt for the Codex adapter implementation branch
-- the repository contains one detailed implementation plan for the Codex adapter under `docs/superpowers/plans/`
-- the planning assets keep the adapter strictly downstream of the frozen ASCP v0.1 contracts
-- the docs index and status log make the new planning assets discoverable from repository state alone
-- no protocol-core or adapter runtime code changes are mixed into this planning branch
+- protocol source-of-truth assets live under `protocol/`
+- SDKs live under `sdks/`
+- the reference client lives under `apps/reference-client/`
+- the mock server lives under `services/mock-server/`
+- root workspace files document and orchestrate the monorepo shape
+- placeholder module directories exist for `packages/`, `adapters/`, and future apps/services where requested
+- documentation explains the dependency direction `protocol -> packages -> sdks -> adapters -> apps`
+- the existing validation entrypoints still run successfully from the new structure
 
 ## Next Likely Step
 
-Create `feature/codex-adapter` from updated `main`, use the new starter prompt plus detailed plan, and implement the adapter as an optional downstream runtime integration without silently redefining ASCP semantics.
+Commit the validated monorepo migration, push `branch-ascp-monorepo-structure`, merge it back into updated `main`, push `main`, and leave the repository ready for the next downstream module.
 
 ## Completion Outcome
 
-- Status: complete on `feature/codex-adapter-planning`
+- Status: validated and ready to commit on `branch-ascp-monorepo-structure`
 - Validation evidence:
-  - reviewed `docs/prompts/codex-adapter.md` against the external Codex adapter brief and current repository prompt-pack conventions
-  - reviewed `docs/superpowers/plans/2026-04-26-codex-adapter.md` for branch scope, dependency gates, file paths, and concrete task sequencing
   - `git diff --check`
+  - `bash tooling/scripts/validate_method_contracts.sh`
+  - `bash tooling/scripts/validate_event_contracts.sh`
+  - `bash tooling/scripts/validate_replay_semantics.sh`
+  - `bash tooling/scripts/validate_auth_semantics.sh`
+  - `bash tooling/scripts/validate_extension_semantics.sh`
+  - `bash tooling/scripts/validate_conformance.sh`
+  - `bash tooling/scripts/validate_mock_server.sh`
+  - `bash tooling/scripts/validate_reference_client.sh`
+  - `npm --workspace sdks/typescript run check`
 - Documentation updated:
-  - `plans.md`
   - `README.md`
+  - `AGENTS.md`
+  - `plans.md`
+  - `docs/status.md`
   - `docs/README.md`
   - `docs/project-context-reference.md`
-  - `docs/prompts/README.md`
-  - `docs/prompts/codex-adapter.md`
-  - `docs/superpowers/plans/2026-04-26-codex-adapter.md`
-  - `docs/status.md`
+  - `docs/architecture/system-design.md`
+  - `docs/architecture/dependency-graph.md`
+  - `protocol/ASCP_Protocol_PRD_and_Build_Guide.md`
+  - `protocol/ASCP_Protocol_Detailed_Spec_v0_1.md`
+  - `packages/README.md`
+  - `adapters/README.md`
+  - `apps/README.md`
+  - `services/README.md`
+  - `tooling/README.md`

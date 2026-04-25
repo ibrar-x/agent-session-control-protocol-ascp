@@ -1,0 +1,6 @@
+{
+  "name": "@ascp/adapter-gemini",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Placeholder Gemini adapter package for the ASCP monorepo"
+}

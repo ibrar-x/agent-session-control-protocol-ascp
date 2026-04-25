@@ -19,8 +19,8 @@ Read these files before planning or implementation:
 1. `AGENTS.md`
 2. `plans.md`
 3. `docs/status.md`
-4. `ASCP_Protocol_Detailed_Spec_v0_1.md`
-5. `ASCP_Protocol_PRD_and_Build_Guide.md`
+4. `protocol/ASCP_Protocol_Detailed_Spec_v0_1.md`
+5. `protocol/ASCP_Protocol_PRD_and_Build_Guide.md`
 6. `README.md`
 7. `docs/repo-operating-system.md`
 
@@ -55,16 +55,16 @@ Do not move ahead into:
 
 Create or update the minimum assets needed for schema foundation:
 
-- `schema/ascp-core.schema.json`
-- `schema/ascp-capabilities.schema.json`
-- `schema/ascp-errors.schema.json`
+- `protocol/schema/ascp-core.schema.json`
+- `protocol/schema/ascp-capabilities.schema.json`
+- `protocol/schema/ascp-errors.schema.json`
 - schema-valid examples for `Host`, `Runtime`, `Session`, `Run`, `ApprovalRequest`, `Artifact`, `DiffSummary`, and `EventEnvelope`
 - any supporting protocol docs required to explain scope, design-principle assumptions, or versioning assumptions used by the schemas
 
 Prefer the repository shapes recommended by the specs if new directories are needed:
 
-- `schema/`
-- `examples/`
+- `protocol/schema/`
+- `protocol/examples/`
 - `docs/`
 
 ## Acceptance Criteria
@@ -79,8 +79,8 @@ The feature is done only when:
 
 ## Working Rules
 
-- Treat `ASCP_Protocol_Detailed_Spec_v0_1.md` as the source of truth for exact shapes
-- Use `ASCP_Protocol_PRD_and_Build_Guide.md` for repository shape and build intent
+- Treat `protocol/ASCP_Protocol_Detailed_Spec_v0_1.md` as the source of truth for exact shapes
+- Use `protocol/ASCP_Protocol_PRD_and_Build_Guide.md` for repository shape and build intent
 - Keep examples schema-valid
 - Prefer explicit JSON objects and stable field names
 - Do not redefine semantics through extensions

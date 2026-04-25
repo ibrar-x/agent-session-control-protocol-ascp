@@ -1,0 +1,6 @@
+{
+  "name": "@ascp/app-web",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Placeholder web app package for the ASCP monorepo"
+}

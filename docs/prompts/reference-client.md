@@ -19,21 +19,21 @@ Read these files before planning or implementation:
 1. `AGENTS.md`
 2. `plans.md`
 3. `docs/status.md`
-4. `ASCP_Protocol_Detailed_Spec_v0_1.md`
-5. `ASCP_Protocol_PRD_and_Build_Guide.md`
+4. `protocol/ASCP_Protocol_Detailed_Spec_v0_1.md`
+5. `protocol/ASCP_Protocol_PRD_and_Build_Guide.md`
 6. `README.md`
 7. `docs/repo-operating-system.md`
 8. `docs/protocol-usage-and-dto-generation.md`
-9. `mock-server/README.md`
+9. `services/mock-server/README.md`
 10. `docs/prompts/reference-client.md`
 
 Then read the frozen upstream implementation inputs this client must consume:
 
-- canonical schemas under `schema/`
-- protocol examples under `examples/`
-- compatibility documentation and manifests under `spec/compatibility.md` and `conformance/fixtures/compatibility/`
-- the mock-server implementation under `mock-server/`
-- the mock validator and conformance harness under `mock-server/tests/`, `conformance/tests/`, and `scripts/`
+- canonical schemas under `protocol/schema/`
+- protocol examples under `protocol/examples/`
+- compatibility documentation and manifests under `protocol/spec/compatibility.md` and `protocol/conformance/fixtures/compatibility/`
+- the mock-server implementation under `services/mock-server/`
+- the mock validator and conformance harness under `services/mock-server/tests/`, `protocol/conformance/tests/`, and `tooling/scripts/`
 
 When reading the specs, focus first on:
 
@@ -77,7 +77,7 @@ Do not move ahead into:
 
 Create or update the assets needed for a usable downstream proof client:
 
-- `reference-client/`
+- `apps/reference-client/`
 - a minimal transport/client layer for the mock-server stdio JSON-RPC surface
 - one or more example flows that exercise discovery, session reads, subscribe/replay, and approval/artifact access
 - branch-specific docs explaining client scope and limitations
@@ -111,7 +111,7 @@ The feature is done only when:
 After bootstrap, report:
 
 1. whether the upstream protocol and mock assets are stable enough
-2. the exact `reference-client/` files you will add or modify
+2. the exact `apps/reference-client/` files you will add or modify
 3. the scoped task list for the branch
 
 Then implement only the reference-client slice.

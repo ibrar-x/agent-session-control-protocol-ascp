@@ -38,13 +38,13 @@ Out of scope for this slice:
 
 The schema foundation assets live under:
 
-- `schema/ascp-core.schema.json`
-- `schema/ascp-capabilities.schema.json`
-- `schema/ascp-errors.schema.json`
-- `examples/core/`
-- `examples/capabilities/`
-- `examples/errors/`
-- `examples/events/`
+- `protocol/schema/ascp-core.schema.json`
+- `protocol/schema/ascp-capabilities.schema.json`
+- `protocol/schema/ascp-errors.schema.json`
+- `protocol/examples/core/`
+- `protocol/examples/capabilities/`
+- `protocol/examples/errors/`
+- `protocol/examples/events/`
 
 These files are the contract base for the next feature branch, `method contracts`.
 
@@ -52,8 +52,8 @@ These files are the contract base for the next feature branch, `method contracts
 
 These assets follow the repository source-of-truth rules:
 
-1. `ASCP_Protocol_Detailed_Spec_v0_1.md` defines the exact field names, required and optional fields, enums, and compatibility behavior.
-2. `ASCP_Protocol_PRD_and_Build_Guide.md` defines the repository shape, design-principle framing, and versioning intent.
+1. `protocol/ASCP_Protocol_Detailed_Spec_v0_1.md` defines the exact field names, required and optional fields, enums, and compatibility behavior.
+2. `protocol/ASCP_Protocol_PRD_and_Build_Guide.md` defines the repository shape, design-principle framing, and versioning intent.
 
 Where the detailed spec shows both prose examples and inline schema fragments, the branch keeps the shapes schema-valid against the canonical examples instead of narrowing them beyond what the examples allow.
 
@@ -78,7 +78,7 @@ The schema foundation preserves that behavior explicitly so the example fixtures
 
 ### Shared envelope material only
 
-`schema/ascp-core.schema.json` includes generic request and response envelope definitions so later work can reuse stable JSON-RPC-style wrappers. The schemas deliberately do not encode method-specific `params` or `result` shapes in this branch.
+`protocol/schema/ascp-core.schema.json` includes generic request and response envelope definitions so later work can reuse stable JSON-RPC-style wrappers. The schemas deliberately do not encode method-specific `params` or `result` shapes in this branch.
 
 ### Versioning assumption
 
@@ -100,8 +100,8 @@ The examples are intended to be reused by later method-contract and event-contra
 Validation for this slice means:
 
 - each core object example validates against its exact schema definition
-- the capability document example validates against `schema/ascp-capabilities.schema.json`
-- the error example validates against `schema/ascp-errors.schema.json`
+- the capability document example validates against `protocol/schema/ascp-capabilities.schema.json`
+- the error example validates against `protocol/schema/ascp-errors.schema.json`
 
 The validation step should be rerun before any completion claim or commit.
 

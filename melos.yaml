@@ -1,0 +1,10 @@
+name: ascp
+
+packages:
+  - sdks/dart
+
+scripts:
+  analyze:
+    run: dart analyze
+  test:
+    run: dart test

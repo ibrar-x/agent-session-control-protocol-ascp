@@ -24,19 +24,19 @@ Read these files before planning or implementation:
 6. `docs/project-context-reference.md`
 7. `docs/prompts/codex-adapter.md`
 8. `docs/superpowers/plans/2026-04-26-codex-adapter.md`
-9. `ASCP_Protocol_Detailed_Spec_v0_1.md`
-10. `ASCP_Protocol_PRD_and_Build_Guide.md`
+9. `protocol/ASCP_Protocol_Detailed_Spec_v0_1.md`
+10. `protocol/ASCP_Protocol_PRD_and_Build_Guide.md`
 11. `ASCP_Codex_Adapter_Implementation_Plan.md`
-12. `reference-client/README.md`
-13. `mock-server/README.md`
+12. `apps/reference-client/README.md`
+13. `services/mock-server/README.md`
 
 Then read the frozen upstream implementation inputs the adapter must consume:
 
-- canonical schemas under `schema/`
-- method, event, replay, auth, extension, and compatibility specs under `spec/`
-- protocol examples under `examples/`
-- conformance fixtures and validators under `conformance/`
-- the downstream proof client under `reference-client/`
+- canonical schemas under `protocol/schema/`
+- method, event, replay, auth, extension, and compatibility specs under `protocol/spec/`
+- protocol examples under `protocol/examples/`
+- conformance fixtures and validators under `protocol/conformance/`
+- the downstream proof client under `apps/reference-client/`
 
 When reading the specs, focus first on:
 
@@ -77,7 +77,7 @@ Do not move ahead into:
 
 - protocol redesign
 - new ASCP methods, events, schemas, or compatibility levels
-- SDK packaging under `sdk/`
+- SDK packaging under `sdks/`
 - speculative product UX, daemon work, or app surfaces
 - fake replay, fake artifacts, fake diffs, or fake approvals
 
