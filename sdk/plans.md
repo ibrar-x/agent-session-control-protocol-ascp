@@ -12,9 +12,9 @@ This file tracks the active scoped work for the current branch.
 
 ## Active State
 
-- Feature name: TypeScript replay and event helpers
-- Branch: `feature/typescript-sdk-replay`
-- Goal: make downstream subscriptions and reconnect/replay handling usable on top of the existing typed client and transport layers without hiding snapshot, replay-boundary, or opaque-cursor semantics
+- Feature name: TypeScript examples and integration tests
+- Branch: `feature/typescript-sdk-examples-tests`
+- Goal: prove the TypeScript SDK end to end against the parent mock server with consumer-facing examples and executable integration coverage that use the published client, transport, validation, and replay surfaces directly
 - Active language target: TypeScript SDK
 - Source inputs:
   - `AGENTS.md`
@@ -24,95 +24,99 @@ This file tracks the active scoped work for the current branch.
   - `README.md`
   - `plans.md`
   - `docs/status.md`
+  - `docs/sdk-build-roadmap.md`
   - `docs/branches/typescript-sdk-client.md`
+  - `docs/branches/typescript-sdk-replay.md`
   - `typescript/README.md`
   - `typescript/package.json`
   - `typescript/src/client/`
-  - `typescript/src/events/types.ts`
-  - `typescript/src/methods/types.ts`
-  - `typescript/src/models/types.ts`
   - `typescript/src/replay/`
   - `typescript/src/transport/`
-  - `typescript/src/validation/index.ts`
-  - `../spec/events.md`
-  - `../spec/replay.md`
-  - `../examples/events/`
-  - `../conformance/fixtures/replay/`
+  - `typescript/src/validation/`
+  - `typescript/test/`
+  - `../mock-server/README.md`
+  - `../mock-server/src/mock_server/`
+  - `../reference-client/README.md`
+  - `../reference-client/src/reference_client/demo.py`
+  - `../examples/`
+  - `../conformance/`
   - `../../ASCP_TypeScript_SDK_Implementation_Plan.md`
 
 ## Scope
 
 Included in this branch:
 
-- a published `replay` entry point for the TypeScript package
-- replay request builders for `from_seq` and `from_event_id`
-- opaque replay-cursor pass-through that stays additive to the frozen core subscribe params
-- a snapshot-plus-replay subscription helper built on `AscpClient.subscribe`, `AscpClient.unsubscribe`, and `AscpClient.events`
-- replay stream items that keep original event envelopes visible while classifying snapshot, historical replay, replay-boundary, live, and cursor-advance events
-- cursor tracking that preserves host-provided opaque cursor values instead of inferring them from `seq`
-- focused runtime and type-level tests that prove request shaping, snapshot-versus-replay distinctions, cursor preservation, unsubscribe cleanup, and public API typing against upstream replay fixtures
-- branch documentation that explains usage, replay shape rationale, alternatives rejected, verification evidence, limits, and what the examples/tests branch should build next
+- end-to-end integration tests that launch the upstream mock server over stdio and exercise the published TypeScript SDK surface instead of hand-written protocol glue
+- executable TypeScript examples for subscribe-and-replay, approval handling, and artifact-plus-diff inspection
+- example helpers only where needed to keep consumer flows concise without inventing new ASCP semantics
+- README guidance that shows how to install, run, and reason about the examples and integration tests
+- branch documentation that explains the example structure, the end-to-end proof coverage, the tradeoffs taken to stay protocol-faithful, and what still remains before release-readiness
 
 Explicitly out of scope:
 
-- new transport adapters or changes to stdio/WebSocket framing
 - protocol-core schema or spec changes
-- hiding ASCP replay boundaries behind synthetic combined DTOs
-- inferring opaque cursor values from `seq` or other local heuristics
-- full mock-server integration workflows and end-to-end examples beyond focused replay tests
-- adapter, daemon, product UI, or runtime-specific behavior
+- new transport protocols or deep transport refactors
+- runtime adapters, daemons, or product UI work
+- changing ASCP field names into SDK-specific DTO aliases
+- release-readiness polish unrelated to proving end-to-end behavior
 - Dart SDK work
 
 ## Planned Files
 
 Files to add:
 
-- replay implementation files under `typescript/src/replay/`
-- replay tests under `typescript/test/`
-- replay type tests under `typescript/test-d/`
-- replay branch documentation under `docs/branches/`
+- example scripts under `typescript/examples/`
+- end-to-end integration tests under `typescript/test/`
+- example documentation under `docs/branches/`
+
+Files expected to change:
+
+- `plans.md`
+- `docs/status.md`
+- `typescript/README.md`
+- `typescript/package.json`
+- `typescript/src/index.ts` if root exports need example-facing helpers
+- `typescript/test/`
 
 ## Tasks
 
 | Status | Task | Acceptance Criteria |
 | --- | --- | --- |
-| done | add failing replay tests for the new public surface | tests prove `from_seq`, `from_event_id`, snapshot ordering, replay-boundary handling, opaque cursor pass-through, and unsubscribe cleanup against upstream replay fixtures before implementation is added |
-| done | implement replay request builders and subscription helpers | the package exposes thin replay helpers on top of the existing client surface without changing ASCP method or event semantics |
-| done | export the replay surface from the package | root and `./replay` exports expose replay helpers and public types without moving existing client, transport, validation, or analytics import paths |
-| done | document the replay branch in detail | branch docs and package docs explain usage, why the helper shape preserves protocol meaning, alternatives rejected, verification evidence, limits, and what the examples/tests branch should build next |
-| done | leave a checkpoint for the replay branch | `docs/status.md` records the branch, summary, updated docs, and next likely step |
+| done | add failing integration and example tests first | at least one new test file fails against the current package while asserting subscribe/replay, approval, artifact/diff, and no-hand-written-DTO consumer flows against the upstream mock server |
+| done | implement the minimum example-facing package and test support | the integration tests can drive the published TypeScript SDK end to end without bypassing the package surface or re-creating protocol DTO types in test code |
+| done | add executable consumer examples | `typescript/examples/` contains subscribe/replay, approval, and artifact/diff examples that run against the upstream mock server and reflect the README guidance |
+| done | document the examples/tests branch in detail | package and branch docs explain how to run the examples/tests, why the examples are structured around thin protocol-faithful flows, what was verified, what remains limited, and what the release-readiness branch should pick up next |
+| done | leave a checkpoint for the examples/tests branch | `docs/status.md` records the branch, summary, updated docs, and next likely step |
 
 ## Acceptance Criteria
 
 The task is done only when all of the following are true:
 
-- replay helpers exist for `from_seq`, `from_event_id`, and opaque cursor pass-through
-- snapshot events stay distinct from replayed historical events and from resumed live events
-- replay boundary handling matches the upstream `sync.replayed` semantics
-- host-provided cursor information is preserved only when explicitly emitted instead of being guessed from `seq`
-- helpers reuse `AscpClient.subscribe`, `AscpClient.unsubscribe`, and `AscpClient.events` rather than reimplementing transport or JSON-RPC behavior
-- focused tests cover fixture-aligned replay classification, request shaping, cleanup, exports, and type-level API expectations
-- documentation explains how to use the replay layer and what examples/integration work remains for the next branch
+- integration tests pass against the upstream mock server over stdio
+- subscribe/replay, approval, and artifact/diff flows are proven through the published TypeScript SDK surface
+- downstream examples do not need hand-written protocol DTO definitions outside the SDK package
+- the package README is enough to get a consumer running the mock-server examples and tests
+- documentation explains why the examples stay thin and protocol-faithful, what was verified end to end, and what release-readiness work remains
 
 ## Next Likely Step
 
-Create `feature/typescript-sdk-examples-tests` from updated `main` after this branch lands and add end-to-end examples plus mock-server integration coverage that exercises the new replay helpers against executable upstream flows.
+Create the release-readiness branch from updated `main` after the examples/tests branch lands and tighten package polish, auth hooks, packaging details, and any remaining production-facing verification gaps that the end-to-end proof work exposes.
 
 ## Completion Outcome
 
-- Status: complete on `feature/typescript-sdk-replay`
-- Replay evidence:
-  - `npm test -- replay.test.ts` in `typescript/`
-  - `npm run test:types` in `typescript/`
+- Status: complete on `feature/typescript-sdk-examples-tests`
+- End-to-end evidence:
+  - `npm test -- examples.integration.test.ts` in `typescript/`
   - `npm run build` in `typescript/`
+  - `npm run test:integration` in `typescript/`
   - `npm test` in `typescript/`
+  - `npm run test:types` in `typescript/`
   - `npm run check` in `typescript/`
   - `git diff --check`
 - Documentation updated:
   - `plans.md`
   - `docs/README.md`
-  - `docs/project-context-reference.md`
   - `docs/status.md`
-  - `docs/branches/typescript-sdk-replay.md`
+  - `docs/branches/typescript-sdk-examples-tests.md`
   - `typescript/README.md`
   - `typescript/package.json`

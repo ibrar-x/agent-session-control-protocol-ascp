@@ -2,7 +2,7 @@
 
 This package is the first downstream SDK target for ASCP.
 
-The current package state includes the foundation, validation, transport, analytics, typed client, and replay slices.
+The current package state includes the foundation, validation, transport, analytics, typed client, replay, and end-to-end examples/tests slices.
 
 For the full branch-level rationale and handoff context, see:
 
@@ -12,6 +12,7 @@ For the full branch-level rationale and handoff context, see:
 - `../docs/branches/typescript-sdk-analytics.md`
 - `../docs/branches/typescript-sdk-client.md`
 - `../docs/branches/typescript-sdk-replay.md`
+- `../docs/branches/typescript-sdk-examples-tests.md`
 
 ## Upstream Inputs
 
@@ -39,6 +40,7 @@ typescript/
     transport/
     replay/
     auth/
+  examples/
   test/
   test-d/
 ```
@@ -334,14 +336,63 @@ The current replay design intentionally does not:
 - add a synthetic "recovery state" object that hides protocol events
 - infer opaque cursor values from `seq`
 - change transport subscription behavior below the client layer
-- replace fixture-driven or mock-server integration examples that still belong to the later examples/tests branch
+
+## End-To-End Examples
+
+The examples under `typescript/examples/` prove the package end to end against the upstream mock server without hand-written response DTOs or event-envelope wrappers in consumer code.
+
+Run them from `sdk/typescript/` after building once:
+
+```bash
+npm install
+npm run build
+npm run example:subscribe-replay
+npm run example:approval
+npm run example:artifact-diff
+```
+
+The scripts are:
+
+- `examples/subscribe-replay.ts`: launches the mock server over stdio, uses `AscpClient` plus `subscribeWithReplay(...)`, captures the snapshot and replay boundary, then sends live input and shows the post-replay event flow
+- `examples/approval-flow.ts`: reads pending approvals, resolves the seeded approval through `respondApproval(...)`, and captures the emitted approval lifecycle events from the transport stream
+- `examples/artifact-diff.ts`: lists artifacts for the seeded session, fetches the diff artifact metadata, and reads the related diff summary through typed client calls
+
+The examples stay deliberately thin:
+
+- imports use the package entry points (`ascp-sdk-typescript/client`, `ascp-sdk-typescript/replay`, and `ascp-sdk-typescript/transport`)
+- request params keep upstream ASCP field names
+- result objects and event envelopes are consumed directly instead of being remapped into SDK-specific DTO aliases
+- replay boundaries remain explicit through `snapshot`, `replay_event`, `replay_complete`, `live_event`, and `cursor_advanced`
+
+That structure makes it easy to compare runtime behavior with the upstream protocol examples, conformance fixtures, mock server, and reference client.
+
+## Integration Tests
+
+The end-to-end integration suite lives in `test/examples.integration.test.ts`.
+
+It launches the parent mock server over stdio and proves:
+
+- typed client method calls for discovery, sessions, approvals, artifacts, and diffs
+- replay subscriptions against the deterministic `sync.snapshot`, `sync.replayed`, and `sync.cursor_advanced` flow
+- post-replay live events driven by `sessions.send_input`
+- standalone example entrypoints that run as scripts and produce deterministic summaries
+
+Run it directly with:
+
+```bash
+npm run test:integration
+```
 
 ## Commands
 
 - `npm install`
 - `npm run build`
 - `npm test`
+- `npm run test:integration`
 - `npm run test:types`
+- `npm run example:subscribe-replay`
+- `npm run example:approval`
+- `npm run example:artifact-diff`
 - `npm run check`
 
 ## Current Scope
@@ -369,8 +420,10 @@ Implemented in the foundation slice:
 - focused runtime and type-level client tests
 - replay request builders and cursor-preserving replay subscriptions
 - focused runtime and type-level replay tests
+- standalone example scripts for subscribe/replay, approvals, and artifact/diff flows
+- end-to-end integration tests against the upstream mock server
 
 Deferred to later slices:
 
-- higher-level integration flows that exercise the full typed client surface against the mock server
 - dedicated auth hooks
+- release-readiness polish such as package publishing automation, release docs tightening, and any remaining production hardening gaps exposed by end-to-end use

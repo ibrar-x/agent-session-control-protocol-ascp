@@ -80,7 +80,11 @@
     "clean": "rimraf dist",
     "build": "npm run clean && tsc -p tsconfig.build.json && node ./scripts/copy-validation-schemas.mjs",
     "test": "vitest run",
+    "test:integration": "vitest run test/examples.integration.test.ts",
     "test:types": "tsc -p tsconfig.type-tests.json",
+    "example:subscribe-replay": "node --experimental-strip-types examples/subscribe-replay.ts",
+    "example:approval": "node --experimental-strip-types examples/approval-flow.ts",
+    "example:artifact-diff": "node --experimental-strip-types examples/artifact-diff.ts",
     "check": "npm run build && npm run test && npm run test:types"
   },
   "dependencies": {

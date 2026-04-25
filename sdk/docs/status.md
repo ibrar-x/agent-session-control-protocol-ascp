@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-25 - TypeScript SDK examples and integration tests
+
+- Branch: `feature/typescript-sdk-examples-tests`
+- Commit: `not committed`
+- Summary: added end-to-end mock-server integration coverage for the published TypeScript SDK surface, introduced standalone subscribe/replay, approval, and artifact/diff example scripts, and documented how downstream consumers can run the examples and tests without hand-written protocol DTOs
+- Documentation updated: `plans.md`, `docs/README.md`, `docs/status.md`, `docs/branches/typescript-sdk-examples-tests.md`, `typescript/README.md`, `typescript/package.json`
+- Next likely step: create `feature/typescript-sdk-release-readiness` from updated `main` and tighten package polish, release-facing docs, and any remaining production-hardening gaps exposed by the end-to-end proof layer
+
 ### 2026-04-24 - TypeScript SDK replay helpers
 
 - Branch: `feature/typescript-sdk-replay`
