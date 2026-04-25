@@ -7,10 +7,13 @@ Use this prompt when the TypeScript SDK is sufficiently established and the next
 1. `AGENTS.md`
 2. `plans.md`
 3. `docs/status.md`
-4. `../../../schema/`
-5. `../../../spec/`
-6. `../../../../ASCP_Dart_SDK_Implementation_Plan.md`
-7. `../../../../ASCP_Next_Phase_Master_Roadmap.md`
+4. `../branches/typescript-sdk-release-readiness.md`
+5. `../../typescript/README.md`
+6. `../../typescript/CHANGELOG.md`
+7. `../../../schema/`
+8. `../../../spec/`
+9. `../../../../ASCP_Dart_SDK_Implementation_Plan.md`
+10. `../../../../ASCP_Next_Phase_Master_Roadmap.md`
 
 ## Feature Boundary
 
@@ -44,6 +47,7 @@ Make sure the branch documentation covers:
 - the thought process behind the proposed package shape, async model, codec strategy, and validation approach
 - why the chosen Dart direction was preferred over plausible alternatives
 - which upstream protocol assets and TypeScript SDK learnings were used as inputs
+- which TypeScript release-readiness package boundaries should be mirrored versus translated for Dart-specific tooling
 - assumptions, risks, and unresolved questions that remain acceptable at planning time
 - what validation or review steps were used to judge the plan quality
 - what should be built first when the actual Dart implementation branch starts

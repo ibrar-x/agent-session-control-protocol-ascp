@@ -1,7 +1,7 @@
 {
   "name": "ascp-sdk-typescript",
   "version": "0.1.0",
-  "description": "TypeScript SDK for the Agent Session & Control Protocol (ASCP).",
+  "description": "Schema-led TypeScript SDK for the Agent Session & Control Protocol (ASCP).",
   "homepage": "https://github.com/ibrar-x/agent-session-control-protocol-ascp/tree/main/sdk/typescript#readme",
   "bugs": {
     "url": "https://github.com/ibrar-x/agent-session-control-protocol-ascp/issues"
@@ -27,10 +27,15 @@
   "sideEffects": false,
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
   ],
   "engines": {
     "node": ">=22.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "exports": {
     ".": {
@@ -79,13 +84,16 @@
   "scripts": {
     "clean": "rimraf dist",
     "build": "npm run clean && tsc -p tsconfig.build.json && node ./scripts/copy-validation-schemas.mjs",
+    "prepack": "npm run build",
     "test": "vitest run",
     "test:integration": "vitest run test/examples.integration.test.ts",
     "test:types": "tsc -p tsconfig.type-tests.json",
+    "test:package-types": "tsc -p tsconfig.package-types.json",
     "example:subscribe-replay": "node --experimental-strip-types examples/subscribe-replay.ts",
     "example:approval": "node --experimental-strip-types examples/approval-flow.ts",
     "example:artifact-diff": "node --experimental-strip-types examples/artifact-diff.ts",
-    "check": "npm run build && npm run test && npm run test:types"
+    "check": "npm run build && npm run test && npm run test:types",
+    "check:release": "npm run check && npm run test:integration && npm run test:package-types && node ./scripts/check-package-exports.mjs && npm pack --dry-run"
   },
   "dependencies": {
     "ajv": "^8.17.1",

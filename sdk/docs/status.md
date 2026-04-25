@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-25 - TypeScript SDK release readiness
+
+- Branch: `feature/typescript-sdk-release-readiness`
+- Commit: `not committed`
+- Summary: tightened the TypeScript SDK package for sustained downstream use by documenting the `0.1.0` release policy, clarifying the root-versus-subpath export boundary, adding packaged changelog and license files, and adding release-specific type/export/tarball verification commands
+- Documentation updated: `plans.md`, `docs/README.md`, `docs/status.md`, `docs/branches/typescript-sdk-release-readiness.md`, `docs/prompts/dart-sdk-planning.md`, `typescript/README.md`, `typescript/CHANGELOG.md`, `typescript/package.json`
+- Next likely step: use the release-readiness branch outputs as the downstream reference set when refreshing or starting the dedicated Dart SDK planning branch
+
 ### 2026-04-25 - TypeScript SDK examples and integration tests
 
 - Branch: `feature/typescript-sdk-examples-tests`

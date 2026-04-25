@@ -1,8 +1,8 @@
 # ASCP TypeScript SDK
 
-This package is the first downstream SDK target for ASCP.
+This package is the first downstream reference SDK for ASCP.
 
-The current package state includes the foundation, validation, transport, analytics, typed client, replay, and end-to-end examples/tests slices.
+The current package state includes the foundation, validation, transport, analytics, typed client, replay, end-to-end examples/tests, and release-readiness slices.
 
 For the full branch-level rationale and handoff context, see:
 
@@ -13,6 +13,37 @@ For the full branch-level rationale and handoff context, see:
 - `../docs/branches/typescript-sdk-client.md`
 - `../docs/branches/typescript-sdk-replay.md`
 - `../docs/branches/typescript-sdk-examples-tests.md`
+- `../docs/branches/typescript-sdk-release-readiness.md`
+
+## Install
+
+Requirements:
+
+- Node.js `>=22.0.0`
+
+Install:
+
+```bash
+npm install ascp-sdk-typescript
+```
+
+Minimal consumer flow:
+
+```ts
+import { AscpClient } from "ascp-sdk-typescript";
+import { AscpStdioTransport } from "ascp-sdk-typescript/transport";
+
+const client = new AscpClient({
+  transport: new AscpStdioTransport({
+    command: ["python3", "../mock-server/src/mock_server/cli.py"]
+  })
+});
+
+await client.connect();
+const capabilities = await client.getCapabilities();
+console.log(capabilities.protocol_version);
+await client.close();
+```
 
 ## Upstream Inputs
 
@@ -45,20 +76,42 @@ typescript/
   test-d/
 ```
 
-Public exports currently include:
+Release package boundaries:
 
-- package root: metadata plus type exports
+- package root: package metadata, `AscpClient`, replay helpers, and core protocol types for the common consumer happy path
+- `./transport`: replaceable request/subscription transports plus normalized transport errors
 - `./validation`: runtime-safe parsing and assertion helpers
 - `./analytics`: opt-in analytics event types, recorders, and remediation helpers
-- `./transport`: replaceable request/subscription transports plus normalized transport errors
-- `./client`: typed ASCP core method wrappers plus protocol error normalization
-- `./replay`: replay request builders, snapshot/replay stream helpers, and cursor-preserving subscription utilities
+- `./client`: direct access to the typed ASCP core method layer
+- `./replay`: direct access to replay request builders and replay subscriptions
 - `./models`
 - `./methods`
 - `./events`
 - `./errors`
 
 The `auth` directory remains reserved for a later slice so auth work can extend the package without moving the root layout.
+
+Boundary rationale:
+
+- the root export stays focused on the downstream flow most consumers start with: create a transport, create a client, call typed methods, and optionally layer replay helpers on top
+- `transport`, `validation`, and `analytics` stay on dedicated subpaths because they are lower-level or optional surfaces and should not blur the root happy path
+- protocol DTO types remain visible and thin so consumers can still compare their usage directly with upstream ASCP schemas, examples, and conformance fixtures
+
+## Versioning Policy
+
+The first release-ready package remains at `0.1.0`.
+
+That decision is intentional:
+
+- it aligns the first downstream reference package with ASCP protocol `0.1.0`
+- it signals that the package is ready for sustained downstream use while the protocol itself is still pre-`1.0`
+- it leaves room for minor-version API tightening if the package surface needs correction before both protocol and SDK semantics stabilize at `1.0.0`
+
+Compatibility expectations for this package:
+
+- patch releases should preserve the documented root-versus-subpath package boundary
+- additive helpers should prefer new subpaths or additive exports over shape changes
+- protocol field names and method names should continue matching upstream ASCP instead of being translated into SDK-specific aliases
 
 ## Model Strategy
 
@@ -390,10 +443,30 @@ npm run test:integration
 - `npm test`
 - `npm run test:integration`
 - `npm run test:types`
+- `npm run test:package-types`
 - `npm run example:subscribe-replay`
 - `npm run example:approval`
 - `npm run example:artifact-diff`
 - `npm run check`
+- `npm run check:release`
+
+## Release Validation Checklist
+
+Use this checklist before publishing or treating the package as the reference release:
+
+- `npm run build`
+- `npm test`
+- `npm run test:integration`
+- `npm run test:types`
+- `npm run test:package-types`
+- `npm run check`
+- `npm run check:release`
+
+`npm run check:release` adds the release-specific evidence on top of the normal package checks:
+
+- package self-reference type resolution through the published export map
+- runtime smoke verification of the root and subpath export boundaries
+- `npm pack --dry-run` tarball inspection for packaged docs and distributable assets
 
 ## Current Scope
 
@@ -426,4 +499,5 @@ Implemented in the foundation slice:
 Deferred to later slices:
 
 - dedicated auth hooks
-- release-readiness polish such as package publishing automation, release docs tightening, and any remaining production hardening gaps exposed by end-to-end use
+- publish automation beyond the documented manual release checks
+- richer extension-specific event parsing for consumers that want stricter streamed payload classification than the base transport layer provides

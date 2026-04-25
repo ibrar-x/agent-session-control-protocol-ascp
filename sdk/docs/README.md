@@ -37,6 +37,7 @@ This index keeps the SDK workspace navigable without relying on hidden chat cont
 - [`branches/typescript-sdk-client.md`](branches/typescript-sdk-client.md): detailed usage, wrapper-shape rationale, protocol-error mapping notes, verification evidence, limitations, and handoff notes for the TypeScript client branch
 - [`branches/typescript-sdk-replay.md`](branches/typescript-sdk-replay.md): detailed usage, replay-shape rationale, cursor-preservation notes, verification evidence, limitations, and handoff notes for the TypeScript replay branch
 - [`branches/typescript-sdk-examples-tests.md`](branches/typescript-sdk-examples-tests.md): detailed usage, end-to-end proof scope, example-structure rationale, verification evidence, limitations, and handoff notes for the TypeScript examples/tests branch
+- [`branches/typescript-sdk-release-readiness.md`](branches/typescript-sdk-release-readiness.md): final package-boundary rationale, versioning decision, release evidence, remaining tradeoffs, and Dart-planning handoff notes for the TypeScript release-readiness branch
 
 ## Prompt Starters
 
