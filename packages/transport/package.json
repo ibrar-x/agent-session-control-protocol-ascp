@@ -1,0 +1,6 @@
+{
+  "name": "@ascp/transport",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Placeholder shared transport package for the ASCP monorepo"
+}

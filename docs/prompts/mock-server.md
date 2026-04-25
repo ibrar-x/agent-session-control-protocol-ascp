@@ -19,15 +19,15 @@ Read these files before planning or implementation:
 1. `AGENTS.md`
 2. `plans.md`
 3. `docs/status.md`
-4. `ASCP_Protocol_Detailed_Spec_v0_1.md`
-5. `ASCP_Protocol_PRD_and_Build_Guide.md`
+4. `protocol/ASCP_Protocol_Detailed_Spec_v0_1.md`
+5. `protocol/ASCP_Protocol_PRD_and_Build_Guide.md`
 6. `README.md`
 7. `docs/repo-operating-system.md`
 
 Then read all upstream outputs that define the protocol behavior the mock must implement:
 
-- canonical schemas under `schema/`
-- request and response examples under `examples/`
+- canonical schemas under `protocol/schema/`
+- request and response examples under `protocol/examples/`
 - event fixtures
 - replay docs and fixtures
 - auth and approval docs and fixtures
@@ -64,7 +64,7 @@ Do not move ahead into:
 
 Create or update the assets needed for a usable protocol mock:
 
-- `mock-server/`
+- `services/mock-server/`
 - sample event streams
 - deterministic fixture data for host, runtime, session, approval, artifact, and diff cases
 - basic compatibility notes for the supported mock behavior

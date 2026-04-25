@@ -1,0 +1,6 @@
+{
+  "name": "@ascp/utils",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Placeholder shared utilities package for the ASCP monorepo"
+}

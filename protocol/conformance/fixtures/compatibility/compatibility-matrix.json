@@ -1,0 +1,170 @@
+{
+  "protocol_version": "0.1.0",
+  "cumulative": true,
+  "cross_cutting_evidence": [
+    {
+      "name": "schema_and_contract_validation",
+      "scenario_ids": [
+        "core-discovery-and-session-read",
+        "interactive-session-control"
+      ],
+      "validator_scripts": [
+        "../tooling/scripts/validate_method_contracts.sh",
+        "../tooling/scripts/validate_event_contracts.sh"
+      ]
+    },
+    {
+      "name": "auth_failure_handling",
+      "scenario_ids": [
+        "auth-failure-classification"
+      ],
+      "validator_scripts": [
+        "../tooling/scripts/validate_auth_semantics.sh"
+      ]
+    },
+    {
+      "name": "extension_ignore_behavior",
+      "scenario_ids": [
+        "extension-ignore-safe"
+      ],
+      "validator_scripts": [
+        "../tooling/scripts/validate_extension_semantics.sh"
+      ]
+    }
+  ],
+  "levels": [
+    {
+      "level": "ASCP Core Compatible",
+      "inherits": [],
+      "required_capability_flags": [
+        "session_list",
+        "stream_events"
+      ],
+      "required_methods": [
+        "capabilities.get",
+        "runtimes.list",
+        "sessions.list",
+        "sessions.get"
+      ],
+      "required_event_support": "EventEnvelope plus core observation events needed to observe session state",
+      "scenario_ids": [
+        "core-discovery-and-session-read"
+      ],
+      "validator_scripts": [
+        "../tooling/scripts/validate_method_contracts.sh",
+        "../tooling/scripts/validate_event_contracts.sh"
+      ]
+    },
+    {
+      "level": "ASCP Interactive",
+      "inherits": [
+        "ASCP Core Compatible"
+      ],
+      "required_capability_flags": [
+        "message_send",
+        "stream_events"
+      ],
+      "required_methods": [
+        "sessions.send_input",
+        "sessions.subscribe",
+        "sessions.unsubscribe"
+      ],
+      "required_method_one_of": [
+        [
+          "sessions.start",
+          "sessions.resume"
+        ]
+      ],
+      "required_event_support": "live event subscriptions and representative interactive transcript or control events",
+      "scenario_ids": [
+        "interactive-session-control"
+      ],
+      "validator_scripts": [
+        "../tooling/scripts/validate_method_contracts.sh",
+        "../tooling/scripts/validate_event_contracts.sh"
+      ]
+    },
+    {
+      "level": "ASCP Approval-Aware",
+      "inherits": [
+        "ASCP Interactive"
+      ],
+      "required_capability_flags": [
+        "approval_requests",
+        "approval_respond"
+      ],
+      "required_methods": [
+        "approvals.list",
+        "approvals.respond"
+      ],
+      "required_event_types": [
+        "approval.requested",
+        "approval.updated",
+        "approval.approved",
+        "approval.rejected",
+        "approval.expired"
+      ],
+      "scenario_ids": [
+        "approval-resolution"
+      ],
+      "validator_scripts": [
+        "../tooling/scripts/validate_auth_semantics.sh"
+      ]
+    },
+    {
+      "level": "ASCP Artifact-Aware",
+      "inherits": [
+        "ASCP Approval-Aware"
+      ],
+      "required_capability_flags": [
+        "artifacts",
+        "diffs"
+      ],
+      "required_methods": [
+        "artifacts.list"
+      ],
+      "required_method_one_of": [
+        [
+          "artifacts.get",
+          "diffs.get"
+        ]
+      ],
+      "required_event_types": [
+        "artifact.created",
+        "artifact.updated",
+        "diff.ready",
+        "diff.updated"
+      ],
+      "scenario_ids": [
+        "artifact-access"
+      ],
+      "validator_scripts": [
+        "../tooling/scripts/validate_auth_semantics.sh"
+      ]
+    },
+    {
+      "level": "ASCP Replay-Capable",
+      "inherits": [
+        "ASCP Artifact-Aware"
+      ],
+      "required_capability_flags": [
+        "replay"
+      ],
+      "required_methods": [
+        "sessions.subscribe"
+      ],
+      "required_replay_features": [
+        "from_seq or equivalent replay support",
+        "sync.snapshot",
+        "sync.replayed",
+        "documented snapshot versus replay boundaries"
+      ],
+      "scenario_ids": [
+        "replay-recovery"
+      ],
+      "validator_scripts": [
+        "../tooling/scripts/validate_replay_semantics.sh"
+      ]
+    }
+  ]
+}

@@ -6,13 +6,13 @@ This repository is a protocol-first workspace for the **Agent Session & Control 
 
 Treat these two files as the current source material:
 
-1. `ASCP_Protocol_Detailed_Spec_v0_1.md`
-2. `ASCP_Protocol_PRD_and_Build_Guide.md`
+1. `protocol/ASCP_Protocol_Detailed_Spec_v0_1.md`
+2. `protocol/ASCP_Protocol_PRD_and_Build_Guide.md`
 
 If they disagree, prefer:
 
-1. `ASCP_Protocol_Detailed_Spec_v0_1.md` for exact contracts, payloads, schemas, and compliance behavior
-2. `ASCP_Protocol_PRD_and_Build_Guide.md` for scope, sequencing, design intent, and repository shape
+1. `protocol/ASCP_Protocol_Detailed_Spec_v0_1.md` for exact contracts, payloads, schemas, and compliance behavior
+2. `protocol/ASCP_Protocol_PRD_and_Build_Guide.md` for scope, sequencing, design intent, and repository shape
 
 ASCP is not a product UI spec. It is not a model API. It is not an agent-planning spec. It is a vendor-neutral control plane for discovering, observing, resuming, steering, and approving long-running agent sessions.
 
@@ -310,11 +310,14 @@ As this repository matures, prefer a structure close to:
 README.md
 AGENTS.md
 plans.md
+protocol/
+packages/
+sdks/
+adapters/
+apps/
+services/
+tooling/
 docs/
-spec/ or schema/
-examples/
-conformance/
-mock-server/ or mock/
 .agents/skills/
 ```
 

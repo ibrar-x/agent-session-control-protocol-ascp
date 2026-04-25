@@ -1,0 +1,6 @@
+{
+  "name": "@ascp/auth",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Placeholder shared auth package for the ASCP monorepo"
+}

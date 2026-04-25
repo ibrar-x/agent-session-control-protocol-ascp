@@ -19,17 +19,17 @@ Read these files before planning or implementation:
 1. `AGENTS.md`
 2. `plans.md`
 3. `docs/status.md`
-4. `ASCP_Protocol_Detailed_Spec_v0_1.md`
-5. `ASCP_Protocol_PRD_and_Build_Guide.md`
+4. `protocol/ASCP_Protocol_Detailed_Spec_v0_1.md`
+5. `protocol/ASCP_Protocol_PRD_and_Build_Guide.md`
 6. `README.md`
 7. `docs/repo-operating-system.md`
 
 Then read upstream outputs if they exist:
 
-- `schema/ascp-core.schema.json`
+- `protocol/schema/ascp-core.schema.json`
 - any capability and error schemas needed by event references
 - method and example docs only where they constrain event-related fields
-- prior example fixtures under `examples/`
+- prior example fixtures under `protocol/examples/`
 
 When reading the specs, focus first on:
 
@@ -61,7 +61,7 @@ Do not move ahead into:
 
 Create or update the assets needed to define event contracts precisely:
 
-- `schema/ascp-events.schema.json`
+- `protocol/schema/ascp-events.schema.json`
 - event fixtures for:
   - session lifecycle events
   - run lifecycle events
@@ -76,9 +76,9 @@ Create or update the assets needed to define event contracts precisely:
 
 Prefer repository locations such as:
 
-- `schema/`
-- `examples/events/`
-- `spec/` or `docs/` for explanatory event notes
+- `protocol/schema/`
+- `protocol/examples/events/`
+- `protocol/spec/` or `docs/` for explanatory event notes
 
 ## Acceptance Criteria
 

@@ -19,17 +19,17 @@ Read these files before planning or implementation:
 1. `AGENTS.md`
 2. `plans.md`
 3. `docs/status.md`
-4. `ASCP_Protocol_Detailed_Spec_v0_1.md`
-5. `ASCP_Protocol_PRD_and_Build_Guide.md`
+4. `protocol/ASCP_Protocol_Detailed_Spec_v0_1.md`
+5. `protocol/ASCP_Protocol_PRD_and_Build_Guide.md`
 6. `README.md`
 7. `docs/repo-operating-system.md`
 
 Then read the outputs from the schema foundation workstream if they exist:
 
-- `schema/ascp-core.schema.json`
-- `schema/ascp-capabilities.schema.json`
-- `schema/ascp-errors.schema.json`
-- any core examples under `examples/`
+- `protocol/schema/ascp-core.schema.json`
+- `protocol/schema/ascp-capabilities.schema.json`
+- `protocol/schema/ascp-errors.schema.json`
+- any core examples under `protocol/examples/`
 - any supporting docs created to explain schema assumptions
 
 When reading the specs, focus first on:
@@ -88,10 +88,10 @@ Create or update the assets needed to make method contracts explicit and impleme
 
 Prefer repository locations that keep normative material separate and explicit, such as:
 
-- `spec/`
-- `examples/requests/`
-- `examples/responses/`
-- `examples/errors/`
+- `protocol/spec/`
+- `protocol/examples/requests/`
+- `protocol/examples/responses/`
+- `protocol/examples/errors/`
 
 ## Acceptance Criteria
 

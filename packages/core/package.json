@@ -1,0 +1,6 @@
+{
+  "name": "@ascp/core",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Placeholder shared core package for the ASCP monorepo"
+}

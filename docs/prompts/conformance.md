@@ -19,15 +19,15 @@ Read these files before planning or implementation:
 1. `AGENTS.md`
 2. `plans.md`
 3. `docs/status.md`
-4. `ASCP_Protocol_Detailed_Spec_v0_1.md`
-5. `ASCP_Protocol_PRD_and_Build_Guide.md`
+4. `protocol/ASCP_Protocol_Detailed_Spec_v0_1.md`
+5. `protocol/ASCP_Protocol_PRD_and_Build_Guide.md`
 6. `README.md`
 7. `docs/repo-operating-system.md`
 
 Then read all upstream protocol outputs that already exist:
 
-- `schema/`
-- `examples/`
+- `protocol/schema/`
+- `protocol/examples/`
 - `docs/` protocol notes related to replay, auth, extensions, and compatibility
 - any prior compatibility documentation
 
@@ -62,9 +62,9 @@ Do not move ahead into:
 
 Create or update the assets needed to make compatibility claims verifiable:
 
-- `conformance/fixtures/`
-- `conformance/validators/`
-- `conformance/tests/`
+- `protocol/conformance/fixtures/`
+- `protocol/conformance/validators/`
+- `protocol/conformance/tests/`
 - compatibility matrix for:
   - `ASCP Core Compatible`
   - `ASCP Interactive`

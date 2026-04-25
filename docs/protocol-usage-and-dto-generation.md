@@ -43,9 +43,9 @@ There are several workable approaches depending on the target language.
 Use [`json-schema-to-typescript`](https://github.com/bcherny/json-schema-to-typescript) when you want interfaces or types from the published schema files.
 
 ```bash
-npx json-schema-to-typescript schema/ascp-core.schema.json > generated/ascp-core.d.ts
-npx json-schema-to-typescript schema/ascp-methods.schema.json > generated/ascp-methods.d.ts
-npx json-schema-to-typescript schema/ascp-events.schema.json > generated/ascp-events.d.ts
+npx json-schema-to-typescript protocol/schema/ascp-core.schema.json > generated/ascp-core.d.ts
+npx json-schema-to-typescript protocol/schema/ascp-methods.schema.json > generated/ascp-methods.d.ts
+npx json-schema-to-typescript protocol/schema/ascp-events.schema.json > generated/ascp-events.d.ts
 ```
 
 ### Multi-language DTOs
@@ -53,8 +53,8 @@ npx json-schema-to-typescript schema/ascp-events.schema.json > generated/ascp-ev
 Use [`quicktype`](https://github.com/glideapps/quicktype) when you need DTOs for multiple languages from the same schema sources.
 
 ```bash
-quicktype --src schema/ascp-core.schema.json --src-lang schema --lang typescript --out generated/ascp-core.ts
-quicktype --src schema/ascp-events.schema.json --src-lang schema --lang swift --out generated/ASCPEvents.swift
+quicktype --src protocol/schema/ascp-core.schema.json --src-lang schema --lang typescript --out generated/ascp-core.ts
+quicktype --src protocol/schema/ascp-events.schema.json --src-lang schema --lang swift --out generated/ASCPEvents.swift
 ```
 
 ### Python models
@@ -62,8 +62,8 @@ quicktype --src schema/ascp-events.schema.json --src-lang schema --lang swift --
 Use [`datamodel-code-generator`](https://github.com/koxudaxi/datamodel-code-generator) when you want Pydantic models from the schema files.
 
 ```bash
-datamodel-codegen --input schema/ascp-core.schema.json --input-file-type jsonschema --output generated/ascp_core_models.py
-datamodel-codegen --input schema/ascp-methods.schema.json --input-file-type jsonschema --output generated/ascp_method_models.py
+datamodel-codegen --input protocol/schema/ascp-core.schema.json --input-file-type jsonschema --output generated/ascp_core_models.py
+datamodel-codegen --input protocol/schema/ascp-methods.schema.json --input-file-type jsonschema --output generated/ascp_method_models.py
 ```
 
 ## Practical DTO Strategy
@@ -81,8 +81,8 @@ The repository uses `$defs` heavily. Some generators emit one file per root sche
 
 ## Recommended Repository Usage
 
-- use `examples/` for golden sample payloads during consumer development
-- use `conformance/` to verify compatibility claims
-- use `mock-server/` when you want a deterministic executable surface for client integration work
+- use `protocol/examples/` for golden sample payloads during consumer development
+- use `protocol/conformance/` to verify compatibility claims
+- use `services/mock-server/` when you want a deterministic executable surface for client integration work
 
 This keeps the protocol source of truth in the schemas and specs, while generated DTOs remain a convenience layer rather than a competing definition of ASCP.

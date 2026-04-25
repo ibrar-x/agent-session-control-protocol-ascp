@@ -20,14 +20,14 @@ Read these files before planning or implementation:
 1. `AGENTS.md`
 2. `plans.md`
 3. `docs/status.md`
-4. `ASCP_Protocol_Detailed_Spec_v0_1.md`
-5. `ASCP_Protocol_PRD_and_Build_Guide.md`
+4. `protocol/ASCP_Protocol_Detailed_Spec_v0_1.md`
+5. `protocol/ASCP_Protocol_PRD_and_Build_Guide.md`
 6. `README.md`
 7. `docs/repo-operating-system.md`
 
 Then read upstream outputs if they exist:
 
-- canonical schemas under `schema/`
+- canonical schemas under `protocol/schema/`
 - method contract outputs
 - event contract outputs
 - capability document outputs
@@ -72,8 +72,8 @@ Create or update the assets needed to make extension handling explicit:
 Prefer repository locations such as:
 
 - `docs/`
-- `examples/`
-- `conformance/fixtures/`
+- `protocol/examples/`
+- `protocol/conformance/fixtures/`
 
 ## Acceptance Criteria
 

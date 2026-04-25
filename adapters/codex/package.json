@@ -1,0 +1,6 @@
+{
+  "name": "@ascp/adapter-codex",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Placeholder Codex adapter package for the ASCP monorepo"
+}

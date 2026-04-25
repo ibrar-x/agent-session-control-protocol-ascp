@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-26 - Production-grade monorepo restructure
+
+- Branch: `branch-ascp-monorepo-structure`
+- Commit: `not committed`
+- Summary: converted the repository into the requested monorepo layout by moving protocol truth into `protocol/`, SDKs into `sdks/`, the reference client into `apps/reference-client/`, the mock server into `services/mock-server/`, adding root workspace scaffolding, adding placeholder package and adapter boundaries, and updating scripts/tests/docs to execute from the new structure
+- Documentation updated: `plans.md`, `README.md`, `AGENTS.md`, `docs/status.md`, `docs/README.md`, `docs/project-context-reference.md`, `docs/architecture/system-design.md`, `docs/architecture/dependency-graph.md`, `protocol/ASCP_Protocol_PRD_and_Build_Guide.md`, `protocol/ASCP_Protocol_Detailed_Spec_v0_1.md`, `packages/README.md`, `adapters/README.md`, `apps/README.md`, `services/README.md`, `tooling/README.md`
+- Next likely step: commit the validated migration, push `branch-ascp-monorepo-structure`, merge it into `main`, push `main`, and continue future shared-package, adapter, or app work from the monorepo baseline
+
 ### 2026-04-26 - Codex adapter planning pack
 
 - Branch: `feature/codex-adapter-planning`
@@ -35,7 +43,7 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 - Branch: `feature/reference-client`
 - Commit: `not committed`
 - Summary: added a deterministic downstream ASCP reference client over the existing stdio mock surface, with schema-validated discovery, session inspection, subscribe/replay, approval/artifact/diff reads, a repeatable demo summary, and a branch-specific validator
-- Documentation updated: `plans.md`, `docs/status.md`, `README.md`, `docs/README.md`, `reference-client/README.md`
+- Documentation updated: `plans.md`, `docs/status.md`, `README.md`, `docs/README.md`, `apps/reference-client/README.md`
 - Next likely step: merge the finished downstream proof client into `main` and leave the repository clean on updated `main`
 
 ### 2026-04-22 - Repository close-out
@@ -51,7 +59,7 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 - Branch: `feature/mock-server`
 - Commit: `bd4472a`
 - Summary: added a deterministic fixture-backed ASCP mock server over line-oriented stdio JSON-RPC, seeded host/runtime/session/approval/artifact/diff data, replay-aware sample event streams, a repeatable mock validator, a docs index, and a protocol usage plus DTO-generation guide
-- Documentation updated: `plans.md`, `docs/status.md`, `README.md`, `docs/README.md`, `docs/protocol-usage-and-dto-generation.md`, `mock-server/README.md`
+- Documentation updated: `plans.md`, `docs/status.md`, `README.md`, `docs/README.md`, `docs/protocol-usage-and-dto-generation.md`, `services/mock-server/README.md`
 - Next likely step: build a protocol-consumer reference or deeper interoperability checks on top of the mock without reopening the frozen ASCP v0.1 contracts
 
 ### 2026-04-22 - Conformance
@@ -59,7 +67,7 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 - Branch: `feature/conformance`
 - Commit: `not committed`
 - Summary: added a normative compatibility spec, a machine-readable compatibility matrix, golden example manifests spanning requests, responses, events, replay flows, auth failures, and extension handling, and a repeatable top-level conformance harness that composes the existing method, event, replay, auth, and extension validators into evidence-backed ASCP compatibility claims
-- Documentation updated: `plans.md`, `docs/status.md`, `spec/compatibility.md`
+- Documentation updated: `plans.md`, `docs/status.md`, `protocol/spec/compatibility.md`
 - Next likely step: build `feature/mock-server` against the frozen compatibility matrix and golden conformance fixtures instead of redefining protocol behavior in the mock
 
 ### 2026-04-22 - Extensions
@@ -67,7 +75,7 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 - Branch: `feature/extensions`
 - Commit: `not committed`
 - Summary: added the normative extensions spec, documented namespacing and capability advertisement rules, created namespaced method, event, field, and capability examples, and added a repeatable validator plus ignore-behavior fixtures that make the open-versus-closed schema boundary explicit for later conformance work
-- Documentation updated: `plans.md`, `docs/status.md`, `spec/extensions.md`, `docs/superpowers/specs/2026-04-22-extensions-design.md`, `docs/superpowers/plans/2026-04-22-extensions.md`
+- Documentation updated: `plans.md`, `docs/status.md`, `protocol/spec/extensions.md`, `docs/superpowers/specs/2026-04-22-extensions-design.md`, `docs/superpowers/plans/2026-04-22-extensions.md`
 - Next likely step: build `feature/conformance` or `feature/mock-server` using the frozen extension rules instead of reopening namespacing semantics
 
 ### 2026-04-22 - Auth and approvals
@@ -75,7 +83,7 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 - Branch: `feature/auth-approvals`
 - Commit: `not committed`
 - Summary: added the normative auth and approvals spec, documented the method scope matrix and audit-attribution hooks, created approval lifecycle fixtures for approved, rejected, and expired outcomes, expanded auth failure examples to distinguish `UNAUTHORIZED` from `FORBIDDEN`, and added a repeatable validator for auth-specific invariants against the frozen method and event contracts
-- Documentation updated: `plans.md`, `docs/status.md`, `spec/auth.md`, `docs/superpowers/specs/2026-04-22-auth-approvals-design.md`, `docs/superpowers/plans/2026-04-22-auth-approvals.md`
+- Documentation updated: `plans.md`, `docs/status.md`, `protocol/spec/auth.md`, `docs/superpowers/specs/2026-04-22-auth-approvals-design.md`, `docs/superpowers/plans/2026-04-22-auth-approvals.md`
 - Next likely step: build `feature/extensions` or widen into the broader `conformance` slice using the auth and approval rules from this branch as fixed inputs
 
 ### 2026-04-22 - Replay semantics
@@ -83,7 +91,7 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 - Branch: `feature/replay-semantics`
 - Commit: `not committed`
 - Summary: added the normative replay semantics spec, created replay-focused conformance fixtures for snapshot, from-seq, from-event-id, opaque-cursor, and retention-limited recovery paths, and added a repeatable validator that checks replay-specific ordering, boundary, and fallback rules against the frozen method and event contracts
-- Documentation updated: `plans.md`, `docs/status.md`, `spec/replay.md`, `docs/superpowers/specs/2026-04-22-replay-semantics-design.md`, `docs/superpowers/plans/2026-04-22-replay-semantics.md`
+- Documentation updated: `plans.md`, `docs/status.md`, `protocol/spec/replay.md`, `docs/superpowers/specs/2026-04-22-replay-semantics-design.md`, `docs/superpowers/plans/2026-04-22-replay-semantics.md`
 - Next likely step: build `feature/auth-and-approvals` or widen into the broader `conformance` slice using the replay rules and replay fixtures as fixed inputs
 
 ### 2026-04-22 - Event contracts
@@ -91,7 +99,7 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 - Branch: `feature/event-contracts`
 - Commit: `not committed`
 - Summary: added the ASCP event-contract schema, one schema-valid `EventEnvelope` fixture for every core event type, a normative event support spec, and a repeatable validator that confirms the full event surface against the frozen schema foundation
-- Documentation updated: `plans.md`, `docs/status.md`, `spec/events.md`, `docs/superpowers/specs/2026-04-22-event-contracts-design.md`, `docs/superpowers/plans/2026-04-22-event-contracts.md`
+- Documentation updated: `plans.md`, `docs/status.md`, `protocol/spec/events.md`, `docs/superpowers/specs/2026-04-22-event-contracts-design.md`, `docs/superpowers/plans/2026-04-22-event-contracts.md`
 - Next likely step: build `feature/replay-semantics` from the locked event stream surface, without redefining event payload shapes
 
 ### 2026-04-22 - Method contracts
@@ -99,7 +107,7 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 - Branch: `feature/method-contracts`
 - Commit: `not committed`
 - Summary: added the ASCP method-contract schema, a normative method surface spec, and request/success/error example envelopes for every core method; documented capability gating and method-specific error mapping; and added a repeatable validator that confirms the full method-contract example set against the shared schema foundation
-- Documentation updated: `plans.md`, `docs/status.md`, `spec/methods.md`
+- Documentation updated: `plans.md`, `docs/status.md`, `protocol/spec/methods.md`
 - Next likely step: build `feature/event-contracts` from the frozen method triggers and shared `EventEnvelope`, without widening back into method shape changes
 ### 2026-04-21 - Schema foundation
 
