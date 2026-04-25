@@ -1,0 +1,25 @@
+name: ascp_sdk_dart
+description: Schema-led Dart SDK foundation for the Agent Session & Control Protocol (ASCP).
+version: 0.1.0
+homepage: https://github.com/ibrar-x/agent-session-control-protocol-ascp/tree/main/sdk/dart
+repository: https://github.com/ibrar-x/agent-session-control-protocol-ascp
+issue_tracker: https://github.com/ibrar-x/agent-session-control-protocol-ascp/issues
+topics:
+  - ascp
+  - sdk
+  - json-rpc
+  - agent-session-control-protocol
+
+environment:
+  sdk: ">=3.8.0 <4.0.0"
+
+dependencies:
+  freezed_annotation: ^3.1.0
+  json_annotation: ^4.11.0
+
+dev_dependencies:
+  build_runner: ^2.7.0
+  freezed: ^3.2.3
+  json_serializable: ^6.11.0
+  lints: ^6.0.0
+  test: ^1.26.0

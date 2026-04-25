@@ -60,7 +60,7 @@ Conflict rule:
 
 ## Current Status
 
-The workspace is bootstrapped for SDK development and now contains the full TypeScript reference package plus a dedicated Dart planning handoff.
+The workspace is bootstrapped for SDK development and now contains the full TypeScript reference package plus a Dart foundation package built from the dedicated Dart planning handoff.
 
 Completed local outputs currently include:
 
@@ -80,6 +80,7 @@ Completed local outputs currently include:
 - end-to-end examples and integration tests against the upstream mock server
 - release-readiness documentation that locks the TypeScript package boundary as the first downstream reference package
 - a Dart planning branch reference that defines the Dart package scope, layout, model and codec strategy, and replay-aware implementation handoff
+- a Dart foundation package with installable metadata, explicit library seams, generated immutable DTOs, shared envelopes, and example-backed codec tests
 
 ## Planned Workstreams
 
@@ -207,19 +208,34 @@ Expected outputs:
 Status:
 - complete on `feature/dart-sdk-planning`
 
-### 10. Dart SDK
+### 10. Dart SDK foundation
 
 Purpose:
-- create a second consumer package after TypeScript proves the downstream shape
+- scaffold the second downstream SDK package before executable client behavior is added
 
 Expected outputs:
-- Dart package scaffold and typed API
+- installable Dart package scaffold
+- generated DTO and codec baseline
+- explicit library seams for later executable work
+- package-level verification guidance
+
+Status:
+- complete on `feature/dart-sdk-foundation`
+
+### 11. Dart SDK executable surface
+
+Purpose:
+- add the typed client, subscriptions, replay helpers, validation helpers, and justified transport implementations on top of the stabilized Dart package
+
+Expected outputs:
+- typed method wrappers
 - stream-friendly subscription surface
 - replay helpers
+- validation helpers
 - integration guidance for Flutter consumers
 
 Status:
-- next likely implementation slice is `feature/dart-sdk-foundation`
+- next likely implementation slice is `feature/dart-sdk-client`
 
 ## Local Directory Layout
 

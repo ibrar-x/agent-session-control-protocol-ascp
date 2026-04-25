@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-25 - Dart SDK foundation
+
+- Branch: `feature/dart-sdk-foundation`
+- Commit: `not committed`
+- Summary: scaffolded the Dart SDK package with installable metadata, explicit root and secondary libraries, generated immutable core DTOs and shared envelopes, a typed subscription-success plus sync-snapshot baseline, and example-backed codec verification without widening into executable client or transport behavior
+- Documentation updated: `plans.md`, `README.md`, `docs/README.md`, `docs/project-context-reference.md`, `docs/sdk-build-roadmap.md`, `docs/status.md`, `docs/branches/dart-sdk-foundation.md`, `dart/README.md`
+- Next likely step: create `feature/dart-sdk-client` from updated `main` and add typed methods, subscription lifecycle handling, replay helpers, validation helpers, and the first justified transport implementations on top of the current Dart package layout
+
 ### 2026-04-25 - Dart SDK planning refresh
 
 - Branch: `feature/dart-sdk-planning`

@@ -1,56 +1,61 @@
 # ASCP Dart SDK
 
-This directory is the planned home for the ASCP Dart SDK package.
+This package is the Dart foundation for ASCP.
 
-The TypeScript SDK is now the first stable downstream reference package. Dart should follow it intentionally, not as a Flutter-only side branch and not by copying Node-specific packaging choices.
+The current package state is intentionally limited to foundation work: installable package metadata, explicit library seams, generated immutable models, shared JSON envelopes, selected typed method and event payloads, and example-backed codec tests.
 
-Use these files before starting implementation:
+For the branch-level rationale and handoff context, see:
 
-1. `../plans.md`
-2. `../docs/status.md`
-3. `../docs/branches/dart-sdk-planning.md`
-4. `../docs/branches/typescript-sdk-release-readiness.md`
-5. `../../ASCP_Dart_SDK_Implementation_Plan.md`
-6. `../../schema/`
-7. `../../spec/`
-8. `../../examples/`
+- `../docs/branches/dart-sdk-planning.md`
+- `../docs/branches/dart-sdk-foundation.md`
 
-## Confirmed Package Scope
+## Install
 
-The Dart SDK should provide:
+Requirements:
 
-- typed ASCP models
-- method wrappers
-- event subscription support
+- Dart SDK `>=3.8.0 <4.0.0`
+
+Install dependencies locally:
+
+```bash
+dart pub get
+```
+
+Generate model and codec code:
+
+```bash
+dart run build_runner build --delete-conflicting-outputs
+```
+
+Verify the foundation branch:
+
+```bash
+dart analyze
+dart test
+```
+
+## Current Scope
+
+This foundation package currently provides:
+
+- generated immutable core DTOs for ASCP entities such as `Host`, `Runtime`, `Session`, `Run`, `ApprovalRequest`, `Artifact`, and `DiffSummary`
+- shared JSON-RPC and event-envelope models
+- a typed `sessions.subscribe` success result model
+- a typed `sync.snapshot` event model
+- one root library plus explicit secondary libraries for later client, transport, validation, replay, model, method, event, and error work
+
+This branch intentionally does not provide:
+
+- live transport implementations
+- typed method wrappers for the full ASCP method set
 - replay helpers
-- transport abstraction
-- validation hooks
-- auth-hook seams later
-- Flutter-friendly async ergonomics without Flutter UI code
+- runtime validation helpers
+- Flutter UI concerns or app-level networking policy
 
-The Dart SDK should not become:
-
-- a Flutter UI package
-- app-level networking policy
-- local cache or state-management glue
-- a protocol-redefinition layer
-
-## Planned Package Direction
-
-The chosen direction from `feature/dart-sdk-planning` is:
-
-- one pure Dart package named `ascp_sdk_dart`
-- one root happy-path library at `package:ascp_sdk_dart/ascp_sdk_dart.dart`
-- explicit secondary libraries for `client`, `replay`, `transport`, `validation`, `models`, `methods`, `events`, and `errors`
-- generated immutable DTOs plus hand-authored envelope dispatch and public barrel files
-- replay helpers layered above the client seam, not baked into transport
-- raw event-envelope preservation for unknown extension events
-
-Planned layout:
+## Package Layout
 
 ```text
 dart/
-  README.md
   pubspec.yaml
   analysis_options.yaml
   lib/
@@ -64,25 +69,97 @@ dart/
     events.dart
     errors.dart
     src/
+      auth/
       client/
+      errors/
+      events/
+      methods/
+      models/
       replay/
       transport/
       validation/
-      codecs/
-      models/
-      methods/
-      events/
-      errors/
-      auth/
   test/
   example/
   tool/
 ```
 
-## First Implementation Branch
+Current public libraries:
 
-The first implementation branch should be `feature/dart-sdk-foundation`.
+- `package:ascp_sdk_dart/ascp_sdk_dart.dart`: root foundation exports for models, methods, events, and errors
+- `package:ascp_sdk_dart/models.dart`
+- `package:ascp_sdk_dart/methods.dart`
+- `package:ascp_sdk_dart/events.dart`
+- `package:ascp_sdk_dart/errors.dart`
+- `package:ascp_sdk_dart/client.dart`
+- `package:ascp_sdk_dart/transport.dart`
+- `package:ascp_sdk_dart/validation.dart`
+- `package:ascp_sdk_dart/replay.dart`
 
-That branch should scaffold the package, the library entrypoints, the generated model and codec workflow, shared envelope and error types, and example-backed baseline tests.
+The `client`, `transport`, `validation`, and `replay` libraries are foundation-only markers in this branch so later implementation can extend the already-published seams without moving package boundaries.
 
-For the full rationale, tradeoffs, alternatives, replay plan, and open assumptions, read `../docs/branches/dart-sdk-planning.md`.
+## Model And Codec Strategy
+
+The foundation follows the direction locked in `feature/dart-sdk-planning`:
+
+- use `freezed` for immutable value types
+- use `json_serializable` for JSON conversion
+- keep public barrel files hand-authored
+- keep ASCP field names unchanged instead of introducing Dart aliases
+- keep the raw event-envelope shape available at the root surface
+- add typed method and event dispatch incrementally instead of generating every protocol layer at once
+
+This means the package stays close to the upstream ASCP schema and example assets while still fitting normal Dart and Flutter-adjacent tooling.
+
+## Example
+
+```dart
+import 'package:ascp_sdk_dart/ascp_sdk_dart.dart';
+
+void main() {
+  final session = AscpSession.fromJson(<String, Object?>{
+    'id': 'sess_abc123',
+    'runtime_id': 'codex_local',
+    'status': 'running',
+    'created_at': '2026-04-21T10:00:00Z',
+    'updated_at': '2026-04-21T10:12:00Z',
+  });
+
+  final event = AscpEventEnvelope.fromJson(<String, Object?>{
+    'id': 'evt_9001',
+    'type': 'message.assistant.delta',
+    'ts': '2026-04-21T10:07:00Z',
+    'session_id': session.id,
+    'payload': <String, Object?>{
+      'message_id': 'msg_12',
+      'delta': 'I found the failing assertion...'
+    },
+  });
+
+  print(session.toJson());
+  print(event.toJson());
+}
+```
+
+## Upstream Inputs
+
+This package depends on the upstream ASCP assets:
+
+- `../../../ASCP_Dart_SDK_Implementation_Plan.md`
+- `../../ASCP_Protocol_Detailed_Spec_v0_1.md`
+- `../../schema/`
+- `../../spec/`
+- `../../examples/`
+
+The schema, spec, and example assets remain the protocol truth. The Dart package is a downstream translation layer, not a place to redefine ASCP semantics.
+
+## Next Branch
+
+The expected next branch is `feature/dart-sdk-client`.
+
+That branch should preserve the current package layout and code-generation strategy, then add:
+
+- typed method wrappers
+- subscription lifecycle handling
+- replay helpers
+- validation helpers
+- the first justified transport implementations
