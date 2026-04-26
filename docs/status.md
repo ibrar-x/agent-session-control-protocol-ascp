@@ -22,6 +22,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 - Documentation updated: `plans.md`, `docs/status.md`
 - Next likely step: add command dispatch over the existing adapter service, then wire the executable wrapper and interactive flow
 
+### 2026-04-26 - Codex live smoke script task 3
+
+- Branch: `feature/codex-live-smoke-script`
+- Commit: `not committed`
+- Summary: completed the dispatch slice for the Codex live smoke script by adding typed dependency-based command dispatch for discovery, list, get, resume, and send-input, tightening the dependency contract so branch-specific dispatch stays testable, and extending focused coverage to the interactive early return plus all supported command branches
+- Documentation updated: `plans.md`, `docs/status.md`
+- Next likely step: add the executable wrapper, package script alias, and interactive terminal flow on top of the tested `live-smoke.ts` module
+
 ### 2026-04-26 - Codex adapter initialization hotfix
 
 - Branch: `feature/codex-adapter-init-fix`

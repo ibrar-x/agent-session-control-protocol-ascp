@@ -79,4 +79,4 @@ The task is done only when all of the following are true:
 
 ## Next Likely Step
 
-Implement Task 3 and Task 4 in `docs/superpowers/plans/2026-04-26-codex-live-smoke-script.md`: add dispatch over the adapter service, then wire the executable wrapper and interactive flow.
+Implement Task 4 in `docs/superpowers/plans/2026-04-26-codex-live-smoke-script.md`: wire the executable wrapper and interactive flow on top of the now-tested parser and dispatch module.
