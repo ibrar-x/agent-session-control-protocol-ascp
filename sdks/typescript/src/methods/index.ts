@@ -1,2 +1,2 @@
 export * from "./envelopes.js";
-export type * from "./types.js";
+export * from "./types.js";

@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-26 - Reusable ASCP host service with Codex-first web console
+
+- Branch: `branch-ascp-host-service`
+- Commit: `not committed`
+- Summary: added a reusable local WebSocket ASCP host service package with push-style event delivery, connected the host to the existing Codex adapter through a truthful runtime binding plus launch script, made the TypeScript SDK browser-safe for the host console path by loading validation schemas without `node:fs` and exporting a browser transport entrypoint, and added a separate Codex-first browser console for real-time session inspection, live event streaming, input, approvals, artifacts, and diffs without touching the user’s existing `apps/web` work
+- Documentation updated: `plans.md`, `docs/status.md`, `packages/host-service/README.md`, `apps/host-console/README.md`, `adapters/codex/README.md`
+- Next likely step: run the Codex host and browser console together against a live session, then decide whether the next branch should add auth/multi-client boundaries or widen the host registration surface for additional runtimes
+
 ### 2026-04-26 - Codex live smoke coverage for remaining adapter surfaces
 
 - Branch: `branch-codex-live-smoke-surfaces`

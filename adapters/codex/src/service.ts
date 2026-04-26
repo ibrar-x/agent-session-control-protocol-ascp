@@ -59,7 +59,7 @@ interface CodexTurnStartResponse {
   turn?: CodexTurn;
 }
 
-interface CodexServiceClient {
+export interface CodexServiceClient {
   threadList(limit?: number): Promise<unknown>;
   threadRead(threadId: string, options?: { includeTurns?: boolean }): Promise<unknown>;
   threadResume(threadId: string): Promise<unknown>;
@@ -364,6 +364,9 @@ export class CodexAdapterService {
   private readonly sessionSeq = new Map<string, number>();
   private readonly approvals = new Map<string, ApprovalRequest>();
   private readonly approvalIdsBySession = new Map<string, Set<string>>();
+  private readonly eventListeners = new Set<
+    (event: EventEnvelope<Record<string, unknown>>) => void
+  >();
   private readonly approvalRespondMethods: string[];
   private readonly removeNotificationListener: (() => void) | null;
   private nextSubscriptionOrdinal = 1;
@@ -382,6 +385,15 @@ export class CodexAdapterService {
   close(): void {
     this.removeNotificationListener?.();
     this.subscriptions.clear();
+    this.eventListeners.clear();
+  }
+
+  onEvent(listener: (event: EventEnvelope<Record<string, unknown>>) => void): () => void {
+    this.eventListeners.add(listener);
+
+    return () => {
+      this.eventListeners.delete(listener);
+    };
   }
 
   drainSubscriptionEvents(subscriptionId: string, limit?: number): EventEnvelope<Record<string, unknown>>[] {
@@ -868,6 +880,10 @@ export class CodexAdapterService {
       if (subscription.sessionId === sequenced.session_id) {
         subscription.queue.push(sequenced);
       }
+    }
+
+    for (const listener of this.eventListeners) {
+      listener(sequenced);
     }
   }
 

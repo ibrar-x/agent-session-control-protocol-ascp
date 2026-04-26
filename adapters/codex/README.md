@@ -40,6 +40,37 @@ bash ../../tooling/scripts/validate_codex_adapter.sh
 npm --workspace @ascp/adapter-codex run check
 ```
 
+## Local WebSocket host and browser console
+
+The adapter now includes a Codex-backed launch path for the reusable local ASCP WebSocket host service.
+
+Start the host:
+
+```bash
+npm --workspace @ascp/adapter-codex run host
+```
+
+The host prints a JSON object with its WebSocket URL and defaults to `ws://127.0.0.1:8765`. It is intentionally local-only in this branch: single-user, no auth, no multi-client security boundary yet.
+
+Start the separate Codex-first browser console:
+
+```bash
+npm --workspace @ascp/app-host-console run dev
+```
+
+The console exercises:
+
+- `capabilities.get`
+- `sessions.list`
+- `sessions.get`
+- `sessions.subscribe`
+- `sessions.send_input`
+- `approvals.list` and `approvals.respond`
+- `artifacts.list` and `artifacts.get`
+- `diffs.get`
+
+This browser path uses the TypeScript SDK browser websocket transport rather than a one-off client, so it is a real SDK-backed proof of the hosted ASCP surface.
+
 ## Live runtime smoke testing
 
 The package includes a checked-in live smoke script over the real `codex app-server`.

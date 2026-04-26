@@ -4,3 +4,6 @@ __pycache__/
 adapters/codex/dist/
 adapters/codex/node_modules/
 node_modules/
+packages/host-service/dist/
+apps/host-console/dist/
+apps/web/

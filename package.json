@@ -6,13 +6,13 @@
     "packages/*",
     "sdks/typescript",
     "adapters/*",
-    "apps/web"
+    "apps/*"
   ],
   "scripts": {
     "build": "turbo run build",
     "test": "turbo run test",
     "lint": "turbo run lint",
-    "check": "npm run validate:protocol && npm run validate:mock && npm run validate:reference-client && npm --workspace sdks/typescript run check",
+    "check": "npm run validate:protocol && npm run validate:mock && npm run validate:reference-client && npm --workspace sdks/typescript run check && npm --workspace @ascp/host-service run check && npm --workspace @ascp/app-host-console run build",
     "validate:protocol": "bash tooling/scripts/validate_method_contracts.sh && bash tooling/scripts/validate_event_contracts.sh && bash tooling/scripts/validate_replay_semantics.sh && bash tooling/scripts/validate_auth_semantics.sh && bash tooling/scripts/validate_extension_semantics.sh && bash tooling/scripts/validate_conformance.sh",
     "validate:mock": "bash tooling/scripts/validate_mock_server.sh",
     "validate:reference-client": "bash tooling/scripts/validate_reference_client.sh"

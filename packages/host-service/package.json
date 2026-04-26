@@ -1,5 +1,5 @@
 {
-  "name": "@ascp/adapter-codex",
+  "name": "@ascp/host-service",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -14,18 +14,17 @@
     "node": ">=22.0.0"
   },
   "scripts": {
-    "build": "npm --workspace @ascp/host-service run build --silent && tsc -p tsconfig.json",
-    "host": "npm run build --silent && npm --workspace @ascp/host-service run build --silent && node ./scripts/host.mjs",
-    "live": "npm run build --silent && node ./scripts/live-smoke.mjs",
+    "build": "tsc -p tsconfig.json",
     "test": "vitest run",
     "check": "npm run build && npm run test"
   },
   "dependencies": {
-    "@ascp/host-service": "file:../../packages/host-service",
-    "ascp-sdk-typescript": "file:../../sdks/typescript"
+    "ascp-sdk-typescript": "file:../../sdks/typescript",
+    "ws": "^8.18.3"
   },
   "devDependencies": {
     "@types/node": "^24.9.1",
+    "@types/ws": "^8.18.1",
     "typescript": "^5.9.3",
     "vitest": "^3.2.4"
   }

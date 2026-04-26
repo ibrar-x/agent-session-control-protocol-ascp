@@ -1,8 +1,11 @@
-import { readFileSync } from "node:fs";
-
 import * as Ajv2020Module from "ajv/dist/2020.js";
 import type { AnySchemaObject, ValidateFunction } from "ajv";
 import * as addFormatsModule from "ajv-formats";
+import coreSchemaJson from "./schemas/ascp-core.schema.json" with { type: "json" };
+import capabilitiesSchemaJson from "./schemas/ascp-capabilities.schema.json" with { type: "json" };
+import methodsSchemaJson from "./schemas/ascp-methods.schema.json" with { type: "json" };
+import eventsSchemaJson from "./schemas/ascp-events.schema.json" with { type: "json" };
+import errorsSchemaJson from "./schemas/ascp-errors.schema.json" with { type: "json" };
 
 type AjvLike = {
   addSchema: (schema: AnySchemaObject) => void;
@@ -24,22 +27,13 @@ const ajv = new Ajv2020({
 
 addFormats(ajv);
 
-const SCHEMA_FILE_NAMES = [
-  "ascp-core.schema.json",
-  "ascp-capabilities.schema.json",
-  "ascp-methods.schema.json",
-  "ascp-events.schema.json",
-  "ascp-errors.schema.json"
-] as const;
-
-function loadSchema(fileName: (typeof SCHEMA_FILE_NAMES)[number]): AnySchemaObject {
-  const schemaUrl = new URL(`./schemas/${fileName}`, import.meta.url);
-  const schemaText = readFileSync(schemaUrl, "utf8");
-
-  return JSON.parse(schemaText) as AnySchemaObject;
-}
-
-const loadedSchemas = SCHEMA_FILE_NAMES.map(loadSchema) as [
+const loadedSchemas = [
+  coreSchemaJson,
+  capabilitiesSchemaJson,
+  methodsSchemaJson,
+  eventsSchemaJson,
+  errorsSchemaJson
+] as [
   AnySchemaObject,
   AnySchemaObject,
   AnySchemaObject,

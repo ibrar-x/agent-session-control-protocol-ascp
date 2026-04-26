@@ -1,3 +1,4 @@
+export { AscpBrowserWebSocketTransport } from "./browser-websocket.js";
 export { AscpStdioTransport } from "./stdio.js";
 export { AscpWebSocketTransport } from "./websocket.js";
 export {
@@ -8,6 +9,7 @@ export {
 } from "./errors.js";
 
 export type * from "./errors.js";
+export type * from "./browser-websocket.js";
 export type * from "./stdio.js";
 export type * from "./types.js";
 export type * from "./websocket.js";

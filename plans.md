@@ -12,67 +12,91 @@ This file tracks the active scoped work for the current branch.
 
 ## Active State
 
-- Feature name: Codex live smoke coverage for remaining adapter surfaces
-- Branch: `branch-codex-live-smoke-surfaces`
-- Goal: expose and document live-smoke testing for `sessions.subscribe|unsubscribe`, `approvals.list|respond`, `artifacts.list|get`, and `diffs.get`, including interactive replay/stream validation flow
+- Feature name: Reusable ASCP host service with Codex-first web console
+- Branch: `branch-ascp-host-service`
+- Goal: expose the existing Codex adapter through a persistent local ASCP WebSocket host service and add a separate Codex-first browser console for real-time operator testing without modifying the user’s existing `apps/web` work
 - Source inputs:
   - `AGENTS.md`
+  - `protocol/ASCP_Protocol_Detailed_Spec_v0_1.md`
+  - `protocol/ASCP_Protocol_PRD_and_Build_Guide.md`
   - `plans.md`
   - `docs/status.md`
-  - `adapters/codex/scripts/live-smoke.mjs`
-  - `adapters/codex/src/live-smoke.ts`
-  - `adapters/codex/tests/live-smoke.test.ts`
-  - `adapters/codex/README.md`
   - `adapters/codex/src/service.ts`
-  - `sdks/typescript/src/methods/types.ts`
-  - `sdks/typescript/src/events/types.ts`
+  - `adapters/codex/src/app-server-client.ts`
+  - `adapters/codex/README.md`
+  - `sdks/typescript/src/client/index.ts`
+  - `sdks/typescript/src/transport/websocket.ts`
 
 ## Scope
 
 Included in this branch:
 
-- extend live-smoke command parsing/validation/dispatch to cover the remaining adapter surfaces
-- add interactive menu actions to exercise subscribe/replay/drain, approvals, artifacts, and diffs in one session
-- wire executable dependencies to service methods for all new live-smoke commands
-- update live-smoke tests to cover parser, validation, dispatch, and interactive paths
-- update README usage and caveats for truthful stream/replay smoke behavior
+- add a reusable local host service package that exposes ASCP JSON-RPC over WebSocket
+- adapt the existing Codex adapter service into the host through a runtime registration boundary that can support other runtimes later
+- provide real-time pushed event delivery for ASCP subscriptions without the smoke-tool polling loop
+- add a separate Codex-first browser console for session inspection, operator actions, and live event streaming
+- document local setup, truthful scope, and validation commands for the host service and console
 
 Explicitly out of scope:
 
-- protocol/schema or adapter service contract changes
-- replay or subscription persistence across separate CLI processes
-- non-Codex adapter work
+- multi-user auth, tenancy, or remote-host hardening
+- protocol changes or new ASCP semantics
+- changes to the user’s existing `apps/web` tree beyond preserving it untouched
+- mobile app integration
+- non-Codex runtime implementations beyond the reusable host boundary
 
 ## Planned Files
 
-Files to modify:
+Files to add or modify:
 
-- `adapters/codex/src/live-smoke.ts`
-- `adapters/codex/tests/live-smoke.test.ts`
-- `adapters/codex/scripts/live-smoke.mjs`
+- `package.json`
+- `.gitignore`
+- `packages/host-service/`
+- `packages/host-service/package.json`
+- `packages/host-service/tsconfig.json`
+- `packages/host-service/src/`
+- `packages/host-service/tests/`
+- `packages/host-service/README.md`
+- `apps/host-console/`
+- `apps/host-console/package.json`
+- `apps/host-console/tsconfig.json`
+- `apps/host-console/src/`
+- `apps/host-console/README.md`
+- `sdks/typescript/package.json`
+- `sdks/typescript/src/methods/index.ts`
+- `sdks/typescript/src/transport/`
+- `sdks/typescript/src/validation/schema-registry.ts`
+- `sdks/typescript/test/transport.test.ts`
+- `adapters/codex/package.json`
+- `adapters/codex/scripts/host.mjs`
+- `adapters/codex/src/host-runtime.ts`
+- `adapters/codex/src/index.ts`
+- `adapters/codex/src/service.ts`
+- `adapters/codex/tests/host-runtime.test.ts`
 - `adapters/codex/README.md`
-- `plans.md`
 - `docs/status.md`
+- `plans.md`
 
 ## Tasks
 
 | Status | Task | Acceptance Criteria |
 | --- | --- | --- |
-| completed | extend live-smoke command surface for remaining adapter methods | parser/validator/dispatcher supports subscribe, unsubscribe, approvals list/respond, artifacts list/get, and diffs get |
-| completed | add interactive smoke actions for streaming and replay checks | session menu supports subscribe+drain flow with optional unsubscribe and exposes approvals/artifacts/diff actions |
-| completed | wire executable dependencies for new smoke commands | `scripts/live-smoke.mjs` maps command handlers to real service methods including drain helper |
-| completed | update docs and verification for new smoke flows | README usage is accurate and `npm --workspace @ascp/adapter-codex run check` plus adapter validator pass |
+| completed | build reusable WebSocket host service package | package accepts runtime handlers, serves ASCP JSON-RPC over WebSocket, and pushes subscription events without polling |
+| completed | connect host service to Codex adapter | host can serve truthful `capabilities.get`, `hosts.get`, session methods, approvals, artifacts, diffs, and subscription traffic through the existing Codex adapter |
+| completed | add focused host service tests | tests cover request routing, subscription push delivery, unsubscribe cleanup, and Codex adapter integration seams |
+| completed | build separate Codex-first browser console | browser app can connect to the host, list/select sessions, stream live events, send input, and exercise approvals/artifacts/diffs |
+| completed | document and verify the new slice | package/app READMEs and status log are updated and the new host service plus console checks pass |
 
 ## Acceptance Criteria
 
 The task is done only when all of the following are true:
 
-- live-smoke parser and dispatcher handle all newly implemented adapter surfaces
-- interactive smoke mode provides a usable flow to test replay and stream handling in one process
-- script dependency wiring calls real service methods for the new commands
-- tests cover new parsing/validation/dispatch/interactive behavior
-- adapter checks and validator pass
+- the host service exposes ASCP over WebSocket with push-style event delivery
+- the service boundary is reusable for future runtimes instead of being Codex-only in shape
+- the Codex adapter is usable through the host without inventing new protocol behavior
+- the separate browser console provides a practical real-time operator workflow for Codex sessions
+- documentation explains truthful scope, local-only assumptions, and validation commands
 
 ## Next Likely Step
 
-Commit and push this branch, then merge into `main` if accepted.
+Run the Codex-backed host and the browser console together against a live session, then decide whether the next branch should add auth/multi-client boundaries or widen the host registration surface for additional runtimes.

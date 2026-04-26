@@ -8,6 +8,7 @@ import { WebSocketServer } from "ws";
 
 import type { EventEnvelope } from "../src/models/index.js";
 import {
+  AscpBrowserWebSocketTransport,
   AscpStdioTransport,
   AscpTransportError,
   AscpWebSocketTransport,
@@ -55,6 +56,71 @@ async function nextEvent(
   }
 
   return result.value;
+}
+
+interface FakeBrowserCloseEvent {
+  code: number;
+  reason: string;
+}
+
+interface FakeBrowserMessageEvent {
+  data: unknown;
+}
+
+class FakeBrowserWebSocket {
+  static readonly CONNECTING = 0;
+  static readonly OPEN = 1;
+  static readonly CLOSING = 2;
+  static readonly CLOSED = 3;
+
+  static instances: FakeBrowserWebSocket[] = [];
+
+  readonly url: string;
+  readonly protocols: string | string[] | undefined;
+
+  onclose: ((event: FakeBrowserCloseEvent) => void) | null = null;
+  onerror: ((event: unknown) => void) | null = null;
+  onmessage: ((event: FakeBrowserMessageEvent) => void) | null = null;
+  onopen: ((event: unknown) => void) | null = null;
+  readyState = FakeBrowserWebSocket.CONNECTING;
+  sent: string[] = [];
+
+  constructor(url: string, protocols?: string | string[]) {
+    this.url = url;
+    this.protocols = protocols;
+    FakeBrowserWebSocket.instances.push(this);
+  }
+
+  open(): void {
+    this.readyState = FakeBrowserWebSocket.OPEN;
+    this.onopen?.({});
+  }
+
+  send(data: string): void {
+    if (this.readyState !== FakeBrowserWebSocket.OPEN) {
+      throw new Error("Fake browser websocket is not open.");
+    }
+
+    this.sent.push(data);
+  }
+
+  receive(data: unknown): void {
+    this.onmessage?.({
+      data
+    });
+  }
+
+  close(code = 1000, reason = ""): void {
+    this.readyState = FakeBrowserWebSocket.CLOSED;
+    this.onclose?.({
+      code,
+      reason
+    });
+  }
+
+  failConnect(): void {
+    this.onerror?.({});
+  }
 }
 
 describe("transport layer", () => {
@@ -248,5 +314,107 @@ describe("transport layer", () => {
       name: "AscpTransportError",
       code: "TRANSPORT_CONNECTION"
     } satisfies Partial<AscpTransportError>);
+  });
+
+  it("dispatches request responses and streamed events over browser WebSocket", async () => {
+    FakeBrowserWebSocket.instances = [];
+
+    const transport = trackTransport(
+      new AscpBrowserWebSocketTransport({
+        url: "ws://browser-test.local",
+        webSocketConstructor: FakeBrowserWebSocket
+      })
+    );
+
+    const connectPromise = transport.connect();
+    const socket = FakeBrowserWebSocket.instances.at(-1);
+
+    if (socket === undefined) {
+      throw new Error("Browser websocket constructor was not invoked.");
+    }
+
+    socket.open();
+    await connectPromise;
+
+    const subscription = transport.subscribe();
+    const responsePromise = transport.request("sessions.subscribe", {
+      session_id: "sess_abc123",
+      include_snapshot: true
+    });
+    responsePromise.catch(() => undefined);
+
+    await Promise.resolve();
+
+    const sentRequest = socket.sent.at(-1);
+    expect(sentRequest).toBeDefined();
+
+    if (sentRequest === undefined) {
+      await subscription.close();
+      return;
+    }
+
+    const request = JSON.parse(sentRequest) as {
+      id: string | number;
+    };
+
+    socket.receive(
+      JSON.stringify({
+        jsonrpc: "2.0",
+        id: request.id,
+        result: {
+          session_id: "sess_abc123",
+          subscription_id: "sub_123",
+          snapshot_emitted: true
+        }
+      })
+    );
+
+    socket.receive(
+      JSON.stringify({
+        id: "evt_1",
+        type: "sync.snapshot",
+        ts: "2026-04-26T00:00:00Z",
+        session_id: "sess_abc123",
+        payload: {
+          session: {
+            id: "sess_abc123",
+            runtime_id: "runtime_local_01",
+            status: "running",
+            created_at: "2026-04-24T00:00:00Z",
+            updated_at: "2026-04-24T00:00:00Z"
+          },
+          pending_approvals: []
+        }
+      })
+    );
+
+    const response = await responsePromise;
+    const event = await nextEvent(subscription);
+
+    expect("result" in response).toBe(true);
+    expect(event.type).toBe("sync.snapshot");
+
+    await subscription.close();
+  });
+
+  it("fails browser websocket connect when no constructor is available", async () => {
+    const globalWithWebSocket = globalThis as { WebSocket?: unknown };
+    const originalWebSocket = globalWithWebSocket.WebSocket;
+    globalWithWebSocket.WebSocket = undefined;
+
+    try {
+      const transport = trackTransport(
+        new AscpBrowserWebSocketTransport({
+          url: "ws://browser-test.local"
+        })
+      );
+
+      await expect(transport.connect()).rejects.toMatchObject({
+        name: "AscpTransportError",
+        code: "TRANSPORT_CONNECTION"
+      } satisfies Partial<AscpTransportError>);
+    } finally {
+      globalWithWebSocket.WebSocket = originalWebSocket;
+    }
   });
 });
