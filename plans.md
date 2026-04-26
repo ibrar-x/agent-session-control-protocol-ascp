@@ -12,91 +12,83 @@ This file tracks the active scoped work for the current branch.
 
 ## Active State
 
-- Feature name: Reusable ASCP host service with Codex-first web console
-- Branch: `branch-ascp-host-service`
-- Goal: expose the existing Codex adapter through a persistent local ASCP WebSocket host service and add a separate Codex-first browser console for real-time operator testing without modifying the user’s existing `apps/web` work
+- Feature name: Protocol interaction contract for blocked approvals and blocked input
+- Branch: `branch-protocol-interaction-contract`
+- Goal: extend the protocol so mobile and other clients can receive actionable approval and input requests from any adapter while keeping existing core method names and preserving truthful adapter-specific translation boundaries
 - Source inputs:
   - `AGENTS.md`
   - `protocol/ASCP_Protocol_Detailed_Spec_v0_1.md`
   - `protocol/ASCP_Protocol_PRD_and_Build_Guide.md`
+  - `protocol/spec/auth.md`
+  - `protocol/spec/methods.md`
+  - `protocol/spec/events.md`
   - `plans.md`
   - `docs/status.md`
+  - `adapters/codex/src/approvals.ts`
   - `adapters/codex/src/service.ts`
-  - `adapters/codex/src/app-server-client.ts`
-  - `adapters/codex/README.md`
-  - `sdks/typescript/src/client/index.ts`
-  - `sdks/typescript/src/transport/websocket.ts`
 
 ## Scope
 
 Included in this branch:
 
-- add a reusable local host service package that exposes ASCP JSON-RPC over WebSocket
-- adapt the existing Codex adapter service into the host through a runtime registration boundary that can support other runtimes later
-- provide real-time pushed event delivery for ASCP subscriptions without the smoke-tool polling loop
-- add a separate Codex-first browser console for session inspection, operator actions, and live event streaming
-- document local setup, truthful scope, and validation commands for the host service and console
+- define additive protocol support for blocked interaction requests without changing existing core method names
+- extend the protocol core approval contract with normative provenance and actionability rules
+- add a canonical `InputRequest` noun and related session and event surfaces
+- document the translation boundary so adapters, not the host, derive actionable requests from runtime-native blocked state
+- update protocol examples, schemas, and validation assets so future adapter authors can implement the contract without reading Codex-specific code
 
 Explicitly out of scope:
 
-- multi-user auth, tenancy, or remote-host hardening
-- protocol changes or new ASCP semantics
-- changes to the user’s existing `apps/web` tree beyond preserving it untouched
-- mobile app integration
-- non-Codex runtime implementations beyond the reusable host boundary
+- Codex adapter translation logic
+- host-service implementation work
+- browser console or mobile app UI work
+- new top-level core method names such as `respondToApproval` or `respondToInput`
+- non-additive protocol redesign
 
 ## Planned Files
 
 Files to add or modify:
 
-- `package.json`
-- `.gitignore`
-- `packages/host-service/`
-- `packages/host-service/package.json`
-- `packages/host-service/tsconfig.json`
-- `packages/host-service/src/`
-- `packages/host-service/tests/`
-- `packages/host-service/README.md`
-- `apps/host-console/`
-- `apps/host-console/package.json`
-- `apps/host-console/tsconfig.json`
-- `apps/host-console/src/`
-- `apps/host-console/README.md`
-- `sdks/typescript/package.json`
-- `sdks/typescript/src/methods/index.ts`
-- `sdks/typescript/src/transport/`
-- `sdks/typescript/src/validation/schema-registry.ts`
-- `sdks/typescript/test/transport.test.ts`
-- `adapters/codex/package.json`
-- `adapters/codex/scripts/host.mjs`
-- `adapters/codex/src/host-runtime.ts`
-- `adapters/codex/src/index.ts`
-- `adapters/codex/src/service.ts`
-- `adapters/codex/tests/host-runtime.test.ts`
-- `adapters/codex/README.md`
-- `docs/status.md`
 - `plans.md`
+- `docs/status.md`
+- `docs/superpowers/specs/2026-04-27-interaction-contract-design.md`
+- `protocol/schema/ascp-core.schema.json`
+- `protocol/schema/ascp-methods.schema.json`
+- `protocol/schema/ascp-events.schema.json`
+- `protocol/spec/auth.md`
+- `protocol/spec/methods.md`
+- `protocol/spec/events.md`
+- `protocol/spec/compatibility.md`
+- `protocol/examples/requests/`
+- `protocol/examples/responses/`
+- `protocol/examples/events/`
+- `protocol/examples/errors/`
+- `protocol/conformance/`
+- `sdks/typescript/src/models/types.ts`
+- `sdks/typescript/src/methods/types.ts`
+- `sdks/typescript/src/events/types.ts`
+- `sdks/typescript/src/validation/`
 
 ## Tasks
 
 | Status | Task | Acceptance Criteria |
 | --- | --- | --- |
-| completed | build reusable WebSocket host service package | package accepts runtime handlers, serves ASCP JSON-RPC over WebSocket, and pushes subscription events without polling |
-| completed | connect host service to Codex adapter | host can serve truthful `capabilities.get`, `hosts.get`, session methods, approvals, artifacts, diffs, and subscription traffic through the existing Codex adapter |
-| completed | add focused host service tests | tests cover request routing, subscription push delivery, unsubscribe cleanup, and Codex adapter integration seams |
-| completed | build separate Codex-first browser console | browser app can connect to the host, list/select sessions, stream live events, send input, and exercise approvals/artifacts/diffs |
-| completed | document and verify the new slice | package/app READMEs and status log are updated and the new host service plus console checks pass |
+| in_progress | define interaction-contract design | written design covers approval provenance, input request shape, lifecycle events, actionability rules, and adapter translation boundaries |
+| pending | patch protocol schemas and specs | protocol schemas, method contracts, event contracts, and auth semantics validate the new interaction surfaces without changing existing core method names |
+| pending | patch protocol examples and conformance assets | request, response, and event examples plus validation fixtures prove the new protocol surfaces unambiguously |
+| pending | update TypeScript SDK protocol models | SDK types and bundled validation schemas expose the new core nouns and result fields cleanly |
+| pending | document and checkpoint protocol patch | plans and status log explain the new contract and prepare the follow-up adapter branch |
 
 ## Acceptance Criteria
 
 The task is done only when all of the following are true:
 
-- the host service exposes ASCP over WebSocket with push-style event delivery
-- the service boundary is reusable for future runtimes instead of being Codex-only in shape
-- the Codex adapter is usable through the host without inventing new protocol behavior
-- the separate browser console provides a practical real-time operator workflow for Codex sessions
-- documentation explains truthful scope, local-only assumptions, and validation commands
+- `ApprovalRequest` provenance and actionability rules are explicit and schema-backed
+- `InputRequest` is defined once in the protocol layer with clear lifecycle semantics
+- `sessions.get` can surface pending blocked inputs without introducing new core method names
+- adapter translation responsibility is documented as adapter-specific, not host-specific
+- examples and validators make the contract implementable for a second adapter author without reading Codex code
 
 ## Next Likely Step
 
-Run the Codex-backed host and the browser console together against a live session, then decide whether the next branch should add auth/multi-client boundaries or widen the host registration surface for additional runtimes.
+Merge the protocol interaction-contract patch into `main`, then start a fresh adapter branch from updated `main` to implement Codex translation and response routing against the frozen protocol contract.
