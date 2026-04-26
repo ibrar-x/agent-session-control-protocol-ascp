@@ -18,6 +18,6 @@ for (const file of requiredFiles) {
 
 const pkg = JSON.parse(readFileSync("adapters/codex/package.json", "utf8"));
 
-if (!pkg.scripts?.test || !pkg.scripts?.build) {
-  throw new Error("Adapter package must expose build and test scripts.");
+if (!pkg.scripts?.test || !pkg.scripts?.build || !pkg.scripts?.check) {
+  throw new Error("Adapter package must expose build, test, and check scripts.");
 }
