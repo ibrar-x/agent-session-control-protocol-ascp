@@ -35,7 +35,34 @@
           "cwd": "/Users/me/app"
         },
         "created_at": "2026-04-21T10:06:00Z",
+        "metadata": {
+          "source": "runtime-native",
+          "adapter_kind": "mock",
+          "derivation_reason": "native_approval_request",
+          "native_status": "waiting_approval"
+        },
         "resolved_at": null
+      }
+    ],
+    "pending_inputs": [
+      {
+        "id": "inp_14",
+        "session_id": "sess_abc123",
+        "run_id": "run_9",
+        "question": "Choose the deployment target.",
+        "input_type": "choice",
+        "choices": [
+          "staging",
+          "production"
+        ],
+        "status": "pending",
+        "created_at": "2026-04-21T10:07:00Z",
+        "metadata": {
+          "source": "host-derived",
+          "adapter_kind": "codex",
+          "derivation_reason": "blocked_session_status",
+          "native_status": "waiting_input"
+        }
       }
     ]
   }

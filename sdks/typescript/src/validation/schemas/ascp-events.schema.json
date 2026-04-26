@@ -566,6 +566,50 @@
       },
       "additionalProperties": false
     },
+    "InputRequestedPayload": {
+      "type": "object",
+      "required": [
+        "input"
+      ],
+      "properties": {
+        "input": {
+          "$ref": "ascp-core.schema.json#/$defs/InputRequest"
+        }
+      },
+      "additionalProperties": false
+    },
+    "InputCompletedPayload": {
+      "type": "object",
+      "required": [
+        "input_id",
+        "completed_at"
+      ],
+      "properties": {
+        "input_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "completed_at": {
+          "$ref": "ascp-core.schema.json#/$defs/TimestampUtc"
+        }
+      },
+      "additionalProperties": false
+    },
+    "InputExpiredPayload": {
+      "type": "object",
+      "required": [
+        "input_id",
+        "expired_at"
+      ],
+      "properties": {
+        "input_id": {
+          "$ref": "ascp-core.schema.json#/$defs/Id"
+        },
+        "expired_at": {
+          "$ref": "ascp-core.schema.json#/$defs/TimestampUtc"
+        }
+      },
+      "additionalProperties": false
+    },
     "ArtifactCreatedPayload": {
       "type": "object",
       "required": [
@@ -655,6 +699,12 @@
           "type": "array",
           "items": {
             "$ref": "ascp-core.schema.json#/$defs/ApprovalRequest"
+          }
+        },
+        "pending_inputs": {
+          "type": "array",
+          "items": {
+            "$ref": "ascp-core.schema.json#/$defs/InputRequest"
           }
         },
         "summary": {
@@ -1249,6 +1299,60 @@
         }
       ]
     },
+    "InputRequestedEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "input.requested"
+            },
+            "payload": {
+              "$ref": "#/$defs/InputRequestedPayload"
+            }
+          }
+        }
+      ]
+    },
+    "InputCompletedEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "input.completed"
+            },
+            "payload": {
+              "$ref": "#/$defs/InputCompletedPayload"
+            }
+          }
+        }
+      ]
+    },
+    "InputExpiredEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "input.expired"
+            },
+            "payload": {
+              "$ref": "#/$defs/InputExpiredPayload"
+            }
+          }
+        }
+      ]
+    },
     "ArtifactCreatedEvent": {
       "allOf": [
         {
@@ -1517,6 +1621,15 @@
         },
         {
           "$ref": "#/$defs/ApprovalExpiredEvent"
+        },
+        {
+          "$ref": "#/$defs/InputRequestedEvent"
+        },
+        {
+          "$ref": "#/$defs/InputCompletedEvent"
+        },
+        {
+          "$ref": "#/$defs/InputExpiredEvent"
         },
         {
           "$ref": "#/$defs/ArtifactCreatedEvent"

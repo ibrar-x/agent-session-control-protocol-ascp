@@ -41,6 +41,14 @@
       ]
     }
   ],
+  "derived_actionability_fixture": {
+    "file": "conformance/fixtures/auth/approval-derived-actionability.json",
+    "required_capabilities": {
+      "approval_requests": true,
+      "approval_respond": false
+    },
+    "expected_error_code": "UNSUPPORTED"
+  },
   "conflict_example": {
     "file": "examples/errors/approvals-respond.json",
     "method": "approvals.respond",

@@ -153,7 +153,32 @@ export interface ApprovalRequest {
   description?: string;
   risk_level?: RiskLevel;
   payload?: FlexibleObject;
+  metadata?: FlexibleObject;
   resolved_at?: TimestampUtc | null;
+  [key: string]: unknown;
+}
+
+export const ASCP_INPUT_TYPES = ["text", "choice", "confirm"] as const;
+export const ASCP_INPUT_STATUSES = [
+  "pending",
+  "answered",
+  "expired",
+  "cancelled"
+] as const;
+
+export type InputType = (typeof ASCP_INPUT_TYPES)[number];
+export type InputStatus = (typeof ASCP_INPUT_STATUSES)[number];
+
+export interface InputRequest {
+  id: Id;
+  session_id: Id;
+  question: string;
+  input_type: InputType;
+  status: InputStatus;
+  created_at: TimestampUtc;
+  run_id?: Id;
+  choices?: string[];
+  metadata: FlexibleObject;
   [key: string]: unknown;
 }
 

@@ -1,0 +1,19 @@
+{
+  "id": "inp_44",
+  "session_id": "sess_abc123",
+  "run_id": "run_9",
+  "question": "Choose the deployment target",
+  "input_type": "choice",
+  "choices": [
+    "staging",
+    "production"
+  ],
+  "status": "pending",
+  "created_at": "2026-04-21T10:07:00Z",
+  "metadata": {
+    "source": "host-derived",
+    "adapter_kind": "codex",
+    "derivation_reason": "session_status",
+    "native_status": "waiting_input"
+  }
+}

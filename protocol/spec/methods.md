@@ -75,11 +75,11 @@ Methods without a dedicated capability flag are part of the base ASCP core surfa
 | `sessions.start` | `#/$defs/SessionsStartRequest` | `#/$defs/SessionsStartSuccessResponse` | `INVALID_REQUEST`, `UNAUTHORIZED`, `FORBIDDEN`, `UNSUPPORTED`, `ADAPTER_ERROR`, `RUNTIME_ERROR`, `INTERNAL_ERROR` | `examples/requests/sessions-start.json`, `examples/responses/sessions-start.json`, `examples/errors/sessions-start.json` |
 | `sessions.resume` | `#/$defs/SessionsResumeRequest` | `#/$defs/SessionsResumeSuccessResponse` | `INVALID_REQUEST`, `UNAUTHORIZED`, `FORBIDDEN`, `NOT_FOUND`, `UNSUPPORTED`, `ADAPTER_ERROR`, `RUNTIME_ERROR`, `INTERNAL_ERROR` | `examples/requests/sessions-resume.json`, `examples/responses/sessions-resume.json`, `examples/errors/sessions-resume.json` |
 | `sessions.stop` | `#/$defs/SessionsStopRequest` | `#/$defs/SessionsStopSuccessResponse` | `INVALID_REQUEST`, `UNAUTHORIZED`, `FORBIDDEN`, `NOT_FOUND`, `UNSUPPORTED`, `CONFLICT`, `RUNTIME_ERROR`, `INTERNAL_ERROR` | `examples/requests/sessions-stop.json`, `examples/responses/sessions-stop.json`, `examples/errors/sessions-stop.json` |
-| `sessions.send_input` | `#/$defs/SessionsSendInputRequest` | `#/$defs/SessionsSendInputSuccessResponse` | `INVALID_REQUEST`, `UNAUTHORIZED`, `FORBIDDEN`, `NOT_FOUND`, `UNSUPPORTED`, `RUNTIME_ERROR`, `INTERNAL_ERROR` | `examples/requests/sessions-send-input.json`, `examples/responses/sessions-send-input.json`, `examples/errors/sessions-send-input.json` |
+| `sessions.send_input` | `#/$defs/SessionsSendInputRequest` | `#/$defs/SessionsSendInputSuccessResponse` | `INVALID_REQUEST`, `UNAUTHORIZED`, `FORBIDDEN`, `NOT_FOUND`, `UNSUPPORTED`, `CONFLICT`, `RUNTIME_ERROR`, `INTERNAL_ERROR` | `examples/requests/sessions-send-input.json`, `examples/responses/sessions-send-input.json`, `examples/errors/sessions-send-input.json` |
 | `sessions.subscribe` | `#/$defs/SessionsSubscribeRequest` | `#/$defs/SessionsSubscribeSuccessResponse` | `INVALID_REQUEST`, `UNAUTHORIZED`, `FORBIDDEN`, `NOT_FOUND`, `UNSUPPORTED`, `TRANSIENT_UNAVAILABLE`, `INTERNAL_ERROR` | `examples/requests/sessions-subscribe.json`, `examples/responses/sessions-subscribe.json`, `examples/errors/sessions-subscribe.json` |
 | `sessions.unsubscribe` | `#/$defs/SessionsUnsubscribeRequest` | `#/$defs/SessionsUnsubscribeSuccessResponse` | `INVALID_REQUEST`, `UNAUTHORIZED`, `FORBIDDEN`, `NOT_FOUND`, `UNSUPPORTED`, `INTERNAL_ERROR` | `examples/requests/sessions-unsubscribe.json`, `examples/responses/sessions-unsubscribe.json`, `examples/errors/sessions-unsubscribe.json` |
 | `approvals.list` | `#/$defs/ApprovalsListRequest` | `#/$defs/ApprovalsListSuccessResponse` | `INVALID_REQUEST`, `UNAUTHORIZED`, `FORBIDDEN`, `UNSUPPORTED`, `ADAPTER_ERROR`, `INTERNAL_ERROR` | `examples/requests/approvals-list.json`, `examples/responses/approvals-list.json`, `examples/errors/approvals-list.json` |
-| `approvals.respond` | `#/$defs/ApprovalsRespondRequest` | `#/$defs/ApprovalsRespondSuccessResponse` | `INVALID_REQUEST`, `UNAUTHORIZED`, `FORBIDDEN`, `NOT_FOUND`, `CONFLICT`, `RUNTIME_ERROR`, `INTERNAL_ERROR` | `examples/requests/approvals-respond.json`, `examples/responses/approvals-respond.json`, `examples/errors/approvals-respond.json` |
+| `approvals.respond` | `#/$defs/ApprovalsRespondRequest` | `#/$defs/ApprovalsRespondSuccessResponse` | `INVALID_REQUEST`, `UNAUTHORIZED`, `FORBIDDEN`, `NOT_FOUND`, `UNSUPPORTED`, `CONFLICT`, `RUNTIME_ERROR`, `INTERNAL_ERROR` | `examples/requests/approvals-respond.json`, `examples/responses/approvals-respond.json`, `examples/errors/approvals-respond.json` |
 | `artifacts.list` | `#/$defs/ArtifactsListRequest` | `#/$defs/ArtifactsListSuccessResponse` | `INVALID_REQUEST`, `UNAUTHORIZED`, `FORBIDDEN`, `NOT_FOUND`, `UNSUPPORTED`, `ADAPTER_ERROR`, `INTERNAL_ERROR` | `examples/requests/artifacts-list.json`, `examples/responses/artifacts-list.json`, `examples/errors/artifacts-list.json` |
 | `artifacts.get` | `#/$defs/ArtifactsGetRequest` | `#/$defs/ArtifactsGetSuccessResponse` | `INVALID_REQUEST`, `UNAUTHORIZED`, `FORBIDDEN`, `NOT_FOUND`, `UNSUPPORTED`, `ADAPTER_ERROR`, `INTERNAL_ERROR` | `examples/requests/artifacts-get.json`, `examples/responses/artifacts-get.json`, `examples/errors/artifacts-get.json` |
 | `diffs.get` | `#/$defs/DiffsGetRequest` | `#/$defs/DiffsGetSuccessResponse` | `INVALID_REQUEST`, `UNAUTHORIZED`, `FORBIDDEN`, `NOT_FOUND`, `UNSUPPORTED`, `ADAPTER_ERROR`, `INTERNAL_ERROR` | `examples/requests/diffs-get.json`, `examples/responses/diffs-get.json`, `examples/errors/diffs-get.json` |
@@ -93,14 +93,16 @@ Methods without a dedicated capability flag are part of the base ASCP core surfa
 
 ### Session methods
 
-- `sessions.get` may omit `runs` and `pending_approvals` unless the corresponding include flags are set. When present, both fields are arrays of canonical nouns.
+- `sessions.get` may omit `runs`, `pending_approvals`, and `pending_inputs` unless the corresponding include flags are set. When present, those fields are arrays of canonical nouns.
 - `sessions.resume` carries the replay-related booleans that a client needs before event-stream work begins, but this branch does not define replay sequencing.
 - `sessions.stop` returns a normalized acknowledgement object instead of echoing a full `Session`.
 - `sessions.subscribe` is the only method whose contract includes a side effect requirement: after a successful response, `EventEnvelope` objects must begin streaming on the active transport.
+- `sessions.send_input` is the response path for `InputRequest` objects. When a request identifier is supplied and the target request is no longer pending, the host SHOULD return `CONFLICT`.
 
 ### Approval and artifact methods
 
 - `approvals.respond` narrows the success status to `approved` or `rejected`, even though the canonical approval object supports broader lifecycle states.
+- `approvals.respond` MAY return `UNSUPPORTED` when a host exposes a visible approval object but cannot route a response into the underlying runtime. That is the required behavior for non-actionable host-derived approvals.
 - `artifacts.list`, `artifacts.get`, and `diffs.get` expose metadata and summaries only. Fetching artifact content or full patch bodies stays outside this branch.
 
 ## Follow-Up

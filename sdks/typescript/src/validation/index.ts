@@ -34,6 +34,7 @@ const CORE_ENTITY_SCHEMA_REFS: Record<CoreEntityName, string> = {
   Session: `${CORE_SCHEMA_ID}#/$defs/Session`,
   Run: `${CORE_SCHEMA_ID}#/$defs/Run`,
   ApprovalRequest: `${CORE_SCHEMA_ID}#/$defs/ApprovalRequest`,
+  InputRequest: `${CORE_SCHEMA_ID}#/$defs/InputRequest`,
   Artifact: `${CORE_SCHEMA_ID}#/$defs/Artifact`,
   DiffSummary: `${CORE_SCHEMA_ID}#/$defs/DiffSummary`,
   EventEnvelope: `${CORE_SCHEMA_ID}#/$defs/EventEnvelope`,

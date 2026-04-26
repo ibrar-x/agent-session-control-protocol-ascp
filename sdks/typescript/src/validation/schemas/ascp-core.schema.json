@@ -367,6 +367,9 @@
         "payload": {
           "$ref": "#/$defs/FlexibleObject"
         },
+        "metadata": {
+          "$ref": "#/$defs/FlexibleObject"
+        },
         "created_at": {
           "$ref": "#/$defs/TimestampUtc"
         },
@@ -382,6 +385,118 @@
         }
       },
       "additionalProperties": true
+    },
+    "InputType": {
+      "type": "string",
+      "enum": [
+        "text",
+        "choice",
+        "confirm"
+      ]
+    },
+    "InputStatus": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "answered",
+        "expired",
+        "cancelled"
+      ]
+    },
+    "InputRequest": {
+      "type": "object",
+      "required": [
+        "id",
+        "session_id",
+        "question",
+        "input_type",
+        "status",
+        "created_at",
+        "metadata"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "session_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "run_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "question": {
+          "type": "string",
+          "minLength": 1
+        },
+        "input_type": {
+          "$ref": "#/$defs/InputType"
+        },
+        "choices": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        },
+        "status": {
+          "$ref": "#/$defs/InputStatus"
+        },
+        "created_at": {
+          "$ref": "#/$defs/TimestampUtc"
+        },
+        "metadata": {
+          "type": "object",
+          "required": [
+            "source",
+            "adapter_kind",
+            "derivation_reason",
+            "native_status"
+          ],
+          "properties": {
+            "source": {
+              "type": "string",
+              "enum": [
+                "runtime-native",
+                "host-derived"
+              ]
+            },
+            "adapter_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "derivation_reason": {
+              "type": "string",
+              "minLength": 1
+            },
+            "native_status": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "input_type": {
+                "const": "choice"
+              }
+            },
+            "required": [
+              "input_type"
+            ]
+          },
+          "then": {
+            "required": [
+              "choices"
+            ]
+          }
+        }
+      ],
+      "additionalProperties": false
     },
     "ArtifactKind": {
       "type": "string",

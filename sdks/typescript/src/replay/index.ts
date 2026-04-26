@@ -8,6 +8,7 @@ import type {
   EventEnvelope,
   FlexibleObject,
   Id,
+  InputRequest,
   Run,
   Session
 } from "../models/index.js";
@@ -69,6 +70,7 @@ export interface SyncSnapshotPayload extends FlexibleObject {
   session: Session;
   active_run?: Run;
   pending_approvals: ApprovalRequest[];
+  pending_inputs?: InputRequest[];
   summary?: FlexibleObject;
 }
 

@@ -120,6 +120,9 @@
         },
         "include_pending_approvals": {
           "type": "boolean"
+        },
+        "include_pending_inputs": {
+          "type": "boolean"
         }
       },
       "additionalProperties": false
@@ -387,6 +390,12 @@
           "type": "array",
           "items": {
             "$ref": "ascp-core.schema.json#/$defs/ApprovalRequest"
+          }
+        },
+        "pending_inputs": {
+          "type": "array",
+          "items": {
+            "$ref": "ascp-core.schema.json#/$defs/InputRequest"
           }
         }
       },
@@ -658,6 +667,7 @@
         "FORBIDDEN",
         "NOT_FOUND",
         "UNSUPPORTED",
+        "CONFLICT",
         "RUNTIME_ERROR",
         "INTERNAL_ERROR"
       ]
@@ -703,6 +713,7 @@
         "UNAUTHORIZED",
         "FORBIDDEN",
         "NOT_FOUND",
+        "UNSUPPORTED",
         "CONFLICT",
         "RUNTIME_ERROR",
         "INTERNAL_ERROR"

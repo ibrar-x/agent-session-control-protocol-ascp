@@ -21,6 +21,7 @@ The event-contract schema must reuse those nouns and shared envelopes. It must n
 - session lifecycle
 - run lifecycle
 - transcript
+- input requests
 - tool activity
 - terminal fallback
 - approvals
@@ -63,6 +64,9 @@ The event-contract schema must reuse those nouns and shared envelopes. It must n
 | `message.assistant.delta` | `#/$defs/MessageAssistantDeltaEvent` | `examples/events/message-assistant-delta.json` |
 | `message.assistant.completed` | `#/$defs/MessageAssistantCompletedEvent` | `examples/events/message-assistant-completed.json` |
 | `message.system` | `#/$defs/MessageSystemEvent` | `examples/events/message-system.json` |
+| `input.requested` | `#/$defs/InputRequestedEvent` | `examples/events/input-requested.json` |
+| `input.completed` | `#/$defs/InputCompletedEvent` | `examples/events/input-completed.json` |
+| `input.expired` | `#/$defs/InputExpiredEvent` | `examples/events/input-expired.json` |
 | `tool.started` | `#/$defs/ToolStartedEvent` | `examples/events/tool-started.json` |
 | `tool.stdout` | `#/$defs/ToolStdoutEvent` | `examples/events/tool-stdout.json` |
 | `tool.stderr` | `#/$defs/ToolStderrEvent` | `examples/events/tool-stderr.json` |
@@ -109,6 +113,13 @@ The event-contract schema must reuse those nouns and shared envelopes. It must n
 - `message.assistant.delta` is the streaming fragment event
 - `message.assistant.completed` carries the finalized content for the same assistant message
 
+### Input requests
+
+- `input.requested` carries the canonical `InputRequest`
+- `input.completed` records that a pending input request was answered or otherwise satisfied
+- `input.expired` records that a pending input request can no longer be answered successfully
+- adapters own the inference that maps runtime-native blocked-question signals into `input_type`; the protocol only freezes the resulting values and event payload shape
+
 ### Tool activity
 
 - tool events normalize non-transcript execution into `tool_call_id`, `tool_name`, output chunks, and completion state
@@ -133,7 +144,7 @@ The event-contract schema must reuse those nouns and shared envelopes. It must n
 ### Sync And Connectivity
 
 - `connection.state_changed` carries one of `connected`, `disconnected`, `reconnecting`, or `reconnected`
-- `sync.snapshot` carries current session state, optional `active_run`, and pending approvals; it is current-state material, not replay history
+- `sync.snapshot` carries current session state, optional `active_run`, pending approvals, and pending inputs; it is current-state material, not replay history
 - `sync.replayed` marks the boundary between historical replay and resumed live streaming
 - `sync.cursor_advanced` is the stream-side hook for opaque replay cursors when implementations advertise them
 
@@ -147,7 +158,7 @@ The event-contract schema must reuse those nouns and shared envelopes. It must n
 | Compatibility Level | Event Requirement |
 | --- | --- |
 | `ASCP Core Compatible` | support `EventEnvelope` plus the core event taxonomy needed to observe session state |
-| `ASCP Interactive` | support live event subscriptions and the interactive families needed for transcript, run, tool, or terminal streaming |
+| `ASCP Interactive` | support live event subscriptions and the interactive families needed for transcript, run, input-request, tool, or terminal streaming |
 | `ASCP Approval-Aware` | support `approval.requested`, `approval.updated`, `approval.approved`, `approval.rejected`, and `approval.expired` |
 | `ASCP Artifact-Aware` | support `artifact.created`, `artifact.updated`, `diff.ready`, and `diff.updated` |
 | `ASCP Replay-Capable` | support replay-safe sync events, replay markers, and documented snapshot versus replay behavior |

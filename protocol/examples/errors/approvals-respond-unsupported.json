@@ -1,0 +1,15 @@
+{
+  "jsonrpc": "2.0",
+  "id": "req_appr_unsupported_1",
+  "error": {
+    "code": "UNSUPPORTED",
+    "message": "This approval is visible but cannot be answered through the runtime",
+    "retryable": false,
+    "details": {
+      "method": "approvals.respond",
+      "approval_id": "apr_host_derived_1",
+      "source": "host-derived"
+    },
+    "correlation_id": "corr_appr_unsupported_1"
+  }
+}

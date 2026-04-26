@@ -117,6 +117,18 @@
           "schema": "RunStartedEvent"
         },
         {
+          "path": "examples/events/input-requested.json",
+          "schema": "InputRequestedEvent"
+        },
+        {
+          "path": "examples/events/input-completed.json",
+          "schema": "InputCompletedEvent"
+        },
+        {
+          "path": "examples/events/input-expired.json",
+          "schema": "InputExpiredEvent"
+        },
+        {
           "path": "examples/events/message-user.json",
           "schema": "MessageUserEvent"
         },
@@ -139,6 +151,12 @@
         {
           "path": "examples/events/terminal-output.json",
           "schema": "TerminalOutputEvent"
+        }
+      ],
+      "entities": [
+        {
+          "path": "examples/core/input-request.json",
+          "schema": "InputRequest"
         }
       ]
     },
@@ -168,6 +186,10 @@
       "entities": [
         {
           "path": "examples/approvals/approval-request-command.json",
+          "schema": "ApprovalRequest"
+        },
+        {
+          "path": "examples/core/approval-request.json",
           "schema": "ApprovalRequest"
         }
       ],
@@ -206,6 +228,9 @@
       "fixtures": [
         {
           "path": "conformance/fixtures/auth/approval-lifecycle.json"
+        },
+        {
+          "path": "conformance/fixtures/auth/approval-derived-actionability.json"
         }
       ]
     },

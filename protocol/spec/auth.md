@@ -47,13 +47,13 @@ The detailed spec defines these recommended scope names:
 | `hosts.get` | read | `read:hosts` | host metadata is read-only but still part of the auth surface |
 | `runtimes.list` | read | `read:runtimes` | runtime discovery remains distinct from session control |
 | `sessions.list` | read | `read:sessions` | listing reveals active work and metadata |
-| `sessions.get` | read | `read:sessions` | includes summary state and optional pending approvals |
+| `sessions.get` | read | `read:sessions` | includes summary state and optional pending approvals or pending inputs |
 | `sessions.subscribe` | read | `read:sessions` | live subscription exposes transcript and approval activity |
 | `sessions.unsubscribe` | read | `read:sessions` | closes an existing read-side subscription |
 | `sessions.start` | control | `write:sessions` | starts a new controllable session |
 | `sessions.resume` | control | `write:sessions` | reattaches control to an existing interactive session |
 | `sessions.stop` | control | `write:sessions` | changes session execution state |
-| `sessions.send_input` | control | `write:sessions` | steers or injects new user input into a running session |
+| `sessions.send_input` | control | `write:sessions` | steers or injects new user input into a running session and answers pending input requests |
 | `approvals.list` | read | `read:approvals` | exposes pending or historical approval requests |
 | `approvals.respond` | control | `write:approvals` | resolves a pending approval and changes execution flow |
 | `artifacts.list` | read | `read:artifacts` | artifact metadata may reveal generated outputs or code-adjacent material |
@@ -124,6 +124,11 @@ Rules:
 - when execution requires human approval, the host emits `approval.requested` with the canonical `ApprovalRequest`
 - the related session may enter `waiting_approval`
 - pending approvals SHOULD remain visible through `approvals.list` and optional `sessions.get.include_pending_approvals`
+- approval provenance is normative:
+  - `metadata.source="runtime-native"` means the runtime exposed the request directly
+  - `metadata.source="host-derived"` means the adapter derived the request from truthful runtime state
+  - both provenance classes are actionable only when the adapter can route a response back into the runtime
+  - if a host-derived approval is visible but not actionable, the host MUST advertise `approval_respond=false` and `approvals.respond` MUST return `UNSUPPORTED`
 
 ### Resolution via `approvals.respond`
 
@@ -151,6 +156,29 @@ Rules:
 - `approval.rejected` MUST carry `approval_id`, `resolved_at`, `actor_id`, and the rejection `note`
 - `approval.expired` records host- or policy-driven timeout without inventing an approval responder
 - once an approval is terminal, later `approvals.respond` attempts SHOULD return `CONFLICT`
+
+## Input Request Lifecycle
+
+### Request creation
+
+- when execution blocks on user input, the host emits `input.requested` with the canonical `InputRequest`
+- the related session may enter `waiting_input`
+- pending input requests SHOULD remain visible through optional `sessions.get.include_pending_inputs`
+- `run_id` on `InputRequest` is populated only when the runtime exposes a stable run or turn identifier that the adapter can map honestly
+- clients MUST treat absent `run_id` as a normal opaque omission and MUST NOT require it for rendering, routing, or response handling
+
+### Resolution via `sessions.send_input`
+
+- `sessions.send_input` is the control method for answering a pending `InputRequest`
+- when a request identifier is supplied, hosts SHOULD validate that the request is still pending before attempting delivery
+- if the target input request is no longer pending, the host SHOULD return `CONFLICT`
+- successful delivery SHOULD lead to `input.completed` when the request is satisfied
+
+### Terminal outcomes
+
+- terminal input outcomes are `answered`, `expired`, and `cancelled`
+- `input.expired` records a blocked question that can no longer be answered successfully
+- if a pending input request becomes terminal before the answer arrives, later `sessions.send_input` attempts SHOULD return `CONFLICT`
 
 ### Approval history and auditability
 

@@ -1,0 +1,12 @@
+{
+  "id": "evt_0033",
+  "type": "input.expired",
+  "ts": "2026-04-21T10:09:00Z",
+  "session_id": "sess_abc123",
+  "run_id": "run_9",
+  "seq": 33,
+  "payload": {
+    "input_id": "inp_15",
+    "expired_at": "2026-04-21T10:09:00Z"
+  }
+}

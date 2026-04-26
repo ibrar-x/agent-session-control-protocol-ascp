@@ -49,8 +49,8 @@ The top-level conformance harness composes those checks instead of treating them
 | Compatibility Level | Inherits | Required Methods | Additional Required Evidence | Golden Scenario |
 | --- | --- | --- | --- | --- |
 | `ASCP Core Compatible` | none | `capabilities.get`, `runtimes.list`, `sessions.list`, `sessions.get` | capability document, `EventEnvelope`, and core observation evidence | `core-discovery-and-session-read` |
-| `ASCP Interactive` | `ASCP Core Compatible` | `sessions.send_input`, `sessions.subscribe`, `sessions.unsubscribe`, and at least one of `sessions.start` or `sessions.resume` | interactive transcript and control evidence | `interactive-session-control` |
-| `ASCP Approval-Aware` | `ASCP Interactive` | `approvals.list`, `approvals.respond` | `approval.requested`, `approval.updated`, `approval.approved`, `approval.rejected`, `approval.expired` | `approval-resolution` |
+| `ASCP Interactive` | `ASCP Core Compatible` | `sessions.send_input`, `sessions.subscribe`, `sessions.unsubscribe`, and at least one of `sessions.start` or `sessions.resume` | interactive transcript, blocked-input, and control evidence | `interactive-session-control` |
+| `ASCP Approval-Aware` | `ASCP Interactive` | `approvals.list`, `approvals.respond` | `approval.requested`, `approval.updated`, `approval.approved`, `approval.rejected`, `approval.expired`, and approval provenance actionability evidence | `approval-resolution` |
 | `ASCP Artifact-Aware` | `ASCP Approval-Aware` | `artifacts.list` and at least one of `artifacts.get` or `diffs.get` | `artifact.created`, `artifact.updated`, `diff.ready`, `diff.updated` | `artifact-access` |
 | `ASCP Replay-Capable` | `ASCP Artifact-Aware` | `sessions.subscribe` plus the replay entry points already frozen in the method contracts | `capabilities.replay=true`, replay ordering evidence, `sync.snapshot`, `sync.replayed`, and replay boundary notes | `replay-recovery` |
 
@@ -71,8 +71,10 @@ The required golden coverage for this branch is:
 
 - requests and responses for the relevant methods
 - representative event examples for the relevant compatibility claim
+- blocked-input entity and event examples for interactive compatibility
 - replay flow fixtures
 - auth failure examples
+- approval provenance actionability fixtures
 - extension handling examples and ignore-behavior fixtures
 
 ## Validator Composition

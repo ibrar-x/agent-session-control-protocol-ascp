@@ -8,6 +8,7 @@ import type {
   FlexibleObject,
   Host,
   Id,
+  InputRequest,
   RequestEnvelope,
   ResponseEnvelope,
   Runtime,
@@ -65,6 +66,7 @@ export interface SessionsGetParams extends FlexibleObject {
   session_id: Id;
   include_runs?: boolean;
   include_pending_approvals?: boolean;
+  include_pending_inputs?: boolean;
 }
 
 export interface SessionsStartParams extends FlexibleObject {
@@ -151,6 +153,7 @@ export interface SessionsGetResult extends FlexibleObject {
   session: Session;
   runs?: Array<Record<string, unknown>>;
   pending_approvals?: ApprovalRequest[];
+  pending_inputs?: InputRequest[];
 }
 
 export interface SessionsStartResult extends FlexibleObject {

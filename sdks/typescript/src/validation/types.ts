@@ -28,6 +28,7 @@ import type {
   ErrorResponseEnvelope,
   EventEnvelope,
   Host,
+  InputRequest,
   ResponseEnvelope,
   Run,
   Session,
@@ -43,6 +44,7 @@ export type CoreEntityName =
   | "Session"
   | "Run"
   | "ApprovalRequest"
+  | "InputRequest"
   | "Artifact"
   | "DiffSummary"
   | "EventEnvelope"
@@ -56,6 +58,7 @@ export interface CoreEntityMap {
   Session: Session;
   Run: Run;
   ApprovalRequest: ApprovalRequest;
+  InputRequest: InputRequest;
   Artifact: Artifact;
   DiffSummary: DiffSummary;
   EventEnvelope: EventEnvelope;

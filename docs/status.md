@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-27 - Protocol interaction contract for blocked approvals and input
+
+- Branch: `branch-protocol-interaction-contract`
+- Commit: `not committed`
+- Summary: extended the frozen protocol with `InputRequest`, `pending_inputs`, and `input.requested|completed|expired`; added approval provenance and actionability rules so host-derived approvals can be visible yet truthfully non-actionable; updated method and event contracts plus compatibility/auth semantics to keep `approvals.respond` and `sessions.send_input` as the existing response paths; and added conformance fixtures and validator coverage for the `approval_respond=false` plus `UNSUPPORTED` round-trip
+- Documentation updated: `plans.md`, `docs/status.md`, `protocol/spec/methods.md`, `protocol/spec/events.md`, `protocol/spec/auth.md`, `protocol/spec/compatibility.md`, `docs/superpowers/specs/2026-04-27-interaction-contract-design.md`, `docs/superpowers/plans/2026-04-27-interaction-contract.md`
+- Next likely step: commit and merge this protocol branch into `main`, then start a fresh adapter branch from updated `main` to implement Codex translation and response routing against the frozen interaction contract
+
 ### 2026-04-27 - Docs site UI polish: search, tables, code blocks, line height
 
 - Branch: `main` (direct commit to `apps/web` submodule)

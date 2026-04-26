@@ -27,9 +27,11 @@ REQUIRED_PATHS = [
     Path("examples/errors/sessions-list-unauthorized.json"),
     Path("examples/errors/approvals-respond-unauthorized.json"),
     Path("examples/errors/approvals-respond-forbidden.json"),
+    Path("examples/errors/approvals-respond-unsupported.json"),
     Path("examples/errors/artifacts-get-unauthorized.json"),
     Path("conformance/fixtures/auth/auth-scope-matrix.json"),
     Path("conformance/fixtures/auth/approval-lifecycle.json"),
+    Path("conformance/fixtures/auth/approval-derived-actionability.json"),
 ]
 
 REQUIRED_SPEC_SNIPPETS = [
@@ -41,9 +43,11 @@ REQUIRED_SPEC_SNIPPETS = [
     "correlation_id",
     "sessions.start",
     "approvals.respond",
+    "sessions.send_input",
     "artifacts.get",
     "diffs.get",
     "ASCP Approval-Aware",
+    "Input Request Lifecycle",
 ]
 
 EXPECTED_METHOD_SCOPES = {
@@ -351,6 +355,39 @@ def validate_approval_examples(core_schema, methods_schema, events_schema, store
     assert_true(
         details.get("status") in conflict["allowed_terminal_statuses"],
         "Approval conflict example must identify a terminal approval status",
+    )
+
+    derived = lifecycle["derived_actionability_fixture"]
+    derived_doc = read_json(derived["file"])
+    validate_instance(derived_doc["approval"], core_schema, "ApprovalRequest", store)
+    validate_instance(derived_doc["request"], methods_schema, "ApprovalsRespondRequest", store)
+    validate_instance(
+        derived_doc["response"], methods_schema, "ApprovalsRespondErrorResponse", store
+    )
+    assert_true(
+        derived_doc["approval"]["metadata"]["source"] == "host-derived",
+        "Derived actionability fixture must use host-derived approval provenance",
+    )
+    assert_true(
+        derived_doc["capabilities"] == derived["required_capabilities"],
+        "Derived actionability fixture must document approval capability fallback",
+    )
+    assert_true(
+        derived_doc["response"]["error"]["code"] == derived["expected_error_code"],
+        "Derived actionability fixture must return UNSUPPORTED",
+    )
+    derived_details = derived_doc["response"]["error"]["details"]
+    assert_true(
+        derived_details.get("method") == "approvals.respond",
+        "Derived actionability fixture must identify approvals.respond",
+    )
+    assert_true(
+        derived_details.get("approval_id") == derived_doc["approval"]["id"],
+        "Derived actionability fixture must target the visible approval id",
+    )
+    assert_true(
+        derived_details.get("source") == "host-derived",
+        "Derived actionability fixture must preserve provenance in the UNSUPPORTED response",
     )
 
 

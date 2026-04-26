@@ -73,11 +73,11 @@ Files to add or modify:
 
 | Status | Task | Acceptance Criteria |
 | --- | --- | --- |
-| in_progress | define interaction-contract design | written design covers approval provenance, input request shape, lifecycle events, actionability rules, and adapter translation boundaries |
-| pending | patch protocol schemas and specs | protocol schemas, method contracts, event contracts, and auth semantics validate the new interaction surfaces without changing existing core method names |
-| pending | patch protocol examples and conformance assets | request, response, and event examples plus validation fixtures prove the new protocol surfaces unambiguously |
-| pending | update TypeScript SDK protocol models | SDK types and bundled validation schemas expose the new core nouns and result fields cleanly |
-| pending | document and checkpoint protocol patch | plans and status log explain the new contract and prepare the follow-up adapter branch |
+| completed | define interaction-contract design | written design covers approval provenance, input request shape, lifecycle events, actionability rules, and adapter translation boundaries |
+| completed | patch protocol schemas and specs | protocol schemas, method contracts, event contracts, and auth semantics validate the new interaction surfaces without changing existing core method names |
+| completed | patch protocol examples and conformance assets | request, response, and event examples plus validation fixtures prove the new protocol surfaces unambiguously |
+| completed | update TypeScript SDK protocol models | SDK types and bundled validation schemas expose the new core nouns and result fields cleanly |
+| completed | document and checkpoint protocol patch | plans and status log explain the new contract and prepare the follow-up adapter branch |
 
 ## Acceptance Criteria
 

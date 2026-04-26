@@ -1,0 +1,12 @@
+{
+  "id": "evt_0032",
+  "type": "input.completed",
+  "ts": "2026-04-21T10:08:00Z",
+  "session_id": "sess_abc123",
+  "run_id": "run_9",
+  "seq": 32,
+  "payload": {
+    "input_id": "inp_14",
+    "completed_at": "2026-04-21T10:08:00Z"
+  }
+}

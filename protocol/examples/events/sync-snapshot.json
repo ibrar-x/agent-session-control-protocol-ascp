@@ -19,6 +19,7 @@
       "status": "running",
       "started_at": "2026-04-21T10:05:00Z"
     },
-    "pending_approvals": []
+    "pending_approvals": [],
+    "pending_inputs": []
   }
 }

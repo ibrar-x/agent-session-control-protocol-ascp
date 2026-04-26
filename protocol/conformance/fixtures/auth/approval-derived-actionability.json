@@ -1,0 +1,51 @@
+{
+  "approval": {
+    "id": "apr_host_derived_1",
+    "session_id": "sess_host_derived_1",
+    "kind": "command",
+    "status": "pending",
+    "title": "Approve package manager write",
+    "description": "Agent wants to update a lockfile in the current workspace",
+    "risk_level": "medium",
+    "payload": {
+      "command": "npm install",
+      "cwd": "/Users/me/app"
+    },
+    "metadata": {
+      "source": "host-derived",
+      "adapter_kind": "codex",
+      "derivation_reason": "session_status",
+      "native_status": "waiting_approval"
+    },
+    "created_at": "2026-04-27T10:00:00Z",
+    "resolved_at": null
+  },
+  "capabilities": {
+    "approval_requests": true,
+    "approval_respond": false
+  },
+  "request": {
+    "jsonrpc": "2.0",
+    "id": "req_appr_unsupported_1",
+    "method": "approvals.respond",
+    "params": {
+      "approval_id": "apr_host_derived_1",
+      "decision": "approved"
+    }
+  },
+  "response": {
+    "jsonrpc": "2.0",
+    "id": "req_appr_unsupported_1",
+    "error": {
+      "code": "UNSUPPORTED",
+      "message": "This approval is visible but cannot be answered through the runtime",
+      "retryable": false,
+      "details": {
+        "method": "approvals.respond",
+        "approval_id": "apr_host_derived_1",
+        "source": "host-derived"
+      },
+      "correlation_id": "corr_appr_unsupported_1"
+    }
+  }
+}
