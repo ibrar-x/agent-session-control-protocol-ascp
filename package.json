@@ -6,7 +6,8 @@
     "packages/*",
     "sdks/typescript",
     "adapters/*",
-    "apps/*"
+    "apps/reference-client",
+    "apps/host-console"
   ],
   "scripts": {
     "build": "turbo run build",
