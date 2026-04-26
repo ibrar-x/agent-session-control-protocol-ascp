@@ -2,238 +2,599 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Implement a truthful downstream Codex runtime adapter for ASCP that proves the frozen v0.1 session-control surface can map onto a real runtime without collapsing into raw PTY passthrough.
+**Goal:** Implement a truthful TypeScript Codex runtime adapter for ASCP that uses the official `codex app-server` surface, reuses the existing TypeScript SDK for small generic ASCP helpers, and keeps all Codex-specific transport and mapping logic inside `adapters/codex/`.
 
-**Architecture:** Build the adapter under `adapters/codex/` as a focused Python package that separates runtime discovery, ASCP ID generation, session and event mapping, method handlers, approval handling, and integration validation. Treat the frozen ASCP specs, examples, conformance assets, and the Codex adapter brief as authoritative inputs, and advertise unsupported capabilities as `false` rather than synthesizing protocol behavior.
+**Architecture:** Build `adapters/codex/` as a Node 22 workspace package with a stdio JSON-RPC client for `codex app-server`, deterministic ASCP ID and entity mappers, a service layer that emits ASCP-shaped method results, and tests that prove conservative capability fallback. Add only small generic SDK helpers where they are reusable across adapters and remain free of Codex-specific assumptions.
 
-**Tech Stack:** Python 3, Markdown, JSON, Bash, Git
+**Tech Stack:** TypeScript, Node.js 22, npm workspaces, Vitest, Bash, JSON-RPC, Markdown
 
 ---
 
-### Task 1: Scope The Adapter Branch In Repository State
+### Task 1: Scope The Branch In Repository State
 
 **Files:**
 - Modify: `plans.md`
+- Modify: `docs/superpowers/plans/2026-04-26-codex-adapter.md`
 
-- [ ] **Step 1: Rewrite the active feature block for `feature/codex-adapter`**
+- [x] **Step 1: Rewrite the active branch plan in `plans.md`**
 
-Set the active branch, source inputs, adapter dependency gate, feature boundary, task list, and acceptance criteria in `plans.md`.
+Use the `feature/codex-adapter` scope that keeps the official app-server surface, truthful capability resolution, and TypeScript SDK reuse explicit.
 
-- [ ] **Step 2: Verify the active block matches the adapter branch**
+```md
+- Feature name: Codex adapter
+- Branch: `feature/codex-adapter`
+- Goal: implement a truthful downstream TypeScript adapter under `adapters/codex/`
+- Source inputs:
+  - `docs/superpowers/specs/2026-04-26-codex-adapter-design.md`
+  - `sdks/typescript/`
+  - observed `codex app-server` schemas and live runtime probes
+```
 
-Run: `sed -n '1,260p' plans.md`
-Expected: the active feature is `Codex adapter` on `feature/codex-adapter` and the next likely step points to adapter implementation follow-through rather than protocol-core work
+- [x] **Step 2: Replace the earlier draft with the TypeScript plan in this file**
 
-### Task 2: Scaffold The Adapter Package And Red-State Validator
+The final header must match this structure exactly:
 
-**Files:**
-- Create: `adapters/codex/README.md`
-- Create: `adapters/codex/src/codex_adapter/__init__.py`
-- Create: `adapters/codex/tests/__init__.py`
-- Create: `adapters/codex/tests/validate_codex_adapter.py`
-- Create: `scripts/validate_codex_adapter.sh`
+```md
+# Codex Adapter Implementation Plan
 
-- [ ] **Step 1: Create the adapter directory layout and package entrypoints**
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-Add the top-level adapter README, the Python package root, a test package marker, and a shell validator entrypoint that future tasks can extend.
+**Goal:** Implement a truthful TypeScript Codex runtime adapter for ASCP that uses the official `codex app-server` surface, reuses the existing TypeScript SDK for small generic ASCP helpers, and keeps all Codex-specific transport and mapping logic inside `adapters/codex/`.
+**Architecture:** Build `adapters/codex/` as a Node 22 workspace package with a stdio JSON-RPC client for `codex app-server`, deterministic ASCP ID and entity mappers, a service layer that emits ASCP-shaped method results, and tests that prove conservative capability fallback. Add only small generic SDK helpers where they are reusable across adapters and remain free of Codex-specific assumptions.
+**Tech Stack:** TypeScript, Node.js 22, npm workspaces, Vitest, Bash, JSON-RPC, Markdown
+```
 
-- [ ] **Step 2: Add a validator that fails while core adapter assets are missing**
+- [x] **Step 3: Verify the plan files describe the TypeScript boundary**
 
-Make `validate_codex_adapter.py` require the planned discovery, mapping, service, and test files to exist before deeper checks run.
+Run: `sed -n '1,220p' plans.md && printf '\n---\n' && sed -n '1,80p' docs/superpowers/plans/2026-04-26-codex-adapter.md`
 
-- [ ] **Step 3: Run the validator and confirm the red state**
+Expected: both files describe a TypeScript adapter over `codex app-server`, and the earlier non-TypeScript package paths are gone
 
-Run: `./scripts/validate_codex_adapter.sh`
-Expected: FAIL with missing adapter asset paths because the runtime-discovery, mapping, and method files do not exist yet
-
-### Task 3: Implement Runtime Discovery And Truthful Capability Resolution
-
-**Files:**
-- Create: `adapters/codex/src/codex_adapter/discovery.py`
-- Create: `adapters/codex/src/codex_adapter/capabilities.py`
-- Create: `adapters/codex/tests/test_discovery.py`
-- Create: `adapters/codex/tests/test_capabilities.py`
-
-- [ ] **Step 1: Add failing tests for runtime detection and capability truthfulness**
-
-Cover runtime-availability detection, version extraction, and capability fallback when replay, approvals, artifacts, or diffs cannot be observed safely enough to claim support.
-
-- [ ] **Step 2: Implement Codex runtime probing**
-
-Detect whether the local Codex runtime surface needed by the adapter is available, capture version or endpoint identity where possible, and return explicit discovery results instead of implicit global state.
-
-- [ ] **Step 3: Implement capability resolution**
-
-Map discovery findings into a truthful ASCP capability document, ensuring unsupported or ambiguous capabilities resolve to `false`.
-
-- [ ] **Step 4: Run the focused discovery tests**
-
-Run: `python3 -m pytest adapters/codex/tests/test_discovery.py adapters/codex/tests/test_capabilities.py -q`
-Expected: PASS with coverage of runtime detection and truthful capability behavior
-
-### Task 4: Implement Stable ASCP ID Generation And Session Mapping
+### Task 2: Scaffold The Adapter Workspace And Red-State Validator
 
 **Files:**
-- Create: `adapters/codex/src/codex_adapter/ids.py`
-- Create: `adapters/codex/src/codex_adapter/session_mapper.py`
-- Create: `adapters/codex/tests/test_ids.py`
-- Create: `adapters/codex/tests/test_session_mapper.py`
+- Modify: `adapters/codex/package.json`
+- Modify: `adapters/codex/README.md`
+- Create: `adapters/codex/tsconfig.json`
+- Create: `adapters/codex/vitest.config.ts`
+- Create: `adapters/codex/src/index.ts`
+- Create: `adapters/codex/tests/validate-codex-adapter.mjs`
+- Create: `tooling/scripts/validate_codex_adapter.sh`
 
-- [ ] **Step 1: Add failing tests for runtime, session, run, and approval IDs**
+- [x] **Step 1: Write the failing validator first**
 
-Cover the recommended formats from the Codex adapter brief:
-- `runtime_id = codex_local`
-- `session_id = codex:<thread_id>`
-- `run_id = codex:<thread_id>:<turn_id>`
-- `approval_id = codex:<approval_id>`
+Add a validator that asserts the adapter package exposes the planned source files and scripts before any implementation exists.
 
-- [ ] **Step 2: Add failing tests for session and run normalization**
+```js
+import { existsSync, readFileSync } from "node:fs";
 
-Cover mapping from Codex thread state into ASCP `Session` and `Run` objects, preserving exact ASCP field names and defaulting unknown-but-required data honestly.
+const requiredFiles = [
+  "adapters/codex/src/app-server-client.ts",
+  "adapters/codex/src/discovery.ts",
+  "adapters/codex/src/capabilities.ts",
+  "adapters/codex/src/session-mapper.ts",
+  "adapters/codex/src/service.ts",
+  "adapters/codex/tests/discovery.test.ts",
+  "adapters/codex/tests/service.test.ts"
+];
 
-- [ ] **Step 3: Implement ID helpers and session mapping**
+for (const file of requiredFiles) {
+  if (!existsSync(file)) {
+    throw new Error(`Missing required adapter file: ${file}`);
+  }
+}
 
-Build the helper functions that normalize Codex runtime objects into ASCP IDs, `Session`, and `Run` outputs without embedding transport or method logic.
+const pkg = JSON.parse(readFileSync("adapters/codex/package.json", "utf8"));
+if (!pkg.scripts?.test || !pkg.scripts?.build) {
+  throw new Error("Adapter package must expose build and test scripts.");
+}
+```
 
-- [ ] **Step 4: Run the focused mapping tests**
+- [x] **Step 2: Add the TypeScript workspace package metadata and configs**
 
-Run: `python3 -m pytest adapters/codex/tests/test_ids.py adapters/codex/tests/test_session_mapper.py -q`
-Expected: PASS with deterministic IDs and stable session mapping
+Replace the current minimal package with a real workspace package that depends on the TypeScript SDK and Vitest tooling.
 
-### Task 5: Implement The Session Method Surface
+```json
+{
+  "name": "@ascp/adapter-codex",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "check": "npm run build && npm run test"
+  },
+  "dependencies": {
+    "ascp-sdk-typescript": "file:../../sdks/typescript"
+  },
+  "devDependencies": {
+    "@types/node": "^24.9.1",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  }
+}
+```
 
-**Files:**
-- Create: `adapters/codex/src/codex_adapter/service.py`
-- Create: `adapters/codex/src/codex_adapter/runtime_client.py`
-- Create: `adapters/codex/tests/test_service_sessions.py`
+```ts
+import { defineConfig } from "vitest/config";
 
-- [ ] **Step 1: Add failing tests for `sessions.list`, `sessions.get`, and `sessions.resume`**
+export default defineConfig({
+  test: {
+    include: ["tests/**/*.test.ts"]
+  }
+});
+```
 
-Cover successful responses, `NOT_FOUND`, and honest behavior when resume or listing data is unavailable from the runtime.
+- [x] **Step 3: Add the shell entrypoint and confirm red state**
 
-- [ ] **Step 2: Implement a minimal runtime client seam**
+Write the validator shell script in the existing repo pattern:
 
-Create a small runtime-facing abstraction that isolates Codex-specific session reads from ASCP method-response shaping.
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-- [ ] **Step 3: Implement the ASCP session methods**
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+cd "$ROOT"
 
-Return ASCP-shaped method results for listing, reading, and resuming sessions while preserving frozen field names and protocol error expectations.
+node adapters/codex/tests/validate-codex-adapter.mjs
+```
 
-- [ ] **Step 4: Run the focused session-method tests**
+Run: `bash tooling/scripts/validate_codex_adapter.sh`
 
-Run: `python3 -m pytest adapters/codex/tests/test_service_sessions.py -q`
-Expected: PASS with ASCP-shaped session results and explicit error behavior
+Expected: FAIL with missing `app-server-client.ts`, `service.ts`, and test paths because the real adapter has not been created yet
 
-### Task 6: Implement Input Sending, Event Streaming, And Event Normalization
-
-**Files:**
-- Create: `adapters/codex/src/codex_adapter/events.py`
-- Create: `adapters/codex/src/codex_adapter/subscription.py`
-- Create: `adapters/codex/tests/test_events.py`
-- Create: `adapters/codex/tests/test_subscription.py`
-
-- [ ] **Step 1: Add failing tests for `sessions.send_input` and `sessions.subscribe`**
-
-Cover input forwarding, subscription acceptance, and event-stream behavior.
-
-- [ ] **Step 2: Add failing tests for event normalization**
-
-Cover at minimum:
-- assistant incremental output -> `message.assistant.delta`
-- assistant completion -> `message.assistant.completed`
-- active execution starts -> `run.started`
-- active execution ends -> `run.completed` or `run.failed`
-- tool activity -> `tool.started` and `tool.completed`
-
-- [ ] **Step 3: Implement event mapping and subscription handling**
-
-Normalize observable Codex runtime events into exact ASCP `EventEnvelope` objects, preserving any unmapped runtime detail inside extension-safe metadata rather than changing core meanings.
-
-- [ ] **Step 4: Implement input sending on top of the runtime client seam**
-
-Forward user input to Codex through the runtime client and shape the ASCP method result without turning the adapter into a product-specific conversation layer.
-
-- [ ] **Step 5: Run the focused event and subscription tests**
-
-Run: `python3 -m pytest adapters/codex/tests/test_events.py adapters/codex/tests/test_subscription.py -q`
-Expected: PASS with normalized ASCP event envelopes and stable subscription behavior
-
-### Task 7: Implement Approval Mapping And Approval Methods
-
-**Files:**
-- Create: `adapters/codex/src/codex_adapter/approvals.py`
-- Create: `adapters/codex/tests/test_approvals.py`
-
-- [ ] **Step 1: Add failing tests for approval request mapping and `approvals.respond`**
-
-Cover pending approval mapping, approval lifecycle events, successful response handling, and honest capability fallback when Codex approval surfaces are absent.
-
-- [ ] **Step 2: Implement approval normalization**
-
-Map Codex approval gates into ASCP `ApprovalRequest` objects and approval lifecycle events without redefining the upstream approval semantics.
-
-- [ ] **Step 3: Implement `approvals.list` and `approvals.respond`**
-
-Return ASCP-shaped method results, error handling, and lifecycle behavior for approvals.
-
-- [ ] **Step 4: Run the focused approval tests**
-
-Run: `python3 -m pytest adapters/codex/tests/test_approvals.py -q`
-Expected: PASS with truthful approval behavior and ASCP-shaped method results
-
-### Task 8: Add Best-Effort Artifact And Diff Mapping With Honest Fallback
+### Task 3: Add Small Generic SDK Helpers That The Adapter Can Reuse
 
 **Files:**
-- Create: `adapters/codex/src/codex_adapter/artifacts.py`
-- Create: `adapters/codex/tests/test_artifacts.py`
+- Create: `sdks/typescript/src/methods/envelopes.ts`
+- Create: `sdks/typescript/src/events/builders.ts`
+- Modify: `sdks/typescript/src/methods/index.ts`
+- Modify: `sdks/typescript/src/events/index.ts`
+- Modify: `sdks/typescript/src/index.ts`
+- Create: `sdks/typescript/test/envelopes.test.ts`
 
-- [ ] **Step 1: Add failing tests for artifact and diff capability fallback**
+- [x] **Step 1: Write failing SDK tests for generic envelope and event builders**
 
-Cover the case where Codex cannot provide artifact or diff data reliably enough to claim support.
+Add tests that prove the helpers remain ASCP-generic and do not mention Codex.
 
-- [ ] **Step 2: Add failing tests for best-effort artifact and diff mapping**
+```ts
+import { describe, expect, it } from "vitest";
+import { createSuccessResponse, createEventEnvelope } from "../src/index.js";
 
-If Codex exposes usable artifact or patch outputs, cover mapping into ASCP `Artifact` and `DiffSummary` objects without requiring perfect reconstruction.
+describe("generic ASCP builders", () => {
+  it("creates a success response envelope", () => {
+    expect(
+      createSuccessResponse("req-1", { session_id: "sess_1", accepted: true })
+    ).toEqual({
+      jsonrpc: "2.0",
+      id: "req-1",
+      result: { session_id: "sess_1", accepted: true }
+    });
+  });
 
-- [ ] **Step 3: Implement truthful artifact and diff behavior**
+  it("creates an event envelope with ASCP field names", () => {
+    expect(
+      createEventEnvelope({
+        id: "evt_1",
+        type: "run.started",
+        ts: "2026-04-26T10:00:00Z",
+        session_id: "sess_1",
+        payload: { run_id: "run_1" }
+      })
+    ).toMatchObject({
+      id: "evt_1",
+      type: "run.started",
+      session_id: "sess_1"
+    });
+  });
+});
+```
 
-Map artifacts and diffs when evidence is reliable; otherwise return unsupported capability flags and protocol-consistent errors rather than fabricating outputs.
+- [x] **Step 2: Implement the minimal generic helpers**
 
-- [ ] **Step 4: Run the focused artifact tests**
+Keep the helpers small and transport-neutral:
 
-Run: `python3 -m pytest adapters/codex/tests/test_artifacts.py -q`
-Expected: PASS with truthful support and fallback behavior
+```ts
+import type { FlexibleObject, RequestId, ResponseEnvelope, EventEnvelope } from "../models/types.js";
 
-### Task 9: Document The Adapter And Make The Validator Green
+export function createSuccessResponse<TResult extends FlexibleObject>(
+  id: RequestId,
+  result: TResult
+): ResponseEnvelope<TResult> {
+  return {
+    jsonrpc: "2.0",
+    id,
+    result
+  };
+}
+
+export function createEventEnvelope<TPayload extends FlexibleObject>(
+  event: EventEnvelope<TPayload>
+): EventEnvelope<TPayload> {
+  return event;
+}
+```
+
+- [x] **Step 3: Export the helpers and run the SDK tests**
+
+Run: `npm --workspace sdks/typescript run test -- test/envelopes.test.ts`
+
+Expected: PASS with generic helpers exported from `src/index.ts` and no Codex-specific strings inside the SDK helper files
+
+### Task 4: Implement The Codex App-Server Client, Discovery, And Capability Resolution
+
+**Files:**
+- Create: `adapters/codex/src/app-server-client.ts`
+- Create: `adapters/codex/src/discovery.ts`
+- Create: `adapters/codex/src/capabilities.ts`
+- Create: `adapters/codex/tests/discovery.test.ts`
+- Create: `adapters/codex/tests/capabilities.test.ts`
+
+- [x] **Step 1: Write failing tests for app-server discovery and conservative capabilities**
+
+Cover runtime availability, version detection, and capability fallback for replay and artifacts.
+
+```ts
+import { describe, expect, it } from "vitest";
+import { resolveCodexCapabilities } from "../src/capabilities.js";
+
+describe("resolveCodexCapabilities", () => {
+  it("marks replay unsupported when no official replay surface is observed", () => {
+    expect(
+      resolveCodexCapabilities({
+        threadList: true,
+        threadResume: true,
+        turnStart: true,
+        turnDiffUpdated: true,
+        approvalRequests: true,
+        approvalRespond: false
+      }).replay
+    ).toBe(false);
+  });
+});
+```
+
+- [x] **Step 2: Implement the stdio JSON-RPC client over `codex app-server`**
+
+Keep it adapter-specific and small:
+
+```ts
+export interface CodexJsonRpcMessage {
+  jsonrpc?: "2.0";
+  id?: string | number;
+  method?: string;
+  params?: unknown;
+  result?: unknown;
+  error?: unknown;
+}
+
+export class CodexAppServerClient {
+  async initialize(): Promise<{ userAgent: string; codexHome: string }> {
+    return this.request("initialize", {
+      clientInfo: { name: "ascp-codex-adapter", version: "0.1.0" },
+      capabilities: {}
+    });
+  }
+
+  async threadList(limit = 20): Promise<unknown> {
+    return this.request("thread/list", { limit, useStateDbOnly: true });
+  }
+}
+```
+
+- [x] **Step 3: Implement discovery and truthful capability resolution**
+
+Discovery should return facts, not ASCP objects:
+
+```ts
+export interface CodexDiscovery {
+  runtimeAvailable: boolean;
+  runtimeId: "codex_local";
+  version: string | null;
+  appServerMethods: string[];
+  notifications: string[];
+  supportsApprovalRequests: boolean;
+  supportsApprovalRespond: boolean;
+  supportsTurnDiffs: boolean;
+}
+```
+
+Capability resolution should be conservative:
+
+```ts
+return {
+  session_list: discovery.appServerMethods.includes("thread/list"),
+  session_resume: discovery.appServerMethods.includes("thread/resume"),
+  session_start: discovery.appServerMethods.includes("thread/start"),
+  message_send: discovery.appServerMethods.includes("turn/start"),
+  stream_events: discovery.notifications.length > 0,
+  approval_requests: discovery.supportsApprovalRequests,
+  approval_respond: discovery.supportsApprovalRespond,
+  diffs: discovery.supportsTurnDiffs,
+  artifacts: false,
+  replay: false
+};
+```
+
+- [x] **Step 4: Run the focused discovery tests**
+
+Run: `npm --workspace @ascp/adapter-codex run test -- tests/discovery.test.ts tests/capabilities.test.ts`
+
+Expected: PASS with `runtime_id = codex_local`, `replay = false`, and `artifacts = false` unless the tests explicitly observe an official surface that justifies them
+
+### Task 5: Implement Deterministic IDs And Session/Run Mapping
+
+**Files:**
+- Create: `adapters/codex/src/ids.ts`
+- Create: `adapters/codex/src/session-mapper.ts`
+- Create: `adapters/codex/tests/ids.test.ts`
+- Create: `adapters/codex/tests/session-mapper.test.ts`
+
+- [ ] **Step 1: Write failing tests for the adapter ID strategy**
+
+```ts
+import { describe, expect, it } from "vitest";
+import { toApprovalId, toRunId, toSessionId } from "../src/ids.js";
+
+describe("Codex adapter ids", () => {
+  it("builds deterministic ids", () => {
+    expect(toSessionId("thread_123")).toBe("codex:thread_123");
+    expect(toRunId("thread_123", "turn_9")).toBe("codex:thread_123:turn_9");
+    expect(toApprovalId("apr_7")).toBe("codex:apr_7");
+  });
+});
+```
+
+- [ ] **Step 2: Write failing tests for thread and turn normalization**
+
+```ts
+expect(mapThreadToSession(thread)).toMatchObject({
+  id: "codex:019dc70f",
+  runtime_id: "codex_local",
+  status: "idle",
+  workspace: "/tmp/worktree",
+  metadata: { source: "codex" }
+});
+
+expect(mapTurnToRun(turn, "codex:019dc70f")).toMatchObject({
+  id: "codex:019dc70f:turn_1",
+  session_id: "codex:019dc70f",
+  status: "running"
+});
+```
+
+- [ ] **Step 3: Implement conservative status mapping**
+
+Use an explicit mapping function instead of scattering status logic:
+
+```ts
+export function mapThreadStatus(status: { type: string; activeFlags?: string[] }): SessionStatus {
+  if (status.type === "idle") return "idle";
+  if (status.type === "systemError") return "failed";
+  if (status.type === "active" && status.activeFlags?.includes("waitingOnApproval")) {
+    return "waiting_approval";
+  }
+  if (status.type === "active") return "running";
+  return "disconnected";
+}
+```
+
+- [ ] **Step 4: Run the mapper tests**
+
+Run: `npm --workspace @ascp/adapter-codex run test -- tests/ids.test.ts tests/session-mapper.test.ts`
+
+Expected: PASS with exact ASCP field names and deterministic adapter-owned IDs
+
+### Task 6: Implement The Supported Session Method Surface
+
+**Files:**
+- Create: `adapters/codex/src/service.ts`
+- Create: `adapters/codex/tests/service.test.ts`
+
+- [ ] **Step 1: Write failing tests for `sessions.list`, `sessions.get`, `sessions.resume`, and `sessions.send_input`**
+
+```ts
+expect(await service.sessionsList({ runtime_id: "codex_local" })).toMatchObject({
+  sessions: [{ runtime_id: "codex_local" }]
+});
+
+await expect(service.sessionsGet({ session_id: "codex:missing" })).rejects.toMatchObject({
+  code: "NOT_FOUND"
+});
+
+expect(await service.sessionsSendInput({
+  session_id: "codex:thread_1",
+  input: "continue"
+})).toEqual({
+  session_id: "codex:thread_1",
+  accepted: true
+});
+```
+
+- [ ] **Step 2: Implement the service methods using SDK envelope helpers**
+
+Keep the service layer ASCP-shaped and adapter-specific:
+
+```ts
+import { createSuccessResponse } from "ascp-sdk-typescript";
+
+export class CodexAdapterService {
+  async sessionsList(params: SessionsListParams): Promise<SessionsListResult> {
+    const threads = await this.client.threadList(params.limit ?? 20);
+    return {
+      sessions: threads.data.map(mapThreadToSession),
+      next_cursor: null
+    };
+  }
+}
+```
+
+- [ ] **Step 3: Map `sessions.send_input` onto `turn/start` and `turn/steer`**
+
+Use the active turn when known; otherwise start a new turn:
+
+```ts
+if (activeTurnId) {
+  await this.client.turnSteer(threadId, activeTurnId, input);
+} else {
+  await this.client.turnStart(threadId, input);
+}
+
+return {
+  session_id,
+  accepted: true
+};
+```
+
+- [ ] **Step 4: Run the service tests**
+
+Run: `npm --workspace @ascp/adapter-codex run test -- tests/service.test.ts`
+
+Expected: PASS with honest `NOT_FOUND` and `UNSUPPORTED` fallback where the Codex surface does not support the ASCP action
+
+### Task 7: Implement Event Normalization, Approval Mapping, And Diff Support
+
+**Files:**
+- Create: `adapters/codex/src/events.ts`
+- Create: `adapters/codex/src/approvals.ts`
+- Create: `adapters/codex/tests/events.test.ts`
+- Create: `adapters/codex/tests/approvals.test.ts`
+
+- [ ] **Step 1: Write failing tests for message, run, approval, and diff normalization**
+
+```ts
+expect(mapNotificationToEvents({
+  method: "turn/started",
+  params: { threadId: "thread_1", turn: { id: "turn_1", status: "in_progress" } }
+})[0]).toMatchObject({ type: "run.started" });
+
+expect(mapNotificationToEvents({
+  method: "turn/diff/updated",
+  params: { threadId: "thread_1", turnId: "turn_1", diff: "--- a\\n+++ b" }
+})[0]).toMatchObject({ type: "diff.updated" });
+```
+
+```ts
+expect(mapApprovalRequest(serverRequest)).toMatchObject({
+  kind: "command",
+  status: "pending",
+  session_id: "codex:thread_1"
+});
+```
+
+- [ ] **Step 2: Implement event mapping with extension-safe fallbacks**
+
+```ts
+if (message.method === "turn/started") {
+  return [createEventEnvelope({
+    id: `evt:${message.params.threadId}:${message.params.turn.id}:started`,
+    type: "run.started",
+    ts: new Date().toISOString(),
+    session_id: toSessionId(message.params.threadId),
+    run_id: toRunId(message.params.threadId, message.params.turn.id),
+    payload: { run: mapTurnToRun(message.params.turn, toSessionId(message.params.threadId)) }
+  })];
+}
+```
+
+For unmapped Codex detail, preserve it additively:
+
+```ts
+payload: {
+  run_id,
+  x_codex_notification: message.params
+}
+```
+
+- [ ] **Step 3: Implement approval request mapping and conservative response behavior**
+
+Until the official response path is fully wired, approvals should degrade honestly:
+
+```ts
+export function canRespondToApprovals(discovery: CodexDiscovery): boolean {
+  return discovery.supportsApprovalRespond;
+}
+
+if (!canRespondToApprovals(this.discovery)) {
+  throw createAdapterError("UNSUPPORTED", "Codex approval response path is not available.");
+}
+```
+
+- [ ] **Step 4: Run the event and approval tests**
+
+Run: `npm --workspace @ascp/adapter-codex run test -- tests/events.test.ts tests/approvals.test.ts`
+
+Expected: PASS with `message.assistant.delta`, `run.started`, `approval.requested`, and `diff.updated` normalized from official Codex notifications or requests
+
+### Task 8: Document, Validate, And Checkpoint The Adapter Slice
 
 **Files:**
 - Modify: `adapters/codex/README.md`
-- Modify: `adapters/codex/tests/validate_codex_adapter.py`
-- Modify: `scripts/validate_codex_adapter.sh`
-
-- [ ] **Step 1: Document adapter scope, runtime assumptions, validation commands, and limits**
-
-Explain what the adapter supports, what it intentionally does not support yet, how capabilities are advertised truthfully, and how to run its tests.
-
-- [ ] **Step 2: Extend the validator to check the finished adapter shape**
-
-Validate required adapter files, focused test coverage, and the presence of adapter documentation and validation commands.
-
-- [ ] **Step 3: Run the adapter validator to green**
-
-Run: `./scripts/validate_codex_adapter.sh`
-Expected: PASS with a summary of validated adapter assets
-
-### Task 10: Checkpoint The Branch
-
-**Files:**
+- Modify: `adapters/codex/tests/validate-codex-adapter.mjs`
+- Modify: `tooling/scripts/validate_codex_adapter.sh`
 - Modify: `docs/status.md`
 - Modify: `plans.md`
 
-- [ ] **Step 1: Mark the adapter tasks complete in `plans.md`**
+- [ ] **Step 1: Document the supported and unsupported Codex surface**
 
-Update task status rows and completion outcome after the adapter tests and validator pass.
+The README should state the support matrix directly:
 
-- [ ] **Step 2: Add a Codex-adapter checkpoint entry**
+```md
+## Supported ASCP surface
 
-Record the branch name, summary, documentation updated, and next likely step in `docs/status.md`.
+- `sessions.list`
+- `sessions.get`
+- `sessions.resume`
+- `sessions.send_input`
+- stream event normalization over official `codex app-server` notifications
+- pending approval mapping where official approval requests are emitted
+- best-effort `diffs.get` from official turn diff updates
+
+## Unsupported or conservative fallbacks
+
+- `replay=false`
+- `artifacts=false`
+- `approval_respond=false` until the official Codex response path is exercised end-to-end
+```
+
+- [ ] **Step 2: Make the validator green**
+
+Extend the validator to check for the README claims and the final test files:
+
+```js
+const readme = readFileSync("adapters/codex/README.md", "utf8");
+if (!readme.includes("replay=false")) {
+  throw new Error("README must document replay fallback.");
+}
+```
+
+Run: `bash tooling/scripts/validate_codex_adapter.sh`
+
+Expected: PASS with all required adapter files present and the README documenting truthful unsupported surfaces
+
+- [ ] **Step 3: Run the final adapter and SDK checks**
+
+Run: `npm --workspace sdks/typescript run test -- test/envelopes.test.ts && npm --workspace @ascp/adapter-codex run check && bash tooling/scripts/validate_codex_adapter.sh`
+
+Expected: PASS with SDK helper tests green, adapter workspace tests green, and the repository validator green
+
+- [ ] **Step 4: Update repository checkpoint files**
+
+Record the completed adapter feature in the branch tracking files:
+
+```md
+### 2026-04-26 - Codex adapter
+
+- Branch: `feature/codex-adapter`
+- Summary: implemented a truthful TypeScript adapter over `codex app-server`
+- Documentation updated: `plans.md`, `docs/status.md`, `adapters/codex/README.md`
+- Next likely step: validate merge readiness and integrate the adapter branch
+```
+
+Run: `sed -n '1,260p' plans.md && printf '\n---\n' && sed -n '1,120p' docs/status.md`
+
+Expected: `plans.md` shows the adapter tasks as done and `docs/status.md` contains a new Codex adapter checkpoint entry

@@ -12,9 +12,9 @@ This file tracks the active scoped work for the current branch.
 
 ## Active State
 
-- Feature name: Production-grade monorepo restructure
-- Branch: `branch-ascp-monorepo-structure`
-- Goal: convert the repository from a protocol-first single-workspace layout into a production-grade ASCP monorepo with strict dependency boundaries, conservative file moves, root workspace orchestration, and updated documentation while preserving the existing protocol and SDK outputs
+- Feature name: Codex adapter
+- Branch: `feature/codex-adapter`
+- Goal: implement a truthful downstream TypeScript adapter under `adapters/codex/` that maps the official Codex app-server runtime surface onto the frozen ASCP v0.1 contracts while reusing the existing TypeScript SDK only for small generic ASCP helpers
 - Source inputs:
   - `AGENTS.md`
   - `plans.md`
@@ -22,130 +22,101 @@ This file tracks the active scoped work for the current branch.
   - `README.md`
   - `docs/README.md`
   - `docs/project-context-reference.md`
+  - `docs/prompts/codex-adapter.md`
+  - `docs/superpowers/specs/2026-04-26-codex-adapter-design.md`
+  - `docs/superpowers/plans/2026-04-26-codex-adapter.md`
   - `protocol/ASCP_Protocol_Detailed_Spec_v0_1.md`
   - `protocol/ASCP_Protocol_PRD_and_Build_Guide.md`
-  - the user-provided "ASCP Monorepo — Production-Grade Structure"
   - `protocol/schema/`
   - `protocol/spec/`
   - `protocol/examples/`
   - `protocol/conformance/`
-  - `services/mock-server/`
-  - `apps/reference-client/`
-  - `sdks/`
-  - recent git history
+  - `apps/reference-client/README.md`
+  - `services/mock-server/README.md`
+  - `sdks/typescript/`
+  - observed `codex app-server` schemas and live runtime probes
 
 ## Scope
 
 Included in this branch:
 
-- move the repository into the target monorepo layout under `protocol/`, `packages/`, `sdks/`, `adapters/`, `apps/`, `services/`, `tooling/`, and `docs/`
-- preserve ASCP protocol contracts while relocating protocol truth into `protocol/`
-- preserve the existing TypeScript and Dart SDKs while relocating them under `sdks/`
-- preserve the existing reference client and mock server while relocating them under `apps/` and `services/`
-- add root workspace scaffolding with npm workspaces, `turbo.json`, and `melos.yaml`
-- scaffold placeholder package directories for future shared packages, adapters, and apps
-- update scripts, docs, tests, and path references so the moved repository remains coherent
+- build a TypeScript workspace package under `adapters/codex/`
+- integrate with the official `codex app-server` stdio JSON-RPC surface
+- implement truthful runtime discovery and capability resolution for Codex
+- normalize Codex threads, turns, notifications, approvals, and turn diffs into ASCP-shaped outputs
+- support `sessions.list`, `sessions.get`, `sessions.resume`, `sessions.send_input`, and event subscription behavior where the runtime supports them honestly
+- add best-effort approval and diff support with explicit unsupported fallback for unresolved surfaces
+- add small generic TypeScript SDK helpers only where they are clearly reusable and Codex-agnostic
+- add adapter tests, validation commands, and adapter documentation
 
 Explicitly out of scope:
 
 - changing ASCP core method, event, schema, replay, auth, extension, or compatibility semantics
-- implementing the Codex adapter or any other new runtime adapter
-- building product UI beyond placeholder module scaffolds
-- widening the protocol scope beyond the current source documents
+- adding new ASCP methods, events, or compatibility levels for Codex
+- claiming replay support without an official Codex replay surface
+- claiming artifact support without an official Codex artifact metadata surface
+- widening the TypeScript SDK with Codex-specific transport or mapping behavior
+- product UX, daemon work, or app surfaces
 
 ## Planned Files
 
 Files to add:
 
-- `package.json`
-- `turbo.json`
-- `melos.yaml`
-- `packages/README.md`
-- `packages/core/README.md`
-- `packages/transport/README.md`
-- `packages/event-engine/README.md`
-- `packages/auth/README.md`
-- `packages/utils/README.md`
-- `adapters/README.md`
+- `adapters/codex/tsconfig.json`
+- `adapters/codex/vitest.config.ts`
+- `adapters/codex/src/index.ts`
+- `adapters/codex/src/app-server-client.ts`
+- `adapters/codex/src/discovery.ts`
+- `adapters/codex/src/capabilities.ts`
+- `adapters/codex/src/ids.ts`
+- `adapters/codex/src/session-mapper.ts`
+- `adapters/codex/src/events.ts`
+- `adapters/codex/src/approvals.ts`
+- `adapters/codex/src/service.ts`
+- `adapters/codex/tests/discovery.test.ts`
+- `adapters/codex/tests/capabilities.test.ts`
+- `adapters/codex/tests/ids.test.ts`
+- `adapters/codex/tests/session-mapper.test.ts`
+- `adapters/codex/tests/service.test.ts`
+- `adapters/codex/tests/events.test.ts`
+- `adapters/codex/tests/approvals.test.ts`
+- `adapters/codex/tests/validate-codex-adapter.mjs`
+- `tooling/scripts/validate_codex_adapter.sh`
+
+Files to modify:
+
+- `adapters/codex/package.json`
 - `adapters/codex/README.md`
-- `adapters/claude/README.md`
-- `adapters/gemini/README.md`
-- `apps/README.md`
-- `apps/web/README.md`
-- `services/README.md`
-- `tooling/README.md`
-- `tooling/scripts/README.md`
-- `tooling/generators/README.md`
-- `docs/architecture/system-design.md`
-- `docs/architecture/dependency-graph.md`
-
-Files to move and update:
-
-- `schema/` -> `protocol/schema/`
-- `spec/` -> `protocol/spec/`
-- `examples/` -> `protocol/examples/`
-- `conformance/` -> `protocol/conformance/`
-- `mock-server/` -> `services/mock-server/`
-- `reference-client/` -> `apps/reference-client/`
-- `sdk/` -> `sdks/`
-- `scripts/` -> `tooling/scripts/`
-- root protocol source docs -> `protocol/`
-- root and repo docs that reference old paths
+- `sdks/typescript/src/index.ts`
+- `sdks/typescript/src/methods/index.ts`
+- `sdks/typescript/src/events/index.ts`
+- small generic helper files under `sdks/typescript/src/` if needed by the final implementation plan
 
 ## Tasks
 
 | Status | Task | Acceptance Criteria |
 | --- | --- | --- |
-| done | rewrite the active plan for the monorepo migration branch | `plans.md` scopes the branch to repository architecture only and names the user monorepo structure plus ASCP source docs as inputs |
-| done | move the repository into the target monorepo layout | the repository contains `protocol/`, `packages/`, `sdks/`, `adapters/`, `apps/`, `services/`, `tooling/`, and `docs/` with existing code/assets relocated conservatively |
-| done | add root workspace scaffolding and placeholder module boundaries | root `package.json`, `turbo.json`, and `melos.yaml` exist and future module placeholders document the dependency direction without leaking reverse dependencies |
-| done | update path-sensitive code, scripts, and docs | validation scripts, SDK tests/examples, mock-server fixtures, and repository docs all point at the new locations |
-| done | checkpoint and close out the branch | `docs/status.md` records the monorepo migration, validation evidence is captured, and the branch is committed, pushed, merged, and closed out on `main` |
+| completed | rewrite the branch plan and implementation plan for the TypeScript adapter boundary | `plans.md` and `docs/superpowers/plans/2026-04-26-codex-adapter.md` both target a TypeScript adapter over `codex app-server` with only small generic SDK extractions |
+| completed | scaffold the adapter workspace and validation entrypoint | `adapters/codex/` has package metadata, TypeScript config, Vitest config, exports, and a validator script that can fail red before implementation is complete |
+| completed | implement Codex app-server transport, discovery, and truthful capability mapping | the adapter can probe the runtime, derive `codex_local`, and advertise only capabilities supported by observed official surfaces |
+| pending | implement ASCP ID, session, run, event, approval, and diff normalization | Codex threads, turns, notifications, approvals, and turn diffs map into exact ASCP field names and deterministic IDs without redefining protocol semantics |
+| pending | implement the ASCP service surface for the supported methods | the adapter exposes honest `sessions.list`, `sessions.get`, `sessions.resume`, `sessions.send_input`, subscribe-like event streaming, and any supported approval or diff reads with correct error fallback |
+| pending | document, validate, and checkpoint the adapter branch | adapter docs, tests, and validator pass; `docs/status.md` records the completed feature; and the branch is ready for implementation close-out |
 
 ## Acceptance Criteria
 
 The task is done only when all of the following are true:
 
-- protocol source-of-truth assets live under `protocol/`
-- SDKs live under `sdks/`
-- the reference client lives under `apps/reference-client/`
-- the mock server lives under `services/mock-server/`
-- root workspace files document and orchestrate the monorepo shape
-- placeholder module directories exist for `packages/`, `adapters/`, and future apps/services where requested
-- documentation explains the dependency direction `protocol -> packages -> sdks -> adapters -> apps`
-- the existing validation entrypoints still run successfully from the new structure
+- the adapter is implemented in TypeScript under `adapters/codex/`
+- the adapter uses the official `codex app-server` surface as its primary runtime integration seam
+- capability advertisement is truthful and conservative
+- `sessions.list`, `sessions.get`, `sessions.resume`, and `sessions.send_input` produce ASCP-shaped outputs
+- event streaming normalizes official Codex notifications into ASCP `EventEnvelope` objects
+- approval support is exposed only where the official surface supports it honestly
+- replay and artifacts stay unsupported unless proven by an official Codex surface
+- any SDK additions remain generic and Codex-agnostic
+- adapter-specific validation commands and tests exist in-repo
 
 ## Next Likely Step
 
-Start the next shared-package, adapter, app, or service feature from updated `main` using the monorepo layout as the new repository baseline.
-
-## Completion Outcome
-
-- Status: complete and merged to `main` from `branch-ascp-monorepo-structure`
-- Validation evidence:
-  - `git diff --check`
-  - `bash tooling/scripts/validate_method_contracts.sh`
-  - `bash tooling/scripts/validate_event_contracts.sh`
-  - `bash tooling/scripts/validate_replay_semantics.sh`
-  - `bash tooling/scripts/validate_auth_semantics.sh`
-  - `bash tooling/scripts/validate_extension_semantics.sh`
-  - `bash tooling/scripts/validate_conformance.sh`
-  - `bash tooling/scripts/validate_mock_server.sh`
-  - `bash tooling/scripts/validate_reference_client.sh`
-  - `npm --workspace sdks/typescript run check`
-- Documentation updated:
-  - `README.md`
-  - `AGENTS.md`
-  - `plans.md`
-  - `docs/status.md`
-  - `docs/README.md`
-  - `docs/project-context-reference.md`
-  - `docs/architecture/system-design.md`
-  - `docs/architecture/dependency-graph.md`
-  - `protocol/ASCP_Protocol_PRD_and_Build_Guide.md`
-  - `protocol/ASCP_Protocol_Detailed_Spec_v0_1.md`
-  - `packages/README.md`
-  - `adapters/README.md`
-  - `apps/README.md`
-  - `services/README.md`
-  - `tooling/README.md`
+Implement Task 5 on `feature/codex-adapter`: deterministic ASCP ID construction plus conservative thread and turn normalization into session/run shapes, without widening into service methods or event normalization yet.

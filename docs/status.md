@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-26 - Codex adapter task 4
+
+- Branch: `feature/codex-adapter`
+- Commit: `6eadc8a`
+- Summary: completed the Codex adapter runtime-discovery slice by adding the app-server stdio JSON-RPC client, truthful runtime discovery, conservative capability resolution, and focused transport/discovery/capability tests; the ASCP-facing capability surface now stays intentionally strict for Task 4, with `stream_events`, approvals, diffs, artifacts, and replay all held false until later tasks implement those contracts honestly
+- Documentation updated: `plans.md`, `docs/status.md`, `docs/superpowers/plans/2026-04-26-codex-adapter.md`
+- Next likely step: implement Task 5 deterministic ID helpers and thread/turn-to-session/run normalization under `adapters/codex/src/`
+
 ### 2026-04-26 - Production-grade monorepo restructure
 
 - Branch: `branch-ascp-monorepo-structure`
