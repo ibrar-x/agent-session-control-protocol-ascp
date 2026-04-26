@@ -99,7 +99,7 @@ Files to modify:
 | completed | rewrite the branch plan and implementation plan for the TypeScript adapter boundary | `plans.md` and `docs/superpowers/plans/2026-04-26-codex-adapter.md` both target a TypeScript adapter over `codex app-server` with only small generic SDK extractions |
 | completed | scaffold the adapter workspace and validation entrypoint | `adapters/codex/` has package metadata, TypeScript config, Vitest config, exports, and a validator script that can fail red before implementation is complete |
 | completed | implement Codex app-server transport, discovery, and truthful capability mapping | the adapter can probe the runtime, derive `codex_local`, and advertise only capabilities supported by observed official surfaces |
-| pending | implement ASCP ID, session, run, event, approval, and diff normalization | Codex threads, turns, notifications, approvals, and turn diffs map into exact ASCP field names and deterministic IDs without redefining protocol semantics |
+| in_progress | implement ASCP ID, session, run, event, approval, and diff normalization | Codex threads, turns, notifications, approvals, and turn diffs map into exact ASCP field names and deterministic IDs without redefining protocol semantics |
 | pending | implement the ASCP service surface for the supported methods | the adapter exposes honest `sessions.list`, `sessions.get`, `sessions.resume`, `sessions.send_input`, subscribe-like event streaming, and any supported approval or diff reads with correct error fallback |
 | pending | document, validate, and checkpoint the adapter branch | adapter docs, tests, and validator pass; `docs/status.md` records the completed feature; and the branch is ready for implementation close-out |
 
@@ -119,4 +119,4 @@ The task is done only when all of the following are true:
 
 ## Next Likely Step
 
-Implement Task 5 on `feature/codex-adapter`: deterministic ASCP ID construction plus conservative thread and turn normalization into session/run shapes, without widening into service methods or event normalization yet.
+Implement Task 6 on `feature/codex-adapter`: the supported ASCP session method surface using the completed discovery, capability, ID, and mapper layers, without widening into event normalization or approval service behavior that is not yet proven.

@@ -22,6 +22,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 - Documentation updated: `plans.md`, `docs/status.md`, `docs/superpowers/plans/2026-04-26-codex-adapter.md`
 - Next likely step: implement Task 5 deterministic ID helpers and thread/turn-to-session/run normalization under `adapters/codex/src/`
 
+### 2026-04-26 - Codex adapter task 5
+
+- Branch: `feature/codex-adapter`
+- Commit: `d90c675`
+- Summary: completed deterministic Codex ID helpers plus conservative thread and turn normalization into ASCP `Session` and `Run` shapes, aligned the mapper to the real Codex runtime schema, converted Unix-second timestamps into ASCP UTC strings, removed the unproven `active_run_id` mapping, and locked the slice with focused mapper tests
+- Documentation updated: `plans.md`, `docs/status.md`, `docs/superpowers/plans/2026-04-26-codex-adapter.md`
+- Next likely step: implement Task 6 service methods for `sessions.list`, `sessions.get`, `sessions.resume`, and `sessions.send_input` on top of the existing discovery and mapping layers
+
 ### 2026-04-26 - Production-grade monorepo restructure
 
 - Branch: `branch-ascp-monorepo-structure`

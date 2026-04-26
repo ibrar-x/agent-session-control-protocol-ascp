@@ -334,7 +334,7 @@ Expected: PASS with `runtime_id = codex_local`, `replay = false`, and `artifacts
 - Create: `adapters/codex/tests/ids.test.ts`
 - Create: `adapters/codex/tests/session-mapper.test.ts`
 
-- [ ] **Step 1: Write failing tests for the adapter ID strategy**
+- [x] **Step 1: Write failing tests for the adapter ID strategy**
 
 ```ts
 import { describe, expect, it } from "vitest";
@@ -349,7 +349,7 @@ describe("Codex adapter ids", () => {
 });
 ```
 
-- [ ] **Step 2: Write failing tests for thread and turn normalization**
+- [x] **Step 2: Write failing tests for thread and turn normalization**
 
 ```ts
 expect(mapThreadToSession(thread)).toMatchObject({
@@ -367,7 +367,7 @@ expect(mapTurnToRun(turn, "codex:019dc70f")).toMatchObject({
 });
 ```
 
-- [ ] **Step 3: Implement conservative status mapping**
+- [x] **Step 3: Implement conservative status mapping**
 
 Use an explicit mapping function instead of scattering status logic:
 
@@ -383,7 +383,7 @@ export function mapThreadStatus(status: { type: string; activeFlags?: string[] }
 }
 ```
 
-- [ ] **Step 4: Run the mapper tests**
+- [x] **Step 4: Run the mapper tests**
 
 Run: `npm --workspace @ascp/adapter-codex run test -- tests/ids.test.ts tests/session-mapper.test.ts`
 
