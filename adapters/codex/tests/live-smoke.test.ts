@@ -6,6 +6,7 @@ import {
   getLiveSmokeUsage,
   parseLiveSmokeCommand,
   runInteractiveLiveSmoke,
+  runInteractiveSessionMenu,
   runLiveSmokeCommand,
   validateLiveSmokeCommand
 } from "../src/live-smoke.js";
@@ -58,6 +59,24 @@ describe("parseLiveSmokeCommand", () => {
       sessionId: "codex:thread_1",
       inputText: "--help --fast continue"
     });
+  });
+
+  it("rejects extra arguments for discover", () => {
+    expect(() => parseLiveSmokeCommand(["discover", "extra"])).toThrow(
+      "The discover command does not accept arguments."
+    );
+  });
+
+  it("rejects an invalid list limit", () => {
+    expect(() => parseLiveSmokeCommand(["list", "--limit", "nope"])).toThrow(
+      "The --limit option requires a positive integer."
+    );
+  });
+
+  it("rejects unknown flags for resume", () => {
+    expect(() => parseLiveSmokeCommand(["resume", "codex:thread_1", "--oops"])).toThrow(
+      "Unsupported option for resume: --oops"
+    );
   });
 });
 
@@ -286,5 +305,41 @@ describe("runInteractiveLiveSmoke", () => {
     expect(calls).toEqual(["discover"]);
     expect(output).toContain('"runtimeAvailable": false');
     expect(output).toContain("Codex runtime is unavailable");
+  });
+
+  it("keeps the session menu alive after an action failure", async () => {
+    let output = "";
+    const getCalls: string[] = [];
+    const sink = new Writable({
+      write(chunk, _encoding, callback) {
+        output += chunk.toString();
+        callback();
+      }
+    });
+    const answers = ["g", "y", "q"];
+
+    const result = await runInteractiveSessionMenu(
+      async () => answers.shift() ?? "q",
+      sink,
+      {
+        id: "codex:thread_1",
+        runtime_id: "codex_local",
+        status: "idle",
+        created_at: "2026-04-26T19:00:00.000Z",
+        updated_at: "2026-04-26T19:00:00.000Z",
+        title: "Test session"
+      },
+      {
+        getSession: async (params) => {
+          getCalls.push(String(params.session_id));
+          throw new Error("Session read failed.");
+        }
+      }
+    );
+
+    expect(getCalls).toEqual(["codex:thread_1"]);
+    expect(result).toBe("quit");
+    expect(output).toContain("Action failed: Session read failed.");
+    expect(output).toContain("Selected codex:thread_1");
   });
 });

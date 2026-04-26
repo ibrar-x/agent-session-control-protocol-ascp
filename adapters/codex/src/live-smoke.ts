@@ -77,6 +77,82 @@ function parseSessionId(args: string[]): string | undefined {
   return args[0].startsWith("--") ? undefined : args[0];
 }
 
+function expectNoArguments(command: string, args: string[]): void {
+  if (args.length > 0) {
+    throw new Error(`The ${command} command does not accept arguments.`);
+  }
+}
+
+function ensureNoExtraPositional(command: string, args: string[]): void {
+  for (const arg of args) {
+    if (!arg.startsWith("--")) {
+      throw new Error(`The ${command} command does not accept extra positional arguments.`);
+    }
+  }
+}
+
+function parseListCommand(args: string[]): Extract<LiveSmokeCommand, { command: "list" }> {
+  if (args.length === 0) {
+    return {
+      mode: "command",
+      command: "list"
+    };
+  }
+
+  if (args.length !== 2 || args[0] !== "--limit") {
+    throw new Error(`Unsupported arguments for list: ${args.join(" ")}`);
+  }
+
+  const limit = parseLimit(args[1]);
+
+  if (limit === undefined) {
+    throw new Error("The --limit option requires a positive integer.");
+  }
+
+  return {
+    mode: "command",
+    command: "list",
+    limit
+  };
+}
+
+function parseGetCommand(args: string[]): Extract<LiveSmokeCommand, { command: "get" }> {
+  const sessionId = parseSessionId(args);
+  const remainder = sessionId === undefined ? args : args.slice(1);
+
+  for (const arg of remainder) {
+    if (arg !== "--runs") {
+      throw new Error(`Unsupported option for get: ${arg}`);
+    }
+  }
+
+  return {
+    mode: "command",
+    command: "get",
+    sessionId,
+    includeRuns: remainder.includes("--runs") ? true : undefined
+  };
+}
+
+function parseResumeCommand(args: string[]): Extract<LiveSmokeCommand, { command: "resume" }> {
+  const sessionId = parseSessionId(args);
+  const remainder = sessionId === undefined ? args : args.slice(1);
+
+  if (remainder.length === 0) {
+    return {
+      mode: "command",
+      command: "resume",
+      sessionId
+    };
+  }
+
+  if (remainder[0]?.startsWith("--")) {
+    throw new Error(`Unsupported option for resume: ${remainder[0]}`);
+  }
+
+  throw new Error("The resume command does not accept extra positional arguments.");
+}
+
 function writeLine(output: NodeJS.WritableStream, line = ""): void {
   output.write(`${line}\n`);
 }
@@ -208,7 +284,7 @@ async function chooseSession(
   return sessions[index - 1];
 }
 
-async function handleInteractiveSession(
+export async function runInteractiveSessionMenu(
   ask: (promptText: string) => Promise<string>,
   output: NodeJS.WritableStream,
   session: Session,
@@ -231,17 +307,21 @@ async function handleInteractiveSession(
     }
 
     if (action === "g") {
-      const includeRuns = await confirmMutatingAction(ask, "Include runs in the session read?");
-      const result = await runLiveSmokeCommand(
-        {
-          mode: "command",
-          command: "get",
-          sessionId: session.id,
-          includeRuns
-        },
-        deps
-      );
-      writeLine(output, renderLiveSmokeValue(result));
+      try {
+        const includeRuns = await confirmMutatingAction(ask, "Include runs in the session read?");
+        const result = await runLiveSmokeCommand(
+          {
+            mode: "command",
+            command: "get",
+            sessionId: session.id,
+            includeRuns
+          },
+          deps
+        );
+        writeLine(output, renderLiveSmokeValue(result));
+      } catch (error) {
+        writeLine(output, `Action failed: ${error instanceof Error ? error.message : String(error)}`);
+      }
       continue;
     }
 
@@ -256,15 +336,19 @@ async function handleInteractiveSession(
         continue;
       }
 
-      const result = await runLiveSmokeCommand(
-        {
-          mode: "command",
-          command: "resume",
-          sessionId: session.id
-        },
-        deps
-      );
-      writeLine(output, renderLiveSmokeValue(result));
+      try {
+        const result = await runLiveSmokeCommand(
+          {
+            mode: "command",
+            command: "resume",
+            sessionId: session.id
+          },
+          deps
+        );
+        writeLine(output, renderLiveSmokeValue(result));
+      } catch (error) {
+        writeLine(output, `Action failed: ${error instanceof Error ? error.message : String(error)}`);
+      }
       continue;
     }
 
@@ -286,16 +370,20 @@ async function handleInteractiveSession(
         continue;
       }
 
-      const result = await runLiveSmokeCommand(
-        {
-          mode: "command",
-          command: "send-input",
-          sessionId: session.id,
-          inputText
-        },
-        deps
-      );
-      writeLine(output, renderLiveSmokeValue(result));
+      try {
+        const result = await runLiveSmokeCommand(
+          {
+            mode: "command",
+            command: "send-input",
+            sessionId: session.id,
+            inputText
+          },
+          deps
+        );
+        writeLine(output, renderLiveSmokeValue(result));
+      } catch (error) {
+        writeLine(output, `Action failed: ${error instanceof Error ? error.message : String(error)}`);
+      }
       continue;
     }
 
@@ -329,29 +417,17 @@ export function parseLiveSmokeCommand(argv: string[]): LiveSmokeCommand {
 
   switch (command) {
     case "discover":
+      expectNoArguments(command, rest);
       return {
         mode: "command",
         command: "discover"
       };
     case "list":
-      return {
-        mode: "command",
-        command: "list",
-        limit: parseLimit(readOptionValue(rest, "--limit"))
-      };
+      return parseListCommand(rest);
     case "get":
-      return {
-        mode: "command",
-        command: "get",
-        sessionId: parseSessionId(rest),
-        includeRuns: rest.includes("--runs") ? true : undefined
-      };
+      return parseGetCommand(rest);
     case "resume":
-      return {
-        mode: "command",
-        command: "resume",
-        sessionId: parseSessionId(rest)
-      };
+      return parseResumeCommand(rest);
     case "send-input":
       return {
         mode: "command",
@@ -535,7 +611,7 @@ export async function runInteractiveLiveSmoke(options: {
         continue;
       }
 
-      const action = await handleInteractiveSession(ask, options.output, selection, options.deps);
+      const action = await runInteractiveSessionMenu(ask, options.output, selection, options.deps);
 
       if (action === "quit") {
         return;
