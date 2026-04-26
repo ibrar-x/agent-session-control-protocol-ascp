@@ -21,7 +21,7 @@ describe("mapThreadStatus", () => {
       "waiting_input"
     );
     expect(mapThreadStatus({ type: "systemError" })).toBe("failed");
-    expect(mapThreadStatus({ type: "notLoaded" })).toBe("disconnected");
+    expect(mapThreadStatus({ type: "notLoaded" })).toBe("idle");
     expect(mapThreadStatus({ type: "unknown" })).toBe("disconnected");
   });
 });

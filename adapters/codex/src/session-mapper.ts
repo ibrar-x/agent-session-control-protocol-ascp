@@ -179,6 +179,10 @@ export function mapThreadStatus(status: {
     return "failed";
   }
 
+  if (status.type === "notLoaded") {
+    return "idle";
+  }
+
   return "disconnected";
 }
 
