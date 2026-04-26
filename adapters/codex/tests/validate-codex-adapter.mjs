@@ -28,10 +28,10 @@ if (!pkg.scripts?.test || !pkg.scripts?.build || !pkg.scripts?.check) {
 }
 
 for (const requiredClaim of [
-  "stream_events=false",
-  "approval_respond=false",
-  "artifacts=false",
-  "replay=false"
+  "`stream_events` and `notifications` are true when runtime notifications are observable",
+  "`approval_respond` stays false until an approval response method succeeds at runtime",
+  "`diffs` and `artifacts` are true because the adapter derives metadata from `thread/read` turn items",
+  "`replay` is true for in-memory subscribe replay behavior (`from_seq` / `from_event_id`)"
 ]) {
   if (!readme.includes(requiredClaim)) {
     throw new Error(`README must document truthful fallback: ${requiredClaim}`);

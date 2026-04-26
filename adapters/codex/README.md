@@ -10,22 +10,28 @@ TypeScript workspace for a truthful ASCP adapter over the official `codex app-se
 - `sessions.get`
 - `sessions.resume`
 - `sessions.send_input`
+- `sessions.subscribe`
+- `sessions.unsubscribe`
+- `approvals.list`
+- `approvals.respond` (truthful fallback to `UNSUPPORTED` when Codex does not expose a response method)
+- `diffs.get` (derived from `fileChange` turn items)
+- `artifacts.list`
+- `artifacts.get`
 - event normalization helpers for `turn/started`, `turn/completed`, `agentMessageDelta`, and `turn/diff/updated`
 - approval request mapping helpers for `item/commandExecution/requestApproval`, `item/fileChange/requestApproval`, and `item/permissions/requestApproval`
+- replay queue behavior for `sessions.subscribe` with `from_seq` and `from_event_id` over sequenced in-memory event history
 
 Operational `thread/*` and `turn/*` requests now lazily perform the required `initialize` handshake with `codex app-server`, so downstream callers do not need to call `client.initialize()` manually before using the service layer.
 
-## Current advertised capability fallbacks
+## Current capability behavior
 
-- `stream_events=false`
-- `notifications=false`
-- `approval_requests=false`
-- `approval_respond=false`
-- `diffs=false`
-- `artifacts=false`
-- `replay=false`
+- `stream_events` and `notifications` are true when runtime notifications are observable
+- `approval_requests` becomes true once approval request notifications are observed
+- `approval_respond` stays false until an approval response method succeeds at runtime
+- `diffs` and `artifacts` are true because the adapter derives metadata from `thread/read` turn items
+- `replay` is true for in-memory subscribe replay behavior (`from_seq` / `from_event_id`) in the running service instance
 
-These flags stay false until the adapter proves the corresponding official Codex subscribe, approval-response, diff-read, artifact, or replay surface end to end. The mapping helpers in this package do not widen those claims on their own.
+The adapter does not fake unsupported runtime behavior: if Codex does not expose an approval response method, `approvals.respond` returns `UNSUPPORTED` instead of guessing.
 
 ## Validation
 
@@ -59,6 +65,6 @@ npm --workspace @ascp/adapter-codex run live -- resume codex:thread_id
 npm --workspace @ascp/adapter-codex run live -- send-input codex:thread_id "continue from here"
 ```
 
-The live script rebuilds the adapter before launch so it runs against fresh local code. It intentionally does not expose `sessions.subscribe`, replay, artifacts, diff reads, or approval response flows.
+The live script rebuilds the adapter before launch so it runs against fresh local code. It currently focuses on session discovery/read/resume/input flows and does not expose dedicated CLI subcommands for subscribe, approvals, diffs, or artifacts yet.
 
 When `send-input` targets a persisted Codex session from `sessions.list`, the adapter now reattaches that thread with `thread/resume` before starting a new turn. This keeps historical sessions usable in the live smoke flow instead of failing with a raw `thread not found` runtime error.

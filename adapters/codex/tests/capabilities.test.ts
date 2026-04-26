@@ -60,12 +60,12 @@ const BASE_DISCOVERY: CodexDiscovery = {
 };
 
 describe("resolveCodexCapabilities", () => {
-  it("marks replay unsupported when no official replay surface is observed", () => {
-    expect(resolveCodexCapabilities(BASE_DISCOVERY).replay).toBe(false);
+  it("marks replay supported when event streaming plus thread reads are available", () => {
+    expect(resolveCodexCapabilities(BASE_DISCOVERY).replay).toBe(true);
   });
 
-  it("keeps artifacts unsupported when no official artifact surface is observed", () => {
-    expect(resolveCodexCapabilities(BASE_DISCOVERY).artifacts).toBe(false);
+  it("marks artifacts supported when thread reads are available", () => {
+    expect(resolveCodexCapabilities(BASE_DISCOVERY).artifacts).toBe(true);
   });
 
   it("maps only observed official surfaces and defaults ambiguous capabilities to false", () => {
@@ -74,17 +74,17 @@ describe("resolveCodexCapabilities", () => {
       session_resume: true,
       session_start: true,
       session_stop: false,
-      stream_events: false,
+      stream_events: true,
       transcript_read: true,
       message_send: true,
-      approval_requests: false,
+      approval_requests: true,
       approval_respond: false,
-      artifacts: false,
-      diffs: false,
+      artifacts: true,
+      diffs: true,
       terminal_passthrough: false,
-      notifications: false,
+      notifications: true,
       checkpoints: false,
-      replay: false,
+      replay: true,
       multi_workspace: false
     });
   });

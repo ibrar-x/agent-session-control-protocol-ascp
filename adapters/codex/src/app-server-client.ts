@@ -487,6 +487,10 @@ export class CodexAppServerClient {
     };
   }
 
+  onNotification(listener: (notification: CodexJsonRpcNotification) => void): () => void {
+    return this.transport.onNotification(listener);
+  }
+
   markApprovalRequestObserved(): void {
     this.approvalRequestsObserved = true;
   }

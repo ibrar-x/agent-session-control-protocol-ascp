@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-26 - Codex adapter remaining ASCP surfaces
+
+- Branch: `branch-codex-adapter-remaining-surfaces`
+- Commit: `not committed`
+- Summary: implemented the remaining Codex adapter service surfaces by adding `sessions.subscribe` and `sessions.unsubscribe` with sequenced event queues and replay behavior, adding `approvals.list` plus truthful `approvals.respond` fallback handling, deriving `diffs.get` and `artifacts.list|get` from Codex `fileChange` turn items, wiring notification listeners from the app-server client, and updating capability resolution to reflect the new surfaces
+- Documentation updated: `plans.md`, `docs/status.md`, `adapters/codex/README.md`
+- Next likely step: review the branch, then commit, push, and merge into `main` if accepted
+
 ### 2026-04-26 - Codex live smoke script task 2
 
 - Branch: `feature/codex-live-smoke-script`
