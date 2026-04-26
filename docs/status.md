@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-27 - Docs site UI polish: search, tables, code blocks, line height
+
+- Branch: `main` (direct commit to `apps/web` submodule)
+- Commit: `eda3e0d` (in `apps/web/`)
+- Summary: fixed all reported docs site UI issues by disabling Fumadocs built-in search to eliminate duplicate CMD+K dialogs, adding 6 curated popular pages to the search empty state, increasing global line heights (body/p/li → 1.75, pre code → 1.85), completely redesigning tables with no vertical borders, alternating row backgrounds, and stronger horizontal separators, and adding functional copy (clipboard API) and share (Web Share API with fallback) buttons to every code block via a client-side `CodeBlockEnhancer` component
+- Documentation updated: `docs/status.md`
+- Next likely step: deploy the updated docs site to sessio.app
+
 ### 2026-04-26 - Docs site monochrome styling refinement and branch merge
 
 - Branch: `branch-ascp-host-service`
