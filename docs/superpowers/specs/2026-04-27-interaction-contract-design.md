@@ -122,6 +122,8 @@ Add a new canonical core noun:
 
 `run_id` remains optional and is populated only when the runtime exposes a stable run or turn identifier that the adapter can map honestly.
 
+Clients must treat absent `run_id` as a normal opaque omission. They must not require it for rendering, response routing, or blocked-interaction handling.
+
 Expected additive metadata keys for `InputRequest`:
 
 - `source`
@@ -209,7 +211,7 @@ No new approval or input capability flags are added in this patch.
 `sessions.send_input`:
 
 - returns `NOT_FOUND` when the target session is gone
-- returns `CONFLICT` when the target input request is no longer pending and the runtime cannot accept the answer
+- returns `CONFLICT` when the target input request is no longer in `pending` status
 - returns `UNSUPPORTED` when the adapter cannot route a blocked-question response back into the runtime
 
 ## Testing Strategy
@@ -221,6 +223,7 @@ The protocol patch must add:
 - event schema validation for input lifecycle events
 - examples showing both runtime-native and host-derived approval provenance
 - examples showing blocked question state and input completion
+- a provenance actionability check proving that a host-derived approval with `approval_respond=false` causes `approvals.respond` to return `UNSUPPORTED`
 - conformance checks proving adapters can implement the contract without inventing host-level translation semantics
 
 ## Follow-Up Branch
