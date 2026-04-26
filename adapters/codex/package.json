@@ -1,6 +1,22 @@
 {
   "name": "@ascp/adapter-codex",
   "private": true,
-  "version": "0.0.0",
-  "description": "Placeholder Codex adapter package for the ASCP monorepo"
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "check": "npm run build && npm run test"
+  },
+  "dependencies": {
+    "ascp-sdk-typescript": "file:../../sdks/typescript"
+  },
+  "devDependencies": {
+    "@types/node": "^24.9.1",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  }
 }
