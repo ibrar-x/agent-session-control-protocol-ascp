@@ -22,10 +22,12 @@ describe("generic ASCP builders", () => {
         session_id: "sess_1",
         payload: { run_id: "run_1" }
       })
-    ).toMatchObject({
+    ).toEqual({
       id: "evt_1",
       type: "run.started",
-      session_id: "sess_1"
+      ts: "2026-04-26T10:00:00Z",
+      session_id: "sess_1",
+      payload: { run_id: "run_1" }
     });
   });
 });

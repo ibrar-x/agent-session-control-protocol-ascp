@@ -1,13 +1,13 @@
 import type {
   FlexibleObject,
   RequestId,
-  ResponseEnvelope
+  SuccessResponseEnvelope
 } from "../models/types.js";
 
 export function createSuccessResponse<TResult extends FlexibleObject>(
   id: RequestId,
   result: TResult
-): ResponseEnvelope<TResult> {
+): SuccessResponseEnvelope<TResult> {
   return {
     jsonrpc: "2.0",
     id,
