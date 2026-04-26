@@ -63,8 +63,8 @@ Files to modify:
 
 | Status | Task | Acceptance Criteria |
 | --- | --- | --- |
-| pending | add a testable live smoke command module | command parsing, validation, and action dispatch live in a normal TypeScript module with focused tests |
-| pending | add the executable script wrapper and npm alias | `npm --workspace @ascp/adapter-codex run live` works in interactive mode and `run live -- <subcommand>` works directly |
+| completed | add a testable live smoke command module | command parsing, validation, and action dispatch live in a normal TypeScript module with focused tests |
+| in_progress | add the executable script wrapper and npm alias | `npm --workspace @ascp/adapter-codex run live` works in interactive mode and `run live -- <subcommand>` works directly |
 | pending | document and verify the live smoke flow | the README documents usage clearly and the adapter build/tests still pass |
 
 ## Acceptance Criteria
@@ -79,4 +79,4 @@ The task is done only when all of the following are true:
 
 ## Next Likely Step
 
-Create the implementation plan in `docs/superpowers/plans/2026-04-26-codex-live-smoke-script.md`, then execute the script feature on this branch with TDD.
+Implement Task 3 and Task 4 in `docs/superpowers/plans/2026-04-26-codex-live-smoke-script.md`: add dispatch over the adapter service, then wire the executable wrapper and interactive flow.

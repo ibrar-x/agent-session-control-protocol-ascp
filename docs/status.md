@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-26 - Codex live smoke script task 2
+
+- Branch: `feature/codex-live-smoke-script`
+- Commit: `not committed`
+- Summary: completed the first implementation slice for the Codex live smoke script by adding typed command parsing and validation helpers, covering interactive default plus core list/get/send-input parsing behavior, and tightening parser invariants so option tokens are not misread as session IDs and send-input text is preserved verbatim
+- Documentation updated: `plans.md`, `docs/status.md`
+- Next likely step: add command dispatch over the existing adapter service, then wire the executable wrapper and interactive flow
+
 ### 2026-04-26 - Codex adapter initialization hotfix
 
 - Branch: `feature/codex-adapter-init-fix`
