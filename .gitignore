@@ -1,3 +1,6 @@
 .DS_Store
 __pycache__/
 *.pyc
+adapters/codex/dist/
+adapters/codex/node_modules/
+node_modules/
