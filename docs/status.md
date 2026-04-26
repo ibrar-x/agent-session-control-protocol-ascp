@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-26 - Codex adapter initialization hotfix
+
+- Branch: `feature/codex-adapter-init-fix`
+- Commit: `not committed`
+- Summary: fixed the live Codex adapter usability regression where service calls failed with `Not initialized` unless downstream code called `client.initialize()` manually first, by adding lazy one-time app-server initialization in the Codex client, extending the client regression tests to model a runtime that rejects pre-initialize requests, and re-running both adapter verification and real runtime smoke checks without manual initialization
+- Documentation updated: `plans.md`, `docs/status.md`, `adapters/codex/README.md`
+- Next likely step: push the hotfix branch, fast-forward `main`, and continue future adapter work from updated `main`
+
 ### 2026-04-26 - Codex adapter task 7 and task 8
 
 - Branch: `feature/codex-adapter`

@@ -108,6 +108,30 @@ class FakeTransport implements CodexAppServerTransport {
   }
 }
 
+class InitializationGatedTransport extends FakeTransport {
+  readonly requestedMethods: string[] = [];
+  private initialized = false;
+
+  override async request<TResult = unknown>(
+    method: string,
+    params?: Record<string, unknown>,
+    options?: CodexAppServerRequestOptions
+  ): Promise<TResult> {
+    this.requestedMethods.push(method);
+
+    if (method === "initialize") {
+      this.initialized = true;
+      return super.request(method, params, options);
+    }
+
+    if (!this.initialized) {
+      throw new Error("Not initialized");
+    }
+
+    return super.request(method, params, options);
+  }
+}
+
 describe("discoverCodexRuntime", () => {
   it("derives runtime availability, version, and observed surface from initialize metadata", async () => {
     const discovery = await discoverCodexRuntime(
@@ -282,6 +306,9 @@ describe("discoverCodexRuntime", () => {
 describe("CodexAppServerClient", () => {
   it("records a method only after a successful RPC response", async () => {
     const transport = new FakeTransport();
+    transport.queueSuccess("initialize", {
+      userAgent: "codex-cli/0.124.0"
+    });
     transport.queueFailure("thread/list", new Error("boom"));
     transport.queueSuccess("thread/read", { ok: true });
 
@@ -290,10 +317,37 @@ describe("CodexAppServerClient", () => {
     });
 
     await expect(client.threadList()).rejects.toThrow("boom");
-    expect(client.getObservedSurface().methods ?? []).toEqual([]);
+    expect(client.getObservedSurface().methods ?? []).toEqual(["initialize"]);
 
     await expect(client.threadRead("thread_1")).resolves.toEqual({ ok: true });
-    expect(client.getObservedSurface().methods ?? []).toEqual(["thread/read"]);
+    expect(client.getObservedSurface().methods ?? []).toEqual(["initialize", "thread/read"]);
+  });
+
+  it("auto-initializes once before the first operational RPC", async () => {
+    const transport = new InitializationGatedTransport();
+    transport.queueSuccess("initialize", {
+      userAgent: "codex-cli/0.124.0"
+    });
+    transport.queueSuccess("thread/list", {
+      data: []
+    });
+    transport.queueSuccess("thread/read", {
+      thread: null
+    });
+
+    const client = new CodexAppServerClient({
+      transport
+    });
+
+    await expect(client.threadList()).resolves.toEqual({ data: [] });
+    await expect(client.threadRead("thread_1")).resolves.toEqual({ thread: null });
+
+    expect(transport.requestedMethods).toEqual(["initialize", "thread/list", "thread/read"]);
+    expect(client.getObservedSurface().methods ?? []).toEqual([
+      "initialize",
+      "thread/list",
+      "thread/read"
+    ]);
   });
 });
 

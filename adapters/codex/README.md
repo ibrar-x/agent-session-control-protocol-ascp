@@ -13,6 +13,8 @@ TypeScript workspace for a truthful ASCP adapter over the official `codex app-se
 - event normalization helpers for `turn/started`, `turn/completed`, `agentMessageDelta`, and `turn/diff/updated`
 - approval request mapping helpers for `item/commandExecution/requestApproval`, `item/fileChange/requestApproval`, and `item/permissions/requestApproval`
 
+Operational `thread/*` and `turn/*` requests now lazily perform the required `initialize` handshake with `codex app-server`, so downstream callers do not need to call `client.initialize()` manually before using the service layer.
+
 ## Current advertised capability fallbacks
 
 - `stream_events=false`

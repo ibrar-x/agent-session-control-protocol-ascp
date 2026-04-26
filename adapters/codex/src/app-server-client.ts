@@ -441,6 +441,8 @@ export class CodexAppServerClient {
   private approvalRequestsObserved: boolean | undefined;
   private approvalRespondSupported: boolean | undefined;
   private readonly removeTransportListener: (() => void) | null;
+  private initializeResult: CodexAppServerInitializeResult | null = null;
+  private initializePromise: Promise<CodexAppServerInitializeResult> | null = null;
 
   constructor(options: CodexAppServerClientOptions = {}) {
     this.transport =
@@ -471,6 +473,8 @@ export class CodexAppServerClient {
 
   async close(): Promise<void> {
     this.removeTransportListener?.();
+    this.initializeResult = null;
+    this.initializePromise = null;
     await this.transport.close();
   }
 
@@ -492,13 +496,7 @@ export class CodexAppServerClient {
   }
 
   async initialize(): Promise<CodexAppServerInitializeResult> {
-    return this.request<CodexAppServerInitializeResult>("initialize", {
-      clientInfo: {
-        name: "@ascp/adapter-codex",
-        version: "0.1.0"
-      },
-      capabilities: {}
-    });
+    return this.ensureInitialized();
   }
 
   async threadList(limit = 20): Promise<unknown> {
@@ -533,6 +531,45 @@ export class CodexAppServerClient {
   }
 
   async request<TResult = unknown>(
+    method: string,
+    params?: Record<string, unknown>,
+    options?: CodexAppServerRequestOptions
+  ): Promise<TResult> {
+    if (method !== "initialize") {
+      await this.ensureInitialized();
+    }
+
+    return this.rawRequest(method, params, options);
+  }
+
+  private async ensureInitialized(): Promise<CodexAppServerInitializeResult> {
+    if (this.initializeResult !== null) {
+      return this.initializeResult;
+    }
+
+    if (this.initializePromise !== null) {
+      return this.initializePromise;
+    }
+
+    this.initializePromise = this.rawRequest<CodexAppServerInitializeResult>("initialize", {
+      clientInfo: {
+        name: "@ascp/adapter-codex",
+        version: "0.1.0"
+      },
+      capabilities: {}
+    }).then((result) => {
+      this.initializeResult = result;
+      return result;
+    });
+
+    try {
+      return await this.initializePromise;
+    } finally {
+      this.initializePromise = null;
+    }
+  }
+
+  private async rawRequest<TResult = unknown>(
     method: string,
     params?: Record<string, unknown>,
     options?: CodexAppServerRequestOptions
