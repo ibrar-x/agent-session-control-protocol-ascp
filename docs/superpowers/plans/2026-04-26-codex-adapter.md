@@ -464,7 +464,7 @@ Expected: PASS with honest `NOT_FOUND` and `UNSUPPORTED` fallback where the Code
 - Create: `adapters/codex/tests/events.test.ts`
 - Create: `adapters/codex/tests/approvals.test.ts`
 
-- [ ] **Step 1: Write failing tests for message, run, approval, and diff normalization**
+- [x] **Step 1: Write failing tests for message, run, approval, and diff normalization**
 
 ```ts
 expect(mapNotificationToEvents({
@@ -486,7 +486,7 @@ expect(mapApprovalRequest(serverRequest)).toMatchObject({
 });
 ```
 
-- [ ] **Step 2: Implement event mapping with extension-safe fallbacks**
+- [x] **Step 2: Implement event mapping with extension-safe fallbacks**
 
 ```ts
 if (message.method === "turn/started") {
@@ -510,7 +510,7 @@ payload: {
 }
 ```
 
-- [ ] **Step 3: Implement approval request mapping and conservative response behavior**
+- [x] **Step 3: Implement approval request mapping and conservative response behavior**
 
 Until the official response path is fully wired, approvals should degrade honestly:
 
@@ -524,7 +524,7 @@ if (!canRespondToApprovals(this.discovery)) {
 }
 ```
 
-- [ ] **Step 4: Run the event and approval tests**
+- [x] **Step 4: Run the event and approval tests**
 
 Run: `npm --workspace @ascp/adapter-codex run test -- tests/events.test.ts tests/approvals.test.ts`
 
@@ -539,7 +539,7 @@ Expected: PASS with `message.assistant.delta`, `run.started`, `approval.requeste
 - Modify: `docs/status.md`
 - Modify: `plans.md`
 
-- [ ] **Step 1: Document the supported and unsupported Codex surface**
+- [x] **Step 1: Document the supported and unsupported Codex surface**
 
 The README should state the support matrix directly:
 
@@ -561,7 +561,7 @@ The README should state the support matrix directly:
 - `approval_respond=false` until the official Codex response path is exercised end-to-end
 ```
 
-- [ ] **Step 2: Make the validator green**
+- [x] **Step 2: Make the validator green**
 
 Extend the validator to check for the README claims and the final test files:
 
@@ -576,13 +576,13 @@ Run: `bash tooling/scripts/validate_codex_adapter.sh`
 
 Expected: PASS with all required adapter files present and the README documenting truthful unsupported surfaces
 
-- [ ] **Step 3: Run the final adapter and SDK checks**
+- [x] **Step 3: Run the final adapter and SDK checks**
 
 Run: `npm --workspace sdks/typescript run test -- test/envelopes.test.ts && npm --workspace @ascp/adapter-codex run check && bash tooling/scripts/validate_codex_adapter.sh`
 
 Expected: PASS with SDK helper tests green, adapter workspace tests green, and the repository validator green
 
-- [ ] **Step 4: Update repository checkpoint files**
+- [x] **Step 4: Update repository checkpoint files**
 
 Record the completed adapter feature in the branch tracking files:
 

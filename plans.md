@@ -99,9 +99,9 @@ Files to modify:
 | completed | rewrite the branch plan and implementation plan for the TypeScript adapter boundary | `plans.md` and `docs/superpowers/plans/2026-04-26-codex-adapter.md` both target a TypeScript adapter over `codex app-server` with only small generic SDK extractions |
 | completed | scaffold the adapter workspace and validation entrypoint | `adapters/codex/` has package metadata, TypeScript config, Vitest config, exports, and a validator script that can fail red before implementation is complete |
 | completed | implement Codex app-server transport, discovery, and truthful capability mapping | the adapter can probe the runtime, derive `codex_local`, and advertise only capabilities supported by observed official surfaces |
-| in_progress | implement ASCP ID, session, run, event, approval, and diff normalization | Codex threads, turns, notifications, approvals, and turn diffs map into exact ASCP field names and deterministic IDs without redefining protocol semantics |
+| completed | implement ASCP ID, session, run, event, approval, and diff normalization | Codex threads, turns, notifications, approvals, and turn diffs map into exact ASCP field names and deterministic IDs without redefining protocol semantics |
 | completed | implement the ASCP service surface for the supported methods | the adapter exposes honest `sessions.list`, `sessions.get`, `sessions.resume`, and `sessions.send_input` results with correct `NOT_FOUND` and `UNSUPPORTED` fallback, while leaving subscribe, approvals, and diff reads for later truthful implementation |
-| pending | document, validate, and checkpoint the adapter branch | adapter docs, tests, and validator pass; `docs/status.md` records the completed feature; and the branch is ready for implementation close-out |
+| completed | document, validate, and checkpoint the adapter branch | adapter docs, tests, and validator pass; `docs/status.md` records the completed feature; and the branch is ready for implementation close-out |
 
 ## Acceptance Criteria
 
@@ -119,4 +119,4 @@ The task is done only when all of the following are true:
 
 ## Next Likely Step
 
-Implement Task 7 on `feature/codex-adapter`: event normalization, approval mapping, and any truthful diff support on top of the completed discovery, mapping, and service layers, while keeping replay and artifacts unsupported unless the official Codex surface proves them.
+Run merge-readiness review for `feature/codex-adapter`, then integrate the branch once the current TypeScript adapter scope is accepted as the v1 downstream example.

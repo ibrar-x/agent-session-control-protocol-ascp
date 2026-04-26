@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-26 - Codex adapter task 7 and task 8
+
+- Branch: `feature/codex-adapter`
+- Commit: `not committed`
+- Summary: completed the remaining Codex adapter slice by adding deterministic normalization for official Codex turn, delta, diff, and approval-request surfaces into ASCP `EventEnvelope` and `ApprovalRequest` shapes, documenting the truthful capability fallbacks in the adapter README, extending the repository validator to require the new mapping files and fallback claims, and validating the finished TypeScript adapter package with the full adapter test suite plus build and validator checks
+- Documentation updated: `plans.md`, `docs/status.md`, `docs/superpowers/plans/2026-04-26-codex-adapter.md`, `adapters/codex/README.md`
+- Next likely step: run merge-readiness review for `feature/codex-adapter`, then integrate the branch if the current truthful v1 scope is accepted
+
 ### 2026-04-26 - Codex adapter task 4
 
 - Branch: `feature/codex-adapter`
