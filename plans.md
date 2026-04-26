@@ -12,63 +12,71 @@ This file tracks the active scoped work for the current branch.
 
 ## Active State
 
-- Feature name: Codex adapter initialization fix
-- Branch: `feature/codex-adapter-init-fix`
-- Goal: remove the live-runtime requirement for downstream callers to manually invoke `client.initialize()` before using the Codex adapter service by adding one-time lazy app-server initialization inside the Codex client layer
+- Feature name: Codex live smoke script
+- Branch: `feature/codex-live-smoke-script`
+- Goal: add a checked-in live test script for the Codex adapter that supports both an interactive terminal flow and direct CLI subcommands over the real `codex app-server`
 - Source inputs:
   - `AGENTS.md`
   - `plans.md`
   - `docs/status.md`
-  - `adapters/codex/src/app-server-client.ts`
-  - `adapters/codex/src/service.ts`
-  - `adapters/codex/tests/discovery.test.ts`
-  - `adapters/codex/tests/service.test.ts`
   - `adapters/codex/README.md`
-  - `docs/superpowers/plans/2026-04-26-codex-adapter.md`
-  - live smoke evidence from `main` showing `sessions.list` failed with `Not initialized` until `client.initialize()` was called explicitly
+  - `adapters/codex/package.json`
+  - `adapters/codex/src/app-server-client.ts`
+  - `adapters/codex/src/discovery.ts`
+  - `adapters/codex/src/service.ts`
+  - `docs/superpowers/specs/2026-04-26-codex-live-smoke-script-design.md`
+  - live smoke behavior already verified on `main`
 
 ## Scope
 
 Included in this branch:
 
-- add lazy one-time `initialize` behavior to the Codex app-server client before operational RPC calls
-- prove the fix with a failing-then-passing regression test that models a runtime rejecting pre-initialize requests
-- document and checkpoint the live smoke fix
+- add one dual-mode live smoke entrypoint for the Codex adapter
+- support interactive no-arg execution
+- support direct subcommands for discovery, list, get, resume, and send-input
+- add focused tests for parsing and dispatch logic
+- document how to run the script honestly against the real runtime
 
 Explicitly out of scope:
 
-- widening the adapter surface beyond the already merged v1 Codex adapter
-- changing ASCP method or event semantics
-- subscribe, replay, artifact, approval-response, or diff capability work
-- product UX or CLI/demo scaffolding
+- implementing `sessions.subscribe`
+- replay, artifacts, approval response, or diff-read support
+- any protocol or adapter capability widening
+- browser UI or daemon work
 
 ## Planned Files
 
+Files to add:
+
+- `adapters/codex/scripts/live-smoke.mjs`
+- `adapters/codex/src/live-smoke.ts`
+- `adapters/codex/tests/live-smoke.test.ts`
+
 Files to modify:
 
-- `adapters/codex/src/app-server-client.ts`
-- `adapters/codex/tests/discovery.test.ts`
+- `adapters/codex/package.json`
 - `adapters/codex/README.md`
+- `docs/superpowers/plans/2026-04-26-codex-live-smoke-script.md`
 - `plans.md`
-- `docs/status.md`
 
 ## Tasks
 
 | Status | Task | Acceptance Criteria |
 | --- | --- | --- |
-| completed | add a failing regression test for pre-initialize operational RPCs | the test reproduces the live `Not initialized` failure when `thread/list` is sent before the app-server handshake |
-| completed | implement lazy one-time initialization inside the Codex client | downstream callers can use `thread/*` and `turn/*` methods without manually calling `client.initialize()`, and initialization is not redundantly repeated on every request |
-| completed | validate and checkpoint the hotfix | focused and full adapter verification pass, the README notes the runtime behavior, and `docs/status.md` records the fix branch outcome |
+| pending | add a testable live smoke command module | command parsing, validation, and action dispatch live in a normal TypeScript module with focused tests |
+| pending | add the executable script wrapper and npm alias | `npm --workspace @ascp/adapter-codex run live` works in interactive mode and `run live -- <subcommand>` works directly |
+| pending | document and verify the live smoke flow | the README documents usage clearly and the adapter build/tests still pass |
 
 ## Acceptance Criteria
 
 The task is done only when all of the following are true:
 
-- `CodexAppServerClient` automatically performs the official initialize handshake before the first operational request
-- repeated operational requests reuse the initialized state instead of forcing callers to initialize manually
-- the regression is covered by an automated adapter test
-- adapter build, tests, and validator all pass after the fix
+- `npm --workspace @ascp/adapter-codex run live` opens a guided interactive terminal flow
+- `npm --workspace @ascp/adapter-codex run live -- <subcommand>` supports direct invocation
+- the script uses the real adapter service layer and honest runtime discovery
+- unsupported features remain explicitly unsupported
+- focused script tests pass along with the existing adapter checks
 
 ## Next Likely Step
 
-Push `feature/codex-adapter-init-fix`, fast-forward `main`, and leave the repository back on updated `main` once the hotfix commit is merged.
+Create the implementation plan in `docs/superpowers/plans/2026-04-26-codex-live-smoke-script.md`, then execute the script feature on this branch with TDD.
