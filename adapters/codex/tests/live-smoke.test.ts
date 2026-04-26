@@ -1,7 +1,11 @@
+import { Readable, Writable } from "node:stream";
+
 import { describe, expect, it } from "vitest";
 
 import {
+  getLiveSmokeUsage,
   parseLiveSmokeCommand,
+  runInteractiveLiveSmoke,
   runLiveSmokeCommand,
   validateLiveSmokeCommand
 } from "../src/live-smoke.js";
@@ -94,6 +98,14 @@ describe("validateLiveSmokeCommand", () => {
         inputText: "continue"
       })
     ).toThrow("The send-input command requires a session_id.");
+  });
+});
+
+describe("getLiveSmokeUsage", () => {
+  it("renders usage for all supported commands", () => {
+    expect(getLiveSmokeUsage()).toContain("discover");
+    expect(getLiveSmokeUsage()).toContain("send-input");
+    expect(getLiveSmokeUsage()).toContain("npm --workspace @ascp/adapter-codex run live");
   });
 });
 
@@ -237,5 +249,42 @@ describe("runLiveSmokeCommand", () => {
       }
     ]);
     expect(result.kind).toBe("send-input");
+  });
+});
+
+describe("runInteractiveLiveSmoke", () => {
+  it("exits cleanly when discovery reports no runtime", async () => {
+    const calls: string[] = [];
+    let output = "";
+
+    const input = Readable.from([]);
+    const sink = new Writable({
+      write(chunk, _encoding, callback) {
+        output += chunk.toString();
+        callback();
+      }
+    });
+
+    await runInteractiveLiveSmoke({
+      input,
+      output: sink,
+      deps: {
+        discover: async () => {
+          calls.push("discover");
+          return {
+            runtimeAvailable: false,
+            runtimeId: "codex_local"
+          };
+        },
+        listSessions: async () => {
+          calls.push("list");
+          return { sessions: [], next_cursor: null };
+        }
+      }
+    });
+
+    expect(calls).toEqual(["discover"]);
+    expect(output).toContain('"runtimeAvailable": false');
+    expect(output).toContain("Codex runtime is unavailable");
   });
 });

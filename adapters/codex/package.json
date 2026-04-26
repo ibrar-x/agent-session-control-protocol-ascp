@@ -15,6 +15,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "live": "npm run build --silent && node ./scripts/live-smoke.mjs",
     "test": "vitest run",
     "check": "npm run build && npm run test"
   },
