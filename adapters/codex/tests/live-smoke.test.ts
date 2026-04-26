@@ -100,6 +100,36 @@ describe("parseLiveSmokeCommand", () => {
     });
   });
 
+  it("parses watch with replay and stream options", () => {
+    expect(
+      parseLiveSmokeCommand([
+        "watch",
+        "codex:thread_1",
+        "--snapshot",
+        "--from-seq",
+        "0",
+        "--from-event-id",
+        "codex:event_3",
+        "--poll-ms",
+        "250",
+        "--idle-seconds",
+        "12",
+        "--input",
+        "just say yes"
+      ])
+    ).toEqual({
+      mode: "command",
+      command: "watch",
+      sessionId: "codex:thread_1",
+      includeSnapshot: true,
+      fromSeq: 0,
+      fromEventId: "codex:event_3",
+      pollMs: 250,
+      idleSeconds: 12,
+      inputText: "just say yes"
+    });
+  });
+
   it("parses artifacts and diffs commands", () => {
     expect(
       parseLiveSmokeCommand([
@@ -148,6 +178,12 @@ describe("parseLiveSmokeCommand", () => {
     expect(() =>
       parseLiveSmokeCommand(["sessions.subscribe", "codex:thread_1", "--from-seq", "-1"])
     ).toThrow("The --from-seq option requires a non-negative integer.");
+  });
+
+  it("rejects invalid watch poll interval", () => {
+    expect(() => parseLiveSmokeCommand(["watch", "codex:thread_1", "--poll-ms", "0"])).toThrow(
+      "The --poll-ms option requires a positive integer."
+    );
   });
 });
 
@@ -217,6 +253,15 @@ describe("validateLiveSmokeCommand", () => {
         sessionId: "codex:thread_1"
       })
     ).toThrow("The diffs.get command requires a run_id.");
+  });
+
+  it("rejects watch without a session id", () => {
+    expect(() =>
+      validateLiveSmokeCommand({
+        mode: "command",
+        command: "watch"
+      })
+    ).toThrow("The watch command requires a session_id.");
   });
 });
 
@@ -556,6 +601,84 @@ describe("runLiveSmokeCommand", () => {
     expect(getResult.kind).toBe("artifacts.get");
     expect(diffResult.kind).toBe("diffs.get");
   });
+
+  it("dispatches watch and drains stream events until idle timeout", async () => {
+    const subscribeCalls: Array<Record<string, unknown>> = [];
+    const sendCalls: Array<Record<string, unknown>> = [];
+    const drainCalls: Array<Record<string, unknown>> = [];
+    const unsubscribeCalls: Array<Record<string, unknown>> = [];
+    let nowMs = 0;
+    let drainIteration = 0;
+
+    const result = await runLiveSmokeCommand(
+      {
+        mode: "command",
+        command: "watch",
+        sessionId: "codex:thread_1",
+        includeSnapshot: true,
+        fromSeq: 0,
+        pollMs: 1_000,
+        idleSeconds: 2,
+        inputText: "stream this"
+      },
+      {
+        subscribeSession: async (params) => {
+          subscribeCalls.push(params);
+          return { session_id: "codex:thread_1", subscription_id: "codex:subscription:1" };
+        },
+        sendInput: async (params) => {
+          sendCalls.push(params);
+          return { session_id: "codex:thread_1", accepted: true };
+        },
+        drainSubscriptionEvents: (params) => {
+          drainCalls.push(params);
+          drainIteration += 1;
+
+          if (drainIteration === 1) {
+            return [{ type: "message.assistant.delta", seq: 1 }];
+          }
+
+          return [];
+        },
+        unsubscribeSession: async (params) => {
+          unsubscribeCalls.push(params);
+          return { subscription_id: "codex:subscription:1", unsubscribed: true };
+        },
+        now: () => nowMs,
+        sleep: async (milliseconds) => {
+          nowMs += milliseconds;
+        }
+      }
+    );
+
+    expect(subscribeCalls).toEqual([
+      {
+        session_id: "codex:thread_1",
+        from_seq: 0,
+        from_event_id: undefined,
+        include_snapshot: true
+      }
+    ]);
+    expect(sendCalls).toEqual([
+      {
+        session_id: "codex:thread_1",
+        input: "stream this"
+      }
+    ]);
+    expect(drainCalls.length).toBeGreaterThanOrEqual(2);
+    expect(unsubscribeCalls).toEqual([
+      {
+        subscription_id: "codex:subscription:1"
+      }
+    ]);
+    expect(result.kind).toBe("watch");
+    expect(result.data).toMatchObject({
+      session_id: "codex:thread_1",
+      subscription_id: "codex:subscription:1",
+      total_events: 1,
+      unsubscribed: true
+    });
+  });
 });
 
 describe("runInteractiveLiveSmoke", () => {
@@ -810,5 +933,77 @@ describe("runInteractiveLiveSmoke", () => {
     expect(result).toBe("quit");
     expect(output).toContain("subscribe+drain");
     expect(output).toContain("codex:subscription:1");
+  });
+
+  it("supports interactive watch streaming action", async () => {
+    let output = "";
+    const subscribeCalls: Array<Record<string, unknown>> = [];
+    const sendCalls: Array<Record<string, unknown>> = [];
+    const unsubscribeCalls: Array<Record<string, unknown>> = [];
+    let nowMs = 0;
+    let drainIteration = 0;
+    const sink = new Writable({
+      write(chunk, _encoding, callback) {
+        output += chunk.toString();
+        callback();
+      }
+    });
+    const answers = ["w", "y", "", "", "stream this", "", "1", "q"];
+
+    const result = await runInteractiveSessionMenu(
+      async () => answers.shift() ?? "q",
+      sink,
+      {
+        id: "codex:thread_1",
+        runtime_id: "codex_local",
+        status: "idle",
+        created_at: "2026-04-26T19:00:00.000Z",
+        updated_at: "2026-04-26T19:00:00.000Z",
+        title: "Test session"
+      },
+      {
+        subscribeSession: async (params) => {
+          subscribeCalls.push(params);
+          return { session_id: "codex:thread_1", subscription_id: "codex:subscription:1" };
+        },
+        sendInput: async (params) => {
+          sendCalls.push(params);
+          return { session_id: "codex:thread_1", accepted: true };
+        },
+        drainSubscriptionEvents: () => {
+          drainIteration += 1;
+
+          if (drainIteration === 1) {
+            return [{ type: "message.assistant.delta", seq: 1 }];
+          }
+
+          return [];
+        },
+        unsubscribeSession: async (params) => {
+          unsubscribeCalls.push(params);
+          return { subscription_id: "codex:subscription:1", unsubscribed: true };
+        },
+        now: () => nowMs,
+        sleep: async (milliseconds) => {
+          nowMs += milliseconds;
+        }
+      }
+    );
+
+    expect(subscribeCalls.length).toBe(1);
+    expect(sendCalls).toEqual([
+      {
+        session_id: "codex:thread_1",
+        input: "stream this"
+      }
+    ]);
+    expect(unsubscribeCalls).toEqual([
+      {
+        subscription_id: "codex:subscription:1"
+      }
+    ]);
+    expect(result).toBe("quit");
+    expect(output).toContain("Watching codex:thread_1 on codex:subscription:1");
+    expect(output).toContain('"message.assistant.delta"');
   });
 });

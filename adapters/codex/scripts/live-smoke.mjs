@@ -4,6 +4,7 @@ import {
   getLiveSmokeUsage,
   parseLiveSmokeCommand,
   runInteractiveLiveSmoke,
+  runLiveSmokeWatch,
   runLiveSmokeCommand,
   validateLiveSmokeCommand,
   writeLiveSmokeResult
@@ -88,6 +89,14 @@ try {
       output: process.stdout,
       deps
     });
+  } else if (parsed.command === "watch") {
+    const validated = validateLiveSmokeCommand(parsed);
+    const result = await runLiveSmokeWatch({
+      command: validated,
+      deps,
+      output: process.stdout
+    });
+    writeLiveSmokeResult(process.stdout, result);
   } else {
     const result = await runLiveSmokeCommand(validateLiveSmokeCommand(parsed), deps);
     writeLiveSmokeResult(process.stdout, result);

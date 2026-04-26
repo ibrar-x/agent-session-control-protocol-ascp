@@ -69,6 +69,7 @@ Expanded method-style smoke commands:
 
 ```bash
 npm --workspace @ascp/adapter-codex run live -- sessions.subscribe codex:thread_id --snapshot
+npm --workspace @ascp/adapter-codex run live -- watch codex:thread_id --input "summarize this" --snapshot
 npm --workspace @ascp/adapter-codex run live -- sessions.subscribe codex:thread_id --from-seq 10
 npm --workspace @ascp/adapter-codex run live -- sessions.subscribe codex:thread_id --from-event-id codex:event_id
 npm --workspace @ascp/adapter-codex run live -- sessions.unsubscribe codex:subscription:thread_id:1
@@ -78,13 +79,13 @@ npm --workspace @ascp/adapter-codex run live -- artifacts.get codex:artifact:thr
 npm --workspace @ascp/adapter-codex run live -- diffs.get codex:thread_id codex:thread_id:turn_id
 ```
 
-For stream testing, use the interactive `p` action (`subscribe+drain`) to subscribe, inspect queued replay/live events, and optionally unsubscribe inside a single live-smoke process. Subscription queues are in-memory, so separate CLI invocations do not share subscription state.
+For stream testing, use `watch` (or interactive `w`) to subscribe, optionally send input, and print drained events continuously until idle timeout inside one process. Subscription queues are in-memory, so separate CLI invocations do not share subscription state.
 
 Short interactive guidance:
 
 1. Run `npm --workspace @ascp/adapter-codex run live` and select a recent session.
 2. Use `resume` or `send input` interactively to create fresh runtime activity.
-3. Use the `p` action to run `sessions.subscribe` with replay params (`from seq` / `from event id`) and drain queued events.
+3. Use the `w` action to watch stream events continuously, or `p` for manual subscribe+drain.
 4. Finish with `sessions.unsubscribe` for the active subscription.
 
 The live script rebuilds the adapter before launch so it runs against fresh local code.
