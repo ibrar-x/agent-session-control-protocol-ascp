@@ -395,7 +395,7 @@ Expected: PASS with exact ASCP field names and deterministic adapter-owned IDs
 - Create: `adapters/codex/src/service.ts`
 - Create: `adapters/codex/tests/service.test.ts`
 
-- [ ] **Step 1: Write failing tests for `sessions.list`, `sessions.get`, `sessions.resume`, and `sessions.send_input`**
+- [x] **Step 1: Write failing tests for `sessions.list`, `sessions.get`, `sessions.resume`, and `sessions.send_input`**
 
 ```ts
 expect(await service.sessionsList({ runtime_id: "codex_local" })).toMatchObject({
@@ -415,7 +415,7 @@ expect(await service.sessionsSendInput({
 });
 ```
 
-- [ ] **Step 2: Implement the service methods using SDK envelope helpers**
+- [x] **Step 2: Implement the service methods using SDK envelope helpers**
 
 Keep the service layer ASCP-shaped and adapter-specific:
 
@@ -433,7 +433,7 @@ export class CodexAdapterService {
 }
 ```
 
-- [ ] **Step 3: Map `sessions.send_input` onto `turn/start` and `turn/steer`**
+- [x] **Step 3: Map `sessions.send_input` onto `turn/start` and `turn/steer`**
 
 Use the active turn when known; otherwise start a new turn:
 
@@ -450,7 +450,7 @@ return {
 };
 ```
 
-- [ ] **Step 4: Run the service tests**
+- [x] **Step 4: Run the service tests**
 
 Run: `npm --workspace @ascp/adapter-codex run test -- tests/service.test.ts`
 

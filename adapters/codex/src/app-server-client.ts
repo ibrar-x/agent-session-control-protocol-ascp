@@ -507,9 +507,10 @@ export class CodexAppServerClient {
     });
   }
 
-  async threadRead(threadId: string): Promise<unknown> {
+  async threadRead(threadId: string, options: { includeTurns?: boolean } = {}): Promise<unknown> {
     return this.request("thread/read", {
-      threadId
+      threadId,
+      ...(options.includeTurns === true ? { includeTurns: true } : {})
     });
   }
 

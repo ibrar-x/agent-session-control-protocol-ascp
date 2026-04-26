@@ -30,6 +30,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 - Documentation updated: `plans.md`, `docs/status.md`, `docs/superpowers/plans/2026-04-26-codex-adapter.md`
 - Next likely step: implement Task 6 service methods for `sessions.list`, `sessions.get`, `sessions.resume`, and `sessions.send_input` on top of the existing discovery and mapping layers
 
+### 2026-04-26 - Codex adapter task 6
+
+- Branch: `feature/codex-adapter`
+- Commit: `921c74c`
+- Summary: completed the first ASCP service layer for the Codex adapter by adding honest `sessions.list`, `sessions.get`, `sessions.resume`, and `sessions.send_input` methods over the existing Codex client and mapper stack, using real `thread.read(includeTurns: true)` state to choose between `turn/steer` and `turn/start`, and validating the combined Task 4-6 slice with adapter build plus five focused test files
+- Documentation updated: `plans.md`, `docs/status.md`, `docs/superpowers/plans/2026-04-26-codex-adapter.md`
+- Next likely step: implement Task 7 event normalization, approval mapping, and any truthful diff support without widening into replay or artifact claims
+
 ### 2026-04-26 - Production-grade monorepo restructure
 
 - Branch: `branch-ascp-monorepo-structure`
