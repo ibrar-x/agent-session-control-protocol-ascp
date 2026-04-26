@@ -201,21 +201,24 @@ describe("discoverCodexRuntime", () => {
   });
 
   it("uses verified official surfaces for a fresh client path without manual prepopulation", async () => {
-    const discovery = await discoverCodexRuntime(
-      new FakeDiscoveryClient({
-        initializeResult: {
-          serverInfo: {
-            version: "0.34.0"
-          }
-        },
-        observedSurface: {}
-      })
-    );
+    const transport = new FakeTransport();
+    transport.queueSuccess("initialize", {
+      serverInfo: {
+        version: "0.34.0"
+      }
+    });
+
+    const client = new CodexAppServerClient({
+      transport
+    });
+
+    const discovery = await discoverCodexRuntime(client);
 
     expect(discovery.runtimeId).toBe(CODEX_RUNTIME_ID);
+    expect(discovery.observedAppServerMethods).toEqual(["initialize"]);
     expect(discovery.appServerMethods).toEqual([...VERIFIED_CODEX_APP_SERVER_METHODS]);
     expect(discovery.notifications).toEqual([...VERIFIED_CODEX_APP_SERVER_NOTIFICATIONS]);
-    expect(discovery.supportsApprovalRequests).toBe(true);
+    expect(discovery.supportsApprovalRequests).toBe(false);
     expect(discovery.supportsApprovalRespond).toBe(false);
     expect(discovery.supportsDiffReads).toBe(false);
   });
@@ -296,6 +299,66 @@ describe("CodexAppServerClient", () => {
 });
 
 describe("StdioCodexAppServerTransport", () => {
+  it("ignores stale-child cleanup after a newer live connection has replaced it", () => {
+    const transport = new StdioCodexAppServerTransport();
+    const staleReader = {
+      closeCalled: false,
+      removeAllListeners() {},
+      close() {
+        this.closeCalled = true;
+      }
+    };
+    const liveReader = {
+      closeCalled: false,
+      removeAllListeners() {},
+      close() {
+        this.closeCalled = true;
+      }
+    };
+    const staleChild = {
+      removeAllListeners() {},
+      stdin: { destroyed: false, destroy() {}, removeAllListeners() {} },
+      stdout: { destroyed: false, destroy() {}, removeAllListeners() {} },
+      stderr: { destroyed: false, destroy() {}, removeAllListeners() {} },
+      exitCode: null,
+      signalCode: null,
+      killed: false,
+      kill() {
+        this.killed = true;
+      }
+    };
+    const liveChild = {
+      removeAllListeners() {},
+      stdin: { destroyed: false, destroy() {}, removeAllListeners() {} },
+      stdout: { destroyed: false, destroy() {}, removeAllListeners() {} },
+      stderr: { destroyed: false, destroy() {}, removeAllListeners() {} },
+      exitCode: null,
+      signalCode: null,
+      killed: false,
+      kill() {
+        this.killed = true;
+      }
+    };
+
+    (transport as unknown as { child: unknown }).child =
+      liveChild as unknown as ReturnType<typeof Object>;
+    (transport as unknown as { stdoutReader: unknown }).stdoutReader =
+      liveReader as unknown as ReturnType<typeof Object>;
+
+    (
+      transport as unknown as {
+        resetConnectionState: (child: unknown, reader: unknown) => void;
+      }
+    ).resetConnectionState(staleChild, staleReader);
+
+    expect((transport as unknown as { child: unknown }).child).toBe(liveChild);
+    expect((transport as unknown as { stdoutReader: unknown }).stdoutReader).toBe(liveReader);
+    expect(staleReader.closeCalled).toBe(true);
+    expect(liveReader.closeCalled).toBe(false);
+    expect(staleChild.killed).toBe(true);
+    expect(liveChild.killed).toBe(false);
+  });
+
   it("resets state after a spawn failure so a later retry can connect", async () => {
     const directory = await createTempDir();
     const serverPath = join(directory, "codex-app-server");

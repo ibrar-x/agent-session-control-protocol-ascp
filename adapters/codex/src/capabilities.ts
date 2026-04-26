@@ -46,23 +46,21 @@ export function resolveCodexCapabilities(discovery: CodexDiscovery): CodexResolv
   }
 
   const methods = new Set(discovery.appServerMethods);
-  const streamEvents = discovery.notifications.length > 0;
-  const approvalRequests = discovery.supportsApprovalRequests;
 
   return {
     session_list: methods.has("thread/list"),
     session_resume: methods.has("thread/resume"),
     session_start: methods.has("thread/start"),
     session_stop: false,
-    stream_events: streamEvents,
+    stream_events: false,
     transcript_read: methods.has("thread/read"),
     message_send: methods.has("turn/start") || methods.has("turn/steer"),
-    approval_requests: approvalRequests,
-    approval_respond: approvalRequests && discovery.supportsApprovalRespond,
+    approval_requests: false,
+    approval_respond: false,
     artifacts: false,
     diffs: discovery.supportsDiffReads,
     terminal_passthrough: false,
-    notifications: streamEvents,
+    notifications: false,
     checkpoints: false,
     replay: false,
     multi_workspace: false

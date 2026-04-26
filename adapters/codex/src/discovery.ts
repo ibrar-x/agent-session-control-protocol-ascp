@@ -24,7 +24,7 @@ export const VERIFIED_CODEX_APP_SERVER_NOTIFICATIONS = [
   "turn/diff/updated"
 ] as const;
 
-export const VERIFIED_CODEX_APPROVAL_REQUESTS = true;
+export const VERIFIED_CODEX_APPROVAL_REQUESTS = false;
 export const VERIFIED_CODEX_APPROVAL_RESPOND = false;
 export const VERIFIED_CODEX_DIFF_READS = false;
 

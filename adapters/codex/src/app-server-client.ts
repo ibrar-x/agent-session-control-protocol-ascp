@@ -114,7 +114,6 @@ export class StdioCodexAppServerTransport implements CodexAppServerTransport {
   private stdoutReader: ReadLineInterface | null = null;
   private connectPromise: Promise<void> | null = null;
   private nextRequestId = 1;
-  private stderrBuffer = "";
 
   constructor(options: {
     command?: readonly [string, ...string[]];
@@ -143,22 +142,22 @@ export class StdioCodexAppServerTransport implements CodexAppServerTransport {
         stdio: "pipe"
       });
       let settled = false;
+      let stderrBuffer = "";
 
       this.child = child;
-      this.stderrBuffer = "";
-
-      this.stdoutReader = createInterface({
+      const stdoutReader = createInterface({
         input: child.stdout,
         crlfDelay: Infinity
       });
+      this.stdoutReader = stdoutReader;
 
-      this.stdoutReader.on("line", (line) => {
-        this.handleLine(line);
+      stdoutReader.on("line", (line) => {
+        this.handleLine(line, child, stdoutReader, () => stderrBuffer);
       });
 
       child.stderr.setEncoding("utf8");
       child.stderr.on("data", (chunk: string) => {
-        this.stderrBuffer = `${this.stderrBuffer}${chunk}`.slice(-4_096);
+        stderrBuffer = `${stderrBuffer}${chunk}`.slice(-4_096);
       });
 
       child.once("spawn", () => {
@@ -172,7 +171,7 @@ export class StdioCodexAppServerTransport implements CodexAppServerTransport {
           reject(error);
         }
 
-        this.handleTransportFailure(error, child);
+        this.handleTransportFailure(error, child, stdoutReader);
       });
 
       child.once("exit", (code, signal) => {
@@ -185,7 +184,7 @@ export class StdioCodexAppServerTransport implements CodexAppServerTransport {
           reject(error);
         }
 
-        this.handleTransportFailure(error, child);
+        this.handleTransportFailure(error, child, stdoutReader);
       });
     }).finally(() => {
       this.connectPromise = null;
@@ -326,19 +325,25 @@ export class StdioCodexAppServerTransport implements CodexAppServerTransport {
 
   private handleTransportFailure(
     error: unknown,
-    child: ChildProcessWithoutNullStreams | null
+    child: ChildProcessWithoutNullStreams | null,
+    stdoutReader: ReadLineInterface | null
   ): void {
-    this.resetConnectionState(child);
+    this.resetConnectionState(child, stdoutReader);
     this.failPending(error);
   }
 
-  private resetConnectionState(child: ChildProcessWithoutNullStreams | null = this.child): void {
+  private resetConnectionState(
+    child: ChildProcessWithoutNullStreams | null = this.child,
+    stdoutReader: ReadLineInterface | null = this.stdoutReader
+  ): void {
     if (this.child === child) {
       this.child = null;
     }
 
-    const stdoutReader = this.stdoutReader;
-    this.stdoutReader = null;
+    if (this.stdoutReader === stdoutReader) {
+      this.stdoutReader = null;
+    }
+
     stdoutReader?.removeAllListeners();
     stdoutReader?.close();
 
@@ -368,7 +373,12 @@ export class StdioCodexAppServerTransport implements CodexAppServerTransport {
     }
   }
 
-  private handleLine(line: string): void {
+  private handleLine(
+    line: string,
+    child: ChildProcessWithoutNullStreams | null,
+    stdoutReader: ReadLineInterface | null,
+    getStderrBuffer: () => string
+  ): void {
     let message: CodexJsonRpcMessage;
 
     try {
@@ -382,9 +392,10 @@ export class StdioCodexAppServerTransport implements CodexAppServerTransport {
     } catch (error) {
       this.handleTransportFailure(
         new Error(
-          `Failed to parse Codex app-server JSON-RPC message.${this.stderrBuffer ? ` stderr=${this.stderrBuffer}` : ""}`
+          `Failed to parse Codex app-server JSON-RPC message.${getStderrBuffer() ? ` stderr=${getStderrBuffer()}` : ""}`
         ),
-        this.child
+        child,
+        stdoutReader
       );
       return;
     }
@@ -428,8 +439,9 @@ export class CodexAppServerClient {
   private readonly defaultTimeoutMs: number | undefined;
   private readonly observedMethods = new Set<string>();
   private readonly observedNotifications = new Set<string>();
-  private approvalRequestsObserved: boolean;
-  private approvalRespondSupported: boolean;
+  private approvalRequestsObserved: boolean | undefined;
+  private approvalRespondSupported: boolean | undefined;
+  private diffReadSupported: boolean | undefined;
   private readonly removeTransportListener: (() => void) | null;
 
   constructor(options: CodexAppServerClientOptions = {}) {
@@ -451,8 +463,9 @@ export class CodexAppServerClient {
       this.observedNotifications.add(notification);
     }
 
-    this.approvalRequestsObserved = options.observedSurface?.approvalRequestsObserved ?? false;
-    this.approvalRespondSupported = options.observedSurface?.approvalRespondSupported ?? false;
+    this.approvalRequestsObserved = options.observedSurface?.approvalRequestsObserved;
+    this.approvalRespondSupported = options.observedSurface?.approvalRespondSupported;
+    this.diffReadSupported = options.observedSurface?.diffReadSupported;
 
     this.removeTransportListener = this.transport.onNotification((notification) => {
       this.observedNotifications.add(notification.method);
@@ -469,7 +482,8 @@ export class CodexAppServerClient {
       methods: [...this.observedMethods],
       notifications: [...this.observedNotifications],
       approvalRequestsObserved: this.approvalRequestsObserved,
-      approvalRespondSupported: this.approvalRespondSupported
+      approvalRespondSupported: this.approvalRespondSupported,
+      diffReadSupported: this.diffReadSupported
     };
   }
 
