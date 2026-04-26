@@ -60,7 +60,7 @@ export function resolveCodexCapabilities(discovery: CodexDiscovery): CodexResolv
     approval_requests: approvalRequests,
     approval_respond: approvalRequests && discovery.supportsApprovalRespond,
     artifacts: false,
-    diffs: discovery.supportsTurnDiffs,
+    diffs: discovery.supportsDiffReads,
     terminal_passthrough: false,
     notifications: streamEvents,
     checkpoints: false,

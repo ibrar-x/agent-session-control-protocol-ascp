@@ -23,9 +23,40 @@ const BASE_DISCOVERY: CodexDiscovery = {
     "turn/completed",
     "turn/diff/updated"
   ],
+  verifiedAppServerMethods: [
+    "initialize",
+    "thread/list",
+    "thread/read",
+    "thread/start",
+    "thread/resume",
+    "turn/start",
+    "turn/steer"
+  ],
+  observedAppServerMethods: [
+    "thread/list",
+    "thread/read",
+    "thread/start",
+    "thread/resume",
+    "turn/start",
+    "turn/steer"
+  ],
+  verifiedNotifications: [
+    "thread/started",
+    "thread/status/changed",
+    "turn/started",
+    "turn/completed",
+    "turn/diff/updated"
+  ],
+  observedNotifications: [
+    "thread/started",
+    "thread/status/changed",
+    "turn/started",
+    "turn/completed",
+    "turn/diff/updated"
+  ],
   supportsApprovalRequests: true,
   supportsApprovalRespond: false,
-  supportsTurnDiffs: true
+  supportsDiffReads: false
 };
 
 describe("resolveCodexCapabilities", () => {
@@ -49,7 +80,7 @@ describe("resolveCodexCapabilities", () => {
       approval_requests: true,
       approval_respond: false,
       artifacts: false,
-      diffs: true,
+      diffs: false,
       terminal_passthrough: false,
       notifications: true,
       checkpoints: false,

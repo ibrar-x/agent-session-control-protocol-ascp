@@ -2,6 +2,7 @@ import type {
   CodexAppServerInitializeResult,
   CodexObservedSurface
 } from "./app-server-client.js";
+export type { CodexObservedSurface } from "./app-server-client.js";
 
 export const CODEX_RUNTIME_ID = "codex_local";
 
@@ -23,15 +24,23 @@ export const VERIFIED_CODEX_APP_SERVER_NOTIFICATIONS = [
   "turn/diff/updated"
 ] as const;
 
+export const VERIFIED_CODEX_APPROVAL_REQUESTS = true;
+export const VERIFIED_CODEX_APPROVAL_RESPOND = false;
+export const VERIFIED_CODEX_DIFF_READS = false;
+
 export interface CodexDiscovery {
   runtimeAvailable: boolean;
   runtimeId: typeof CODEX_RUNTIME_ID;
   version: string | null;
+  verifiedAppServerMethods: string[];
+  observedAppServerMethods: string[];
   appServerMethods: string[];
+  verifiedNotifications: string[];
+  observedNotifications: string[];
   notifications: string[];
   supportsApprovalRequests: boolean;
   supportsApprovalRespond: boolean;
-  supportsTurnDiffs: boolean;
+  supportsDiffReads: boolean;
 }
 
 export interface CodexDiscoveryClient {
@@ -57,6 +66,53 @@ function normalizeValues(values?: Iterable<string>): string[] {
   }
 
   return [...normalized];
+}
+
+function selectObservedValues(
+  liveValues: string[],
+  fallbackValues: string[]
+): string[] {
+  if (liveValues.length > 0) {
+    return liveValues;
+  }
+
+  return fallbackValues;
+}
+
+function hasObservedSurfaceEvidence(surface: CodexObservedSurface): boolean {
+  return (
+    normalizeValues(surface.methods).length > 0 ||
+    normalizeValues(surface.notifications).length > 0 ||
+    surface.approvalRequestsObserved !== undefined ||
+    surface.approvalRespondSupported !== undefined ||
+    surface.diffReadSupported !== undefined
+  );
+}
+
+function mergeVerifiedWithObserved(verifiedValues: readonly string[], observedValues: string[]): string[] {
+  const merged = new Set<string>(verifiedValues);
+
+  for (const observedValue of observedValues) {
+    merged.add(observedValue);
+  }
+
+  return [...merged];
+}
+
+function resolveObservedBoolean(
+  liveValue: boolean | undefined,
+  fallbackValue: boolean | undefined,
+  verifiedValue: boolean
+): boolean {
+  if (liveValue !== undefined) {
+    return liveValue;
+  }
+
+  if (fallbackValue !== undefined) {
+    return fallbackValue;
+  }
+
+  return verifiedValue;
 }
 
 export function extractCodexVersion(initializeResult?: CodexAppServerInitializeResult | null): string | null {
@@ -94,39 +150,81 @@ export function extractCodexVersion(initializeResult?: CodexAppServerInitializeR
 
 export function buildCodexDiscovery(options: {
   initializeResult?: CodexAppServerInitializeResult | null;
-  observedSurface?: CodexObservedSurface;
+  liveObservedSurface?: CodexObservedSurface;
+  fallbackObservedSurface?: CodexObservedSurface;
   runtimeAvailable?: boolean;
 }): CodexDiscovery {
   const runtimeAvailable = options.runtimeAvailable ?? true;
+  const verifiedAppServerMethods = [...VERIFIED_CODEX_APP_SERVER_METHODS];
+  const verifiedNotifications = [...VERIFIED_CODEX_APP_SERVER_NOTIFICATIONS];
+  const liveObservedSurface = options.liveObservedSurface ?? {};
+  const fallbackObservedSurface =
+    hasObservedSurfaceEvidence(liveObservedSurface) ? {} : (options.fallbackObservedSurface ?? {});
+  const observedAppServerMethods = selectObservedValues(
+    normalizeValues(liveObservedSurface.methods),
+    normalizeValues(fallbackObservedSurface.methods)
+  );
+  const observedNotifications = selectObservedValues(
+    normalizeValues(liveObservedSurface.notifications),
+    normalizeValues(fallbackObservedSurface.notifications)
+  );
 
   if (!runtimeAvailable) {
     return {
       runtimeAvailable: false,
       runtimeId: CODEX_RUNTIME_ID,
       version: null,
+      verifiedAppServerMethods,
+      observedAppServerMethods: [],
       appServerMethods: [],
+      verifiedNotifications,
+      observedNotifications: [],
       notifications: [],
       supportsApprovalRequests: false,
       supportsApprovalRespond: false,
-      supportsTurnDiffs: false
+      supportsDiffReads: false
     };
   }
 
-  const appServerMethods = normalizeValues(options.observedSurface?.methods);
-  const notifications = normalizeValues(options.observedSurface?.notifications);
-  const supportsApprovalRequests = options.observedSurface?.approvalRequestsObserved ?? false;
+  const appServerMethods = mergeVerifiedWithObserved(
+    VERIFIED_CODEX_APP_SERVER_METHODS,
+    observedAppServerMethods
+  );
+  const notifications = mergeVerifiedWithObserved(
+    VERIFIED_CODEX_APP_SERVER_NOTIFICATIONS,
+    observedNotifications
+  );
+  const supportsApprovalRequests = resolveObservedBoolean(
+    liveObservedSurface.approvalRequestsObserved,
+    fallbackObservedSurface.approvalRequestsObserved,
+    VERIFIED_CODEX_APPROVAL_REQUESTS
+  );
   const supportsApprovalRespond =
-    supportsApprovalRequests && (options.observedSurface?.approvalRespondSupported ?? false);
+    supportsApprovalRequests &&
+    resolveObservedBoolean(
+      liveObservedSurface.approvalRespondSupported,
+      fallbackObservedSurface.approvalRespondSupported,
+      VERIFIED_CODEX_APPROVAL_RESPOND
+    );
+  const supportsDiffReads = resolveObservedBoolean(
+    liveObservedSurface.diffReadSupported,
+    fallbackObservedSurface.diffReadSupported,
+    VERIFIED_CODEX_DIFF_READS
+  );
 
   return {
     runtimeAvailable: true,
     runtimeId: CODEX_RUNTIME_ID,
     version: extractCodexVersion(options.initializeResult),
+    verifiedAppServerMethods,
+    observedAppServerMethods,
     appServerMethods,
+    verifiedNotifications,
+    observedNotifications,
     notifications,
     supportsApprovalRequests,
     supportsApprovalRespond,
-    supportsTurnDiffs: notifications.includes("turn/diff/updated")
+    supportsDiffReads
   };
 }
 
@@ -136,11 +234,12 @@ export async function discoverCodexRuntime(
 ): Promise<CodexDiscovery> {
   try {
     const initializeResult = await client.initialize();
-    const effectiveObservedSurface = observedSurface ?? client.getObservedSurface?.() ?? {};
+    const liveObservedSurface = client.getObservedSurface?.() ?? {};
 
     return buildCodexDiscovery({
       initializeResult,
-      observedSurface: effectiveObservedSurface,
+      liveObservedSurface,
+      fallbackObservedSurface: observedSurface,
       runtimeAvailable: true
     });
   } catch {
