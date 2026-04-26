@@ -33,3 +33,30 @@ These flags stay false until the adapter proves the corresponding official Codex
 bash ../../tooling/scripts/validate_codex_adapter.sh
 npm --workspace @ascp/adapter-codex run check
 ```
+
+## Live runtime smoke testing
+
+The package includes a checked-in live smoke script over the real `codex app-server`.
+
+Interactive guided flow:
+
+```bash
+npm --workspace @ascp/adapter-codex run live
+```
+
+Direct read-only subcommands:
+
+```bash
+npm --workspace @ascp/adapter-codex run live -- discover
+npm --workspace @ascp/adapter-codex run live -- list --limit 5
+npm --workspace @ascp/adapter-codex run live -- get codex:thread_id --runs
+```
+
+Mutating subcommands:
+
+```bash
+npm --workspace @ascp/adapter-codex run live -- resume codex:thread_id
+npm --workspace @ascp/adapter-codex run live -- send-input codex:thread_id "continue from here"
+```
+
+The live script rebuilds the adapter before launch so it runs against fresh local code. It intentionally does not expose `sessions.subscribe`, replay, artifacts, diff reads, or approval response flows.

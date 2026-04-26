@@ -17,7 +17,7 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 ### 2026-04-26 - Codex live smoke script task 2
 
 - Branch: `feature/codex-live-smoke-script`
-- Commit: `not committed`
+- Commit: `dc00d3d`
 - Summary: completed the first implementation slice for the Codex live smoke script by adding typed command parsing and validation helpers, covering interactive default plus core list/get/send-input parsing behavior, and tightening parser invariants so option tokens are not misread as session IDs and send-input text is preserved verbatim
 - Documentation updated: `plans.md`, `docs/status.md`
 - Next likely step: add command dispatch over the existing adapter service, then wire the executable wrapper and interactive flow
@@ -25,10 +25,18 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 ### 2026-04-26 - Codex live smoke script task 3
 
 - Branch: `feature/codex-live-smoke-script`
-- Commit: `not committed`
+- Commit: `a0cd8d3`
 - Summary: completed the dispatch slice for the Codex live smoke script by adding typed dependency-based command dispatch for discovery, list, get, resume, and send-input, tightening the dependency contract so branch-specific dispatch stays testable, and extending focused coverage to the interactive early return plus all supported command branches
 - Documentation updated: `plans.md`, `docs/status.md`
 - Next likely step: add the executable wrapper, package script alias, and interactive terminal flow on top of the tested `live-smoke.ts` module
+
+### 2026-04-26 - Codex live smoke script task 4 and task 5
+
+- Branch: `feature/codex-live-smoke-script`
+- Commit: `0d731cc`
+- Summary: completed the checked-in live smoke entrypoint for the Codex adapter by adding a dual-mode executable wrapper plus interactive terminal flow, fixing the launch path so `npm --workspace @ascp/adapter-codex run live` rebuilds before executing, rejecting malformed command-line usage instead of silently running, keeping the interactive menu alive after action failures, documenting direct and interactive usage in the adapter README, and re-running focused tests, the full adapter check, the repository validator, and real `discover` plus `list` smoke commands against the live Codex runtime
+- Documentation updated: `plans.md`, `docs/status.md`, `adapters/codex/README.md`
+- Next likely step: review the finished branch, push it, and merge it into `main` if the live smoke workflow is accepted
 
 ### 2026-04-26 - Codex adapter initialization hotfix
 
