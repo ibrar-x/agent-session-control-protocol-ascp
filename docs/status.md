@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-26 - Docs site monochrome styling refinement and branch merge
+
+- Branch: `branch-ascp-host-service`
+- Commit: `dcc63a3`
+- Summary: refined the `apps/web` docs site styling with opencode.ai-inspired monochrome improvements including subtler inline code (border/background instead of button-like), left-bordered code blocks, hover-only link underlines, and button text-decoration fixes; committed the changes in the separate `apps/web` repo; merged `branch-ascp-host-service` into `main` after confirming the branch was up to date with origin
+- Documentation updated: `docs/status.md`
+- Next likely step: deploy the docs site to sessio.app or continue with the next protocol feature branch
+
 ### 2026-04-26 - Host console live browser validation fixes
 
 - Branch: `branch-ascp-host-service`
