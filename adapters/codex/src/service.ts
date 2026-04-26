@@ -443,14 +443,20 @@ export class CodexAdapterService {
         includeTurns: params.include_runs === true
       });
       const session = mapThreadToSession(response.thread);
+      const runs =
+        params.include_runs === true && Array.isArray(response.thread.turns)
+          ? response.thread.turns.flatMap((turn) => {
+              try {
+                return [mapTurnToRun(turn, response.thread!.id)];
+              } catch {
+                return [];
+              }
+            })
+          : undefined;
 
       return {
         session,
-        ...(params.include_runs === true && Array.isArray(response.thread.turns)
-          ? {
-              runs: response.thread.turns.map((turn) => mapTurnToRun(turn, response.thread!.id))
-            }
-          : {}),
+        ...(runs !== undefined ? { runs } : {}),
         ...(params.include_pending_approvals === true
           ? {
               pending_approvals: this.listSessionApprovals(session.id).filter(

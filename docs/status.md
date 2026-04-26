@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-26 - Host console live browser validation fixes
+
+- Branch: `branch-ascp-host-service`
+- Commit: `not committed`
+- Summary: validated the local host and Codex-first browser console through the in-app browser, fixed the host console TSX compilation configuration so the React app renders under Vite during live testing, and fixed `sessions.get(include_runs=true)` to skip incomplete Codex turns instead of failing the whole session read after browser-driven send-input refreshes
+- Documentation updated: `docs/status.md`
+- Next likely step: commit the browser-validation fixes on the current branch, then continue with merge review or broader multi-runtime host follow-up work
+
 ### 2026-04-26 - Reusable ASCP host service with Codex-first web console
 
 - Branch: `branch-ascp-host-service`

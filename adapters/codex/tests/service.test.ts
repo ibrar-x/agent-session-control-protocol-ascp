@@ -198,6 +198,40 @@ describe("CodexAdapterService", () => {
     });
   });
 
+  it("skips incomplete turns instead of failing sessions.get when include_runs is requested", async () => {
+    const client = new FakeCodexClient();
+    client.threadReadResult = {
+      thread: makeThread({
+        turns: [
+          {
+            id: "turn_complete",
+            status: "completed",
+            startedAt: 1_745_661_900,
+            completedAt: 1_745_662_140
+          },
+          {
+            id: "turn_incomplete",
+            status: "inProgress"
+          }
+        ]
+      })
+    };
+
+    const service = new CodexAdapterService(client);
+    const result = await service.sessionsGet({
+      session_id: "codex:thread_1",
+      include_runs: true
+    });
+
+    expect(result.runs).toEqual([
+      expect.objectContaining({
+        id: "codex:thread_1:turn_complete",
+        session_id: "codex:thread_1",
+        status: "completed"
+      })
+    ]);
+  });
+
   it("resumes a session with honest replay flags", async () => {
     const client = new FakeCodexClient();
     client.threadResumeResult = {
