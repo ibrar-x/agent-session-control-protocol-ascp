@@ -84,8 +84,7 @@ function hasObservedSurfaceEvidence(surface: CodexObservedSurface): boolean {
     normalizeValues(surface.methods).length > 0 ||
     normalizeValues(surface.notifications).length > 0 ||
     surface.approvalRequestsObserved !== undefined ||
-    surface.approvalRespondSupported !== undefined ||
-    surface.diffReadSupported !== undefined
+    surface.approvalRespondSupported !== undefined
   );
 }
 
@@ -206,12 +205,6 @@ export function buildCodexDiscovery(options: {
       fallbackObservedSurface.approvalRespondSupported,
       VERIFIED_CODEX_APPROVAL_RESPOND
     );
-  const supportsDiffReads = resolveObservedBoolean(
-    liveObservedSurface.diffReadSupported,
-    fallbackObservedSurface.diffReadSupported,
-    VERIFIED_CODEX_DIFF_READS
-  );
-
   return {
     runtimeAvailable: true,
     runtimeId: CODEX_RUNTIME_ID,
@@ -224,7 +217,7 @@ export function buildCodexDiscovery(options: {
     notifications,
     supportsApprovalRequests,
     supportsApprovalRespond,
-    supportsDiffReads
+    supportsDiffReads: VERIFIED_CODEX_DIFF_READS
   };
 }
 

@@ -58,7 +58,7 @@ export function resolveCodexCapabilities(discovery: CodexDiscovery): CodexResolv
     approval_requests: false,
     approval_respond: false,
     artifacts: false,
-    diffs: discovery.supportsDiffReads,
+    diffs: false,
     terminal_passthrough: false,
     notifications: false,
     checkpoints: false,

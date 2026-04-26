@@ -31,7 +31,6 @@ export interface CodexObservedSurface {
   notifications?: Iterable<string>;
   approvalRequestsObserved?: boolean;
   approvalRespondSupported?: boolean;
-  diffReadSupported?: boolean;
 }
 
 export interface CodexAppServerRequestOptions {
@@ -441,7 +440,6 @@ export class CodexAppServerClient {
   private readonly observedNotifications = new Set<string>();
   private approvalRequestsObserved: boolean | undefined;
   private approvalRespondSupported: boolean | undefined;
-  private diffReadSupported: boolean | undefined;
   private readonly removeTransportListener: (() => void) | null;
 
   constructor(options: CodexAppServerClientOptions = {}) {
@@ -465,7 +463,6 @@ export class CodexAppServerClient {
 
     this.approvalRequestsObserved = options.observedSurface?.approvalRequestsObserved;
     this.approvalRespondSupported = options.observedSurface?.approvalRespondSupported;
-    this.diffReadSupported = options.observedSurface?.diffReadSupported;
 
     this.removeTransportListener = this.transport.onNotification((notification) => {
       this.observedNotifications.add(notification.method);
@@ -482,8 +479,7 @@ export class CodexAppServerClient {
       methods: [...this.observedMethods],
       notifications: [...this.observedNotifications],
       approvalRequestsObserved: this.approvalRequestsObserved,
-      approvalRespondSupported: this.approvalRespondSupported,
-      diffReadSupported: this.diffReadSupported
+      approvalRespondSupported: this.approvalRespondSupported
     };
   }
 

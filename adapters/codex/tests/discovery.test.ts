@@ -242,8 +242,7 @@ describe("discoverCodexRuntime", () => {
         methods: ["x/fallback-only-method"],
         notifications: ["x/fallback-only-notification"],
         approvalRequestsObserved: true,
-        approvalRespondSupported: true,
-        diffReadSupported: true
+        approvalRespondSupported: true
       }
     );
 
