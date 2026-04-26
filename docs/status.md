@@ -38,6 +38,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 - Documentation updated: `plans.md`, `docs/status.md`, `adapters/codex/README.md`
 - Next likely step: review the finished branch, push it, and merge it into `main` if the live smoke workflow is accepted
 
+### 2026-04-26 - Codex live smoke dormant-thread send-input fix
+
+- Branch: `feature/codex-live-smoke-script`
+- Commit: `not committed`
+- Summary: fixed the live smoke `send-input` path for persisted Codex sessions by confirming that `thread/read` succeeds while `turn/start` fails until `thread/resume` reattaches the thread in the current app-server process, then updating `sessions.send_input` to resume dormant threads before starting a new turn and locking the regression with focused service tests plus a real live send-input probe against a historical session
+- Documentation updated: `plans.md`, `docs/status.md`, `adapters/codex/README.md`
+- Next likely step: commit the dormant-thread fix, then push and merge the updated live smoke branch if the historical-session flow is accepted
+
 ### 2026-04-26 - Codex adapter initialization hotfix
 
 - Branch: `feature/codex-adapter-init-fix`

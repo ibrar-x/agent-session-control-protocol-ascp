@@ -23,6 +23,7 @@ class FakeCodexClient {
   };
 
   lastThreadReadOptions: { threadId: string; includeTurns?: boolean } | null = null;
+  lastThreadResumeId: string | null = null;
   lastTurnStartParams: Record<string, unknown> | null = null;
   lastTurnSteerParams: Record<string, unknown> | null = null;
 
@@ -38,7 +39,8 @@ class FakeCodexClient {
     return this.threadReadResult;
   }
 
-  async threadResume(): Promise<unknown> {
+  async threadResume(threadId: string): Promise<unknown> {
+    this.lastThreadResumeId = threadId;
     return this.threadResumeResult;
   }
 
@@ -206,6 +208,11 @@ describe("CodexAdapterService", () => {
         turns: []
       })
     };
+    client.threadResumeResult = {
+      thread: makeThread({
+        turns: []
+      })
+    };
 
     const service = new CodexAdapterService(client);
 
@@ -228,6 +235,50 @@ describe("CodexAdapterService", () => {
         }
       ]
     });
+    expect(client.lastThreadResumeId).toBe("thread_1");
     expect(client.lastTurnSteerParams).toBeNull();
+  });
+
+  it("resumes a persisted thread before starting a new turn", async () => {
+    const client = new FakeCodexClient();
+    client.threadReadResult = {
+      thread: makeThread({
+        id: "thread_2",
+        turns: []
+      })
+    };
+    client.threadResumeResult = {
+      thread: makeThread({
+        id: "thread_2",
+        turns: []
+      })
+    };
+
+    const service = new CodexAdapterService(client);
+
+    await expect(
+      service.sessionsSendInput({
+        session_id: "codex:thread_2",
+        input: "summarize this"
+      })
+    ).resolves.toEqual({
+      session_id: "codex:thread_2",
+      accepted: true
+    });
+
+    expect(client.lastThreadReadOptions).toEqual({
+      threadId: "thread_2",
+      includeTurns: true
+    });
+    expect(client.lastThreadResumeId).toBe("thread_2");
+    expect(client.lastTurnStartParams).toEqual({
+      threadId: "thread_2",
+      input: [
+        {
+          type: "text",
+          text: "summarize this"
+        }
+      ]
+    });
   });
 });

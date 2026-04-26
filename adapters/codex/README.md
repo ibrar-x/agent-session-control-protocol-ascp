@@ -60,3 +60,5 @@ npm --workspace @ascp/adapter-codex run live -- send-input codex:thread_id "cont
 ```
 
 The live script rebuilds the adapter before launch so it runs against fresh local code. It intentionally does not expose `sessions.subscribe`, replay, artifacts, diff reads, or approval response flows.
+
+When `send-input` targets a persisted Codex session from `sessions.list`, the adapter now reattaches that thread with `thread/resume` before starting a new turn. This keeps historical sessions usable in the live smoke flow instead of failing with a raw `thread not found` runtime error.

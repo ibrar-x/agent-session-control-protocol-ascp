@@ -316,6 +316,17 @@ export class CodexAdapterService {
           );
         }
       } else {
+        const resumeResponse = toThreadResponse(
+          await this.client.threadResume(threadId),
+          "thread/resume"
+        );
+
+        if (resumeResponse.thread == null) {
+          throw createServiceError("NOT_FOUND", `Codex thread not found: ${threadId}`, false, {
+            session_id: params.session_id
+          });
+        }
+
         const startResponse = await this.client.turnStart({
           threadId,
           input
