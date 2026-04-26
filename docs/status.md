@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-26 - Codex live smoke coverage for remaining adapter surfaces
+
+- Branch: `branch-codex-live-smoke-surfaces`
+- Commit: `not committed`
+- Summary: expanded the live-smoke tool to support `sessions.subscribe|unsubscribe`, `approvals.list|respond`, `artifacts.list|get`, and `diffs.get`, added interactive session actions for subscribe+drain replay validation plus approvals/artifacts/diff checks, and wired the executable script to the corresponding adapter service methods
+- Documentation updated: `plans.md`, `docs/status.md`, `adapters/codex/README.md`
+- Next likely step: commit the branch and merge to `main` if the new smoke-testing flow is accepted
+
 ### 2026-04-26 - Codex adapter remaining ASCP surfaces
 
 - Branch: `branch-codex-adapter-remaining-surfaces`

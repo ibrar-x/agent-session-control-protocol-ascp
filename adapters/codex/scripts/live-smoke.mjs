@@ -23,12 +23,60 @@ if (argv.length > 0 && (argv[0] === "help" || argv[0] === "--help" || argv[0] ==
 
 const client = new CodexAppServerClient();
 const service = new CodexAdapterService(client);
+const subscribeSession = (params) => service.sessionsSubscribe(params);
+const unsubscribeSession = (params) => service.sessionsUnsubscribe(params);
+const listApprovals = (params) => service.approvalsList(params);
+const respondApproval = (params) => service.approvalsRespond(params);
+const listArtifacts = (params) => service.artifactsList(params);
+const getArtifact = (params) => service.artifactsGet(params);
+const getDiff = (params) => service.diffsGet(params);
+const drainSubscriptionEvents = (paramsOrSubscriptionId, maybeLimit) => {
+  if (typeof paramsOrSubscriptionId === "string") {
+    return service.drainSubscriptionEvents(paramsOrSubscriptionId, maybeLimit);
+  }
+
+  if (typeof paramsOrSubscriptionId === "object" && paramsOrSubscriptionId !== null) {
+    const subscriptionId =
+      typeof paramsOrSubscriptionId.subscription_id === "string"
+        ? paramsOrSubscriptionId.subscription_id
+        : typeof paramsOrSubscriptionId.subscriptionId === "string"
+          ? paramsOrSubscriptionId.subscriptionId
+          : undefined;
+    const limit =
+      typeof paramsOrSubscriptionId.limit === "number" && Number.isFinite(paramsOrSubscriptionId.limit)
+        ? paramsOrSubscriptionId.limit
+        : undefined;
+
+    if (subscriptionId !== undefined) {
+      return service.drainSubscriptionEvents(subscriptionId, limit);
+    }
+  }
+
+  throw new Error("The drain subscription command requires a subscription_id.");
+};
+
 const deps = {
   discover: () => discoverCodexRuntime(client),
   listSessions: (params) => service.sessionsList(params),
   getSession: (params) => service.sessionsGet(params),
   resumeSession: (params) => service.sessionsResume(params),
-  sendInput: (params) => service.sessionsSendInput(params)
+  sendInput: (params) => service.sessionsSendInput(params),
+  subscribeSession,
+  unsubscribeSession,
+  listApprovals,
+  respondApproval,
+  listArtifacts,
+  getArtifact,
+  getDiff,
+  drainSubscriptionEvents,
+  sessionsSubscribe: subscribeSession,
+  sessionsUnsubscribe: unsubscribeSession,
+  approvalsList: listApprovals,
+  approvalsRespond: respondApproval,
+  artifactsList: listArtifacts,
+  artifactsGet: getArtifact,
+  diffsGet: getDiff,
+  drainSubscription: drainSubscriptionEvents
 };
 
 try {

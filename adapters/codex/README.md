@@ -65,6 +65,28 @@ npm --workspace @ascp/adapter-codex run live -- resume codex:thread_id
 npm --workspace @ascp/adapter-codex run live -- send-input codex:thread_id "continue from here"
 ```
 
-The live script rebuilds the adapter before launch so it runs against fresh local code. It currently focuses on session discovery/read/resume/input flows and does not expose dedicated CLI subcommands for subscribe, approvals, diffs, or artifacts yet.
+Expanded method-style smoke commands:
+
+```bash
+npm --workspace @ascp/adapter-codex run live -- sessions.subscribe codex:thread_id --snapshot
+npm --workspace @ascp/adapter-codex run live -- sessions.subscribe codex:thread_id --from-seq 10
+npm --workspace @ascp/adapter-codex run live -- sessions.subscribe codex:thread_id --from-event-id codex:event_id
+npm --workspace @ascp/adapter-codex run live -- sessions.unsubscribe codex:subscription:thread_id:1
+npm --workspace @ascp/adapter-codex run live -- approvals.respond codex:approval_id approved --note "smoke approval"
+npm --workspace @ascp/adapter-codex run live -- artifacts.list codex:thread_id
+npm --workspace @ascp/adapter-codex run live -- artifacts.get codex:artifact:thread_id:turn_id:item_id:0
+npm --workspace @ascp/adapter-codex run live -- diffs.get codex:thread_id codex:thread_id:turn_id
+```
+
+For stream testing, use the interactive `p` action (`subscribe+drain`) to subscribe, inspect queued replay/live events, and optionally unsubscribe inside a single live-smoke process. Subscription queues are in-memory, so separate CLI invocations do not share subscription state.
+
+Short interactive guidance:
+
+1. Run `npm --workspace @ascp/adapter-codex run live` and select a recent session.
+2. Use `resume` or `send input` interactively to create fresh runtime activity.
+3. Use the `p` action to run `sessions.subscribe` with replay params (`from seq` / `from event id`) and drain queued events.
+4. Finish with `sessions.unsubscribe` for the active subscription.
+
+The live script rebuilds the adapter before launch so it runs against fresh local code.
 
 When `send-input` targets a persisted Codex session from `sessions.list`, the adapter now reattaches that thread with `thread/resume` before starting a new turn. This keeps historical sessions usable in the live smoke flow instead of failing with a raw `thread not found` runtime error.
