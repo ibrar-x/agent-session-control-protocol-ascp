@@ -5,5 +5,5 @@ In-progress TypeScript workspace for the ASCP Codex runtime adapter. This packag
 Current validation entrypoint:
 
 ```bash
-bash tooling/scripts/validate_codex_adapter.sh
+bash ../../tooling/scripts/validate_codex_adapter.sh
 ```
