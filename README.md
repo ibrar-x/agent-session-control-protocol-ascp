@@ -17,7 +17,7 @@ ascp/
 ├── apps/
 ├── services/
 ├── tooling/
-├── docs/
+├── internal/
 ├── package.json
 ├── melos.yaml
 └── turbo.json
@@ -33,7 +33,7 @@ ascp/
 - [`apps/web/`](./apps/web/): placeholder future web app boundary
 - [`services/mock-server/`](./services/mock-server/): deterministic protocol mock server
 - [`tooling/`](./tooling/): validation wrappers and future generators
-- [`docs/`](./docs/): repository architecture, workflow, and continuation docs
+- [`internal/`](./internal/): repository workflow, planning, and continuation docs
 
 ## Source Of Truth
 
@@ -83,8 +83,7 @@ ASCP does not standardize model APIs, prompt formats, tool schemas, UI systems, 
 
 ## More Context
 
-- [`docs/README.md`](./docs/README.md)
-- [`docs/architecture/system-design.md`](./docs/architecture/system-design.md)
-- [`docs/architecture/dependency-graph.md`](./docs/architecture/dependency-graph.md)
-- [`docs/project-context-reference.md`](./docs/project-context-reference.md)
-- [`AGENTS.md`](./AGENTS.md)
+- [Documentation Website](https://sessio.app) — user-facing and developer documentation
+- [`internal/README.md`](./internal/README.md) — contributor workflow docs
+- [`protocol/`](./protocol/) — canonical protocol source of truth
+- [`AGENTS.md`](./AGENTS.md) — agent workflow rules
