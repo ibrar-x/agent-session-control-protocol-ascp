@@ -207,7 +207,7 @@ Required sequence on session selection:
 6. attach the live subscription
 7. if subscribe succeeds, set `live`
 8. if subscribe fails after snapshot, set `snapshot-only`
-9. lazily load secondary detail such as artifact list or diff detail when the user opens it
+9. lazily load secondary detail only when the user explicitly expands the relevant rail card
 
 The inline interaction cards in chat and the `Pending interactions` rail card must read from the same normalized store so they cannot drift.
 
@@ -281,6 +281,17 @@ The compact and inline views must stay consistent because they are backed by the
 ## Artifacts and Diff Presentation
 
 Artifacts and diffs should stay secondary in this demo, but visible enough to prove the runtime integration.
+
+### Secondary detail loading rule
+
+Secondary detail must use one explicit trigger across the rail:
+
+- compact artifact/diff summary is derived from already loaded session state when possible
+- full artifact list loads only when the user expands the `Artifacts and diff summary` rail card
+- diff detail loads only when the user explicitly opens the diff section inside that expanded card
+- do not prefetch full artifact lists or diff detail automatically after subscription attach
+
+This rule is intentional. It keeps the selected-session load path stable and prevents different rail cards from drifting into inconsistent fetch behavior.
 
 Operator rail compact state:
 
