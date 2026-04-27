@@ -17,10 +17,13 @@ import type {
   ErrorCode,
   ErrorObject,
   EventEnvelope,
+  InputRequest,
   SessionsGetParams,
   SessionsGetResult,
   SessionsListParams,
   SessionsListResult,
+  SessionsStartParams,
+  SessionsStartResult,
   SessionsResumeParams,
   SessionsResumeResult,
   SessionsSendInputParams,
@@ -36,8 +39,9 @@ import { type CodexJsonRpcNotification, CodexAppServerClient, CodexJsonRpcError 
 import { CODEX_RUNTIME_ID } from "./discovery.js";
 import { toRunId, toSessionId } from "./ids.js";
 import { mapNotificationToEvents } from "./events.js";
+import { buildApprovalResponseInput, deriveApprovalRequest, deriveInputRequest } from "./interactions.js";
 import type { CodexThread, CodexTurn } from "./session-mapper.js";
-import { mapThreadToSession, mapTurnToRun } from "./session-mapper.js";
+import { mapThreadStatus, mapThreadToSession, mapTurnToRun } from "./session-mapper.js";
 
 const APPROVAL_RESPOND_METHOD_CANDIDATES = ["approval/respond"] as const;
 const MAX_SESSION_EVENT_HISTORY = 2_000;
@@ -61,6 +65,7 @@ interface CodexTurnStartResponse {
 
 export interface CodexServiceClient {
   threadList(limit?: number): Promise<unknown>;
+  threadStart(params: Record<string, unknown>): Promise<unknown>;
   threadRead(threadId: string, options?: { includeTurns?: boolean }): Promise<unknown>;
   threadResume(threadId: string): Promise<unknown>;
   turnStart(params: Record<string, unknown>): Promise<unknown>;
@@ -254,7 +259,10 @@ function toThreadListResponse(value: unknown): CodexThreadListResponse {
   throw createServiceError("RUNTIME_ERROR", "Codex thread/list returned an unexpected shape.", false);
 }
 
-function toThreadResponse(value: unknown, method: "thread/read" | "thread/resume"): CodexThreadReadResponse {
+function toThreadResponse(
+  value: unknown,
+  method: "thread/read" | "thread/resume" | "thread/start"
+): CodexThreadReadResponse {
   if (isRecord(value)) {
     return value as CodexThreadReadResponse;
   }
@@ -362,8 +370,11 @@ export class CodexAdapterService {
   private readonly subscriptions = new Map<string, SubscriptionState>();
   private readonly sessionEvents = new Map<string, EventEnvelope<Record<string, unknown>>[]>();
   private readonly sessionSeq = new Map<string, number>();
+  private readonly sessionStatuses = new Map<string, SessionsGetResult["session"]["status"]>();
   private readonly approvals = new Map<string, ApprovalRequest>();
   private readonly approvalIdsBySession = new Map<string, Set<string>>();
+  private readonly inputs = new Map<string, InputRequest>();
+  private readonly inputIdsBySession = new Map<string, Set<string>>();
   private readonly eventListeners = new Set<
     (event: EventEnvelope<Record<string, unknown>>) => void
   >();
@@ -440,8 +451,12 @@ export class CodexAdapterService {
 
     try {
       const response = await this.readThreadOrThrow(threadId, "thread/read", {
-        includeTurns: params.include_runs === true
+        includeTurns:
+          params.include_runs === true ||
+          params.include_pending_approvals === true ||
+          params.include_pending_inputs === true
       });
+      this.syncDerivedInteractions(response.thread, false);
       const session = mapThreadToSession(response.thread);
       const runs =
         params.include_runs === true && Array.isArray(response.thread.turns)
@@ -463,12 +478,65 @@ export class CodexAdapterService {
                 (approval) => approval.status === "pending"
               )
             }
+          : {}),
+        ...(params.include_pending_inputs === true
+          ? {
+              pending_inputs: this.listSessionInputs(session.id).filter((input) => input.status === "pending")
+            }
           : {})
       };
     } catch (error) {
       throw mapRuntimeError(error, {
         method: "sessions.get",
         session_id: params.session_id
+      });
+    }
+  }
+
+  async sessionsStart(params: SessionsStartParams): Promise<SessionsStartResult> {
+    if (params.runtime_id !== CODEX_RUNTIME_ID) {
+      throw createServiceError("UNSUPPORTED", `Unsupported runtime: ${params.runtime_id}`, false, {
+        runtime_id: params.runtime_id
+      });
+    }
+
+    try {
+      const response = toThreadResponse(
+        await this.client.threadStart({
+          ...(params.workspace !== undefined ? { cwd: params.workspace } : {}),
+          ...(params.title !== undefined ? { title: params.title } : {}),
+          ...(params.metadata !== undefined ? { metadata: params.metadata } : {})
+        }),
+        "thread/start"
+      );
+
+      if (response.thread == null) {
+        throw createServiceError("RUNTIME_ERROR", "Codex thread/start returned no thread.", false, {
+          method: "sessions.start"
+        });
+      }
+
+      let thread = response.thread;
+
+      if (params.initial_prompt !== undefined && params.initial_prompt.trim().length > 0) {
+        await this.client.turnStart({
+          threadId: thread.id,
+          input: buildTextInput(params.initial_prompt)
+        });
+        thread = (await this.readThreadOrThrow(thread.id, "thread/read", {
+          includeTurns: true
+        })).thread;
+      }
+
+      this.syncDerivedInteractions(thread, false);
+
+      return {
+        session: mapThreadToSession(thread)
+      };
+    } catch (error) {
+      throw mapRuntimeError(error, {
+        method: "sessions.start",
+        runtime_id: params.runtime_id
       });
     }
   }
@@ -498,44 +566,43 @@ export class CodexAdapterService {
   }
 
   async sessionsSendInput(params: SessionsSendInputParams): Promise<SessionsSendInputResult> {
-    const threadId = parseSessionId(params.session_id);
+    const requestId = this.extractRequestId(params.metadata);
+    const inputRequest = requestId === undefined ? undefined : this.inputs.get(requestId);
+
+    if (requestId !== undefined && inputRequest === undefined) {
+      throw createServiceError("NOT_FOUND", `Unknown input request id: ${requestId}`, false, {
+        input_id: requestId,
+        session_id: params.session_id
+      });
+    }
+
+    if (inputRequest !== undefined && inputRequest.status !== "pending") {
+      throw createServiceError("CONFLICT", `Input request is no longer pending: ${requestId}`, false, {
+        input_id: requestId,
+        status: inputRequest.status
+      });
+    }
 
     try {
-      const response = await this.readThreadOrThrow(threadId, "thread/read", {
-        includeTurns: true
-      });
-      const input = buildTextInput(params.input);
-      const activeTurn = findActiveTurn(response.thread);
+      await this.deliverInputToSession(params.session_id, params.input);
 
-      if (activeTurn !== undefined) {
-        const steerResponse = await this.client.turnSteer({
-          threadId,
-          expectedTurnId: activeTurn.id,
-          input
-        });
-
-        if (!hasTurnId(steerResponse)) {
-          throw createServiceError(
-            "RUNTIME_ERROR",
-            "Codex turn/steer returned an unexpected shape.",
-            false
-          );
-        }
-      } else {
-        await this.readThreadOrThrow(threadId, "thread/resume");
-
-        const startResponse = await this.client.turnStart({
-          threadId,
-          input
-        });
-
-        if (!hasTurnObject(startResponse)) {
-          throw createServiceError(
-            "RUNTIME_ERROR",
-            "Codex turn/start returned an unexpected shape.",
-            false
-          );
-        }
+      if (inputRequest !== undefined) {
+        const completedAt = new Date().toISOString();
+        inputRequest.status = "answered";
+        this.inputs.set(inputRequest.id, inputRequest);
+        this.ingestEvent(
+          createEventEnvelope({
+            id: `codex:event:input_completed:${inputRequest.id}`,
+            type: "input.completed",
+            ts: completedAt,
+            session_id: inputRequest.session_id,
+            ...(inputRequest.run_id !== undefined ? { run_id: inputRequest.run_id } : {}),
+            payload: {
+              input_id: inputRequest.id,
+              completed_at: completedAt
+            }
+          })
+        );
       }
 
       return {
@@ -557,6 +624,7 @@ export class CodexAdapterService {
       const response = await this.readThreadOrThrow(threadId, "thread/read", {
         includeTurns: true
       });
+      this.syncDerivedInteractions(response.thread, false);
       const sessionId = toSessionId(threadId);
       const subscriptionId = `codex:subscription:${threadId}:${this.nextSubscriptionOrdinal++}`;
       const subscription: SubscriptionState = {
@@ -577,7 +645,8 @@ export class CodexAdapterService {
               session_id: sessionId,
               payload: {
                 session: mapThreadToSession(response.thread),
-                pending_approvals: this.listSessionApprovals(sessionId)
+                pending_approvals: this.listSessionApprovals(sessionId),
+                pending_inputs: this.listSessionInputs(sessionId)
               }
             })
           )
@@ -631,6 +700,22 @@ export class CodexAdapterService {
   }
 
   async approvalsList(params: ApprovalsListParams = {}): Promise<ApprovalsListResult> {
+    if (params.session_id !== undefined) {
+      const threadId = parseSessionId(params.session_id);
+
+      try {
+        const response = await this.readThreadOrThrow(threadId, "thread/read", {
+          includeTurns: true
+        });
+        this.syncDerivedInteractions(response.thread, false);
+      } catch (error) {
+        throw mapRuntimeError(error, {
+          method: "approvals.list",
+          session_id: params.session_id
+        });
+      }
+    }
+
     const approvals = [...this.approvals.values()]
       .filter((approval) => {
         if (params.session_id !== undefined && approval.session_id !== params.session_id) {
@@ -667,59 +752,60 @@ export class CodexAdapterService {
     }
 
     if (approval.status !== "pending") {
-      return {
+      throw createServiceError("CONFLICT", `Approval is no longer pending: ${params.approval_id}`, false, {
         approval_id: approval.id,
         status: approval.status
-      };
+      });
     }
 
-    if (this.client.request === undefined || this.approvalRespondMethods.length === 0) {
-      throw createServiceError("UNSUPPORTED", "Codex approval response surface is not available.", false);
+    const routed =
+      (await this.tryRespondToApprovalDirectly(approval, params)) ||
+      (await this.tryRespondToApprovalViaInput(approval, params));
+
+    if (!routed) {
+      throw createServiceError("UNSUPPORTED", "Codex approval response surface is not available.", false, {
+        approval_id: params.approval_id
+      });
     }
 
-    const rawApprovalId = approval.id.startsWith("codex:") ? approval.id.slice("codex:".length) : approval.id;
-    let supported = false;
-
-    for (const method of this.approvalRespondMethods) {
-      try {
-        await this.client.request(method, {
-          approvalId: rawApprovalId,
-          decision: params.decision,
-          ...(params.note !== undefined ? { note: params.note } : {})
-        });
-        supported = true;
-        break;
-      } catch (error) {
-        if (isMethodNotFoundError(error)) {
-          continue;
-        }
-
-        throw mapRuntimeError(error, {
-          method: "approvals.respond",
-          approval_id: params.approval_id
-        });
-      }
-    }
-
-    if (!supported) {
-      throw createServiceError("UNSUPPORTED", "Codex approval response surface is not available.", false);
-    }
-
-    this.client.markApprovalResponseSupported?.();
+    const resolvedAt = new Date().toISOString();
     approval.status = params.decision === "approved" ? "approved" : "rejected";
-    approval.resolved_at = new Date().toISOString();
+    approval.resolved_at = resolvedAt;
     this.approvals.set(approval.id, approval);
 
     this.ingestEvent(
       createEventEnvelope({
-        id: `codex:event:approval_${approval.status}:${approval.id}`,
-        type: approval.status === "approved" ? "approval.approved" : "approval.rejected",
-        ts: approval.resolved_at,
+        id: `codex:event:approval_updated:${approval.id}`,
+        type: "approval.updated",
+        ts: resolvedAt,
         session_id: approval.session_id,
         ...(approval.run_id !== undefined ? { run_id: approval.run_id } : {}),
         payload: {
-          approval
+          approval_id: approval.id,
+          changed_fields: ["status", "resolved_at"]
         }
+      })
+    );
+    this.ingestEvent(
+      createEventEnvelope({
+        id: `codex:event:approval_${approval.status}:${approval.id}`,
+        type: approval.status === "approved" ? "approval.approved" : "approval.rejected",
+        ts: resolvedAt,
+        session_id: approval.session_id,
+        ...(approval.run_id !== undefined ? { run_id: approval.run_id } : {}),
+        payload:
+          approval.status === "approved"
+            ? {
+                approval_id: approval.id,
+                resolved_at: resolvedAt,
+                actor_id: "actor:unknown"
+              }
+            : {
+                approval_id: approval.id,
+                resolved_at: resolvedAt,
+                actor_id: "actor:unknown",
+                note: params.note ?? "Rejected by remote client."
+              }
       })
     );
 
@@ -961,7 +1047,24 @@ export class CodexAdapterService {
       .sort((left, right) => left.created_at.localeCompare(right.created_at));
   }
 
+  private listSessionInputs(sessionId: string): InputRequest[] {
+    const ids = this.inputIdsBySession.get(sessionId);
+
+    if (ids === undefined) {
+      return [];
+    }
+
+    return [...ids]
+      .map((id) => this.inputs.get(id))
+      .filter((input): input is InputRequest => input !== undefined)
+      .sort((left, right) => left.created_at.localeCompare(right.created_at));
+  }
+
   private recordApproval(approval: ApprovalRequest): void {
+    if (this.approvalSource(approval) === "runtime-native") {
+      this.expireDerivedApprovals(approval.session_id, true);
+    }
+
     this.approvals.set(approval.id, approval);
 
     const sessionApprovals = this.approvalIdsBySession.get(approval.session_id) ?? new Set<string>();
@@ -969,9 +1072,21 @@ export class CodexAdapterService {
     this.approvalIdsBySession.set(approval.session_id, sessionApprovals);
   }
 
+  private recordInput(input: InputRequest): void {
+    this.inputs.set(input.id, input);
+
+    const sessionInputs = this.inputIdsBySession.get(input.session_id) ?? new Set<string>();
+    sessionInputs.add(input.id);
+    this.inputIdsBySession.set(input.session_id, sessionInputs);
+  }
+
   private handleNotification(notification: CodexJsonRpcNotification): void {
     for (const event of mapNotificationToEvents(notification)) {
       this.ingestEvent(event);
+    }
+
+    if (notification.method === "thread/status/changed") {
+      void this.refreshDerivedInteractionsFromNotification(notification);
     }
 
     try {
@@ -982,6 +1097,265 @@ export class CodexAdapterService {
       this.ingestEvent(mapApprovalRequestToEvent(message));
     } catch {
       // Ignore non-approval notifications.
+    }
+  }
+
+  private async refreshDerivedInteractionsFromNotification(
+    notification: CodexJsonRpcNotification
+  ): Promise<void> {
+    const params = isRecord(notification.params) ? notification.params : {};
+    const threadId = readString(params, "threadId");
+
+    if (threadId === undefined) {
+      return;
+    }
+
+    try {
+      const response = await this.readThreadOrThrow(threadId, "thread/read", {
+        includeTurns: true
+      });
+      this.syncDerivedInteractions(response.thread, true);
+    } catch {
+      // Ignore refresh failures for best-effort notification handling.
+    }
+  }
+
+  private syncDerivedInteractions(thread: CodexThread & { turns?: CodexTurn[] }, emitEvents: boolean): void {
+    const sessionId = toSessionId(thread.id);
+    const nextStatus = mapThreadStatus(thread.status ?? { type: "unknown" });
+    const previousStatus = this.sessionStatuses.get(sessionId);
+
+    if (emitEvents && previousStatus !== undefined && previousStatus !== nextStatus) {
+      this.ingestEvent(
+        createEventEnvelope({
+          id: `codex:event:session_status_changed:${thread.id}:${Date.now()}`,
+          type: "session.status_changed",
+          ts: new Date().toISOString(),
+          session_id: sessionId,
+          payload: {
+            from: previousStatus,
+            to: nextStatus
+          }
+        })
+      );
+    }
+
+    this.sessionStatuses.set(sessionId, nextStatus);
+
+    const derivedApproval =
+      this.hasPendingNativeApproval(sessionId) ? null : deriveApprovalRequest(thread);
+    const derivedInput = deriveInputRequest(thread);
+
+    if (derivedApproval === null) {
+      this.expireDerivedApprovals(sessionId, emitEvents);
+    } else {
+      this.upsertDerivedApproval(derivedApproval, emitEvents);
+    }
+
+    if (derivedInput === null) {
+      this.expireDerivedInputs(sessionId, emitEvents);
+    } else {
+      this.upsertDerivedInput(derivedInput, emitEvents);
+    }
+  }
+
+  private hasPendingNativeApproval(sessionId: string): boolean {
+    return this.listSessionApprovals(sessionId).some(
+      (approval) => approval.status === "pending" && this.approvalSource(approval) === "runtime-native"
+    );
+  }
+
+  private approvalSource(approval: ApprovalRequest): string | undefined {
+    return isRecord(approval.metadata) ? readString(approval.metadata, "source") : undefined;
+  }
+
+  private upsertDerivedApproval(approval: ApprovalRequest, emitEvents: boolean): void {
+    const existing = this.approvals.get(approval.id);
+    this.recordApproval(approval);
+
+    if (existing === undefined && emitEvents) {
+      this.ingestEvent(
+        createEventEnvelope({
+          id: `codex:event:approval_requested:${approval.id}`,
+          type: "approval.requested",
+          ts: approval.created_at,
+          session_id: approval.session_id,
+          ...(approval.run_id !== undefined ? { run_id: approval.run_id } : {}),
+          payload: {
+            approval
+          }
+        })
+      );
+    }
+  }
+
+  private upsertDerivedInput(input: InputRequest, emitEvents: boolean): void {
+    const existing = this.inputs.get(input.id);
+    this.recordInput(input);
+
+    if (existing === undefined && emitEvents) {
+      this.ingestEvent(
+        createEventEnvelope({
+          id: `codex:event:input_requested:${input.id}`,
+          type: "input.requested",
+          ts: input.created_at,
+          session_id: input.session_id,
+          ...(input.run_id !== undefined ? { run_id: input.run_id } : {}),
+          payload: {
+            input
+          }
+        })
+      );
+    }
+  }
+
+  private expireDerivedApprovals(sessionId: string, emitEvents: boolean): void {
+    const approvals = this.listSessionApprovals(sessionId).filter(
+      (approval) => approval.status === "pending" && this.approvalSource(approval) === "host-derived"
+    );
+
+    for (const approval of approvals) {
+      const expiredAt = new Date().toISOString();
+      approval.status = "expired";
+      approval.resolved_at = expiredAt;
+      this.approvals.set(approval.id, approval);
+
+      if (emitEvents) {
+        this.ingestEvent(
+          createEventEnvelope({
+            id: `codex:event:approval_expired:${approval.id}`,
+            type: "approval.expired",
+            ts: expiredAt,
+            session_id: approval.session_id,
+            ...(approval.run_id !== undefined ? { run_id: approval.run_id } : {}),
+            payload: {
+              approval_id: approval.id,
+              expired_at: expiredAt
+            }
+          })
+        );
+      }
+    }
+  }
+
+  private expireDerivedInputs(sessionId: string, emitEvents: boolean): void {
+    const inputs = this.listSessionInputs(sessionId).filter((input) => input.status === "pending");
+
+    for (const input of inputs) {
+      const expiredAt = new Date().toISOString();
+      input.status = "expired";
+      this.inputs.set(input.id, input);
+
+      if (emitEvents) {
+        this.ingestEvent(
+          createEventEnvelope({
+            id: `codex:event:input_expired:${input.id}`,
+            type: "input.expired",
+            ts: expiredAt,
+            session_id: input.session_id,
+            ...(input.run_id !== undefined ? { run_id: input.run_id } : {}),
+            payload: {
+              input_id: input.id,
+              expired_at: expiredAt
+            }
+          })
+        );
+      }
+    }
+  }
+
+  private extractRequestId(metadata: unknown): string | undefined {
+    if (!isRecord(metadata)) {
+      return undefined;
+    }
+
+    return readString(metadata, "request_id");
+  }
+
+  private async tryRespondToApprovalDirectly(
+    approval: ApprovalRequest,
+    params: ApprovalsRespondParams
+  ): Promise<boolean> {
+    if (this.client.request === undefined || this.approvalRespondMethods.length === 0) {
+      return false;
+    }
+
+    const rawApprovalId = approval.id.startsWith("codex:") ? approval.id.slice("codex:".length) : approval.id;
+
+    for (const method of this.approvalRespondMethods) {
+      try {
+        await this.client.request(method, {
+          approvalId: rawApprovalId,
+          decision: params.decision,
+          ...(params.note !== undefined ? { note: params.note } : {})
+        });
+        this.client.markApprovalResponseSupported?.();
+        return true;
+      } catch (error) {
+        if (isMethodNotFoundError(error)) {
+          continue;
+        }
+
+        throw mapRuntimeError(error, {
+          method: "approvals.respond",
+          approval_id: params.approval_id
+        });
+      }
+    }
+
+    return false;
+  }
+
+  private async tryRespondToApprovalViaInput(
+    approval: ApprovalRequest,
+    params: ApprovalsRespondParams
+  ): Promise<boolean> {
+    try {
+      await this.deliverInputToSession(
+        approval.session_id,
+        buildApprovalResponseInput(params.decision, params.note)
+      );
+      return true;
+    } catch (error) {
+      if (error instanceof CodexAdapterServiceError && error.code === "NOT_FOUND") {
+        return false;
+      }
+
+      throw error;
+    }
+  }
+
+  private async deliverInputToSession(sessionId: string, inputText: string): Promise<void> {
+    const threadId = parseSessionId(sessionId);
+    const response = await this.readThreadOrThrow(threadId, "thread/read", {
+      includeTurns: true
+    });
+    const input = buildTextInput(inputText);
+    const activeTurn = findActiveTurn(response.thread);
+
+    if (activeTurn !== undefined) {
+      const steerResponse = await this.client.turnSteer({
+        threadId,
+        expectedTurnId: activeTurn.id,
+        input
+      });
+
+      if (!hasTurnId(steerResponse)) {
+        throw createServiceError("RUNTIME_ERROR", "Codex turn/steer returned an unexpected shape.", false);
+      }
+
+      return;
+    }
+
+    await this.readThreadOrThrow(threadId, "thread/resume");
+
+    const startResponse = await this.client.turnStart({
+      threadId,
+      input
+    });
+
+    if (!hasTurnObject(startResponse)) {
+      throw createServiceError("RUNTIME_ERROR", "Codex turn/start returned an unexpected shape.", false);
     }
   }
 

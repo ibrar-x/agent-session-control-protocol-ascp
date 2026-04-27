@@ -11,6 +11,9 @@ class FakeCodexClient {
   threadReadResult: unknown = {
     thread: null
   };
+  threadStartResult: unknown = {
+    thread: null
+  };
   threadResumeResult: unknown = {
     thread: null
   };
@@ -31,6 +34,7 @@ class FakeCodexClient {
   approvalRespondSupported = false;
 
   lastThreadReadOptions: { threadId: string; includeTurns?: boolean } | null = null;
+  lastThreadStartParams: Record<string, unknown> | null = null;
   lastThreadResumeId: string | null = null;
   lastTurnStartParams: Record<string, unknown> | null = null;
   lastTurnSteerParams: Record<string, unknown> | null = null;
@@ -50,6 +54,11 @@ class FakeCodexClient {
     }
 
     return this.threadReadResult;
+  }
+
+  async threadStart(params: Record<string, unknown>): Promise<unknown> {
+    this.lastThreadStartParams = params;
+    return this.threadStartResult;
   }
 
   async threadResume(threadId: string): Promise<unknown> {
@@ -251,6 +260,90 @@ describe("CodexAdapterService", () => {
     });
   });
 
+  it("starts a new Codex session and forwards workspace and title", async () => {
+    const client = new FakeCodexClient();
+    client.threadStartResult = {
+      thread: makeThread({
+        id: "thread_start",
+        cwd: "/tmp/new-workspace",
+        name: "Fresh session"
+      })
+    };
+
+    const service = new CodexAdapterService(client);
+
+    await expect(
+      service.sessionsStart({
+        runtime_id: CODEX_RUNTIME_ID,
+        workspace: "/tmp/new-workspace",
+        title: "Fresh session"
+      })
+    ).resolves.toMatchObject({
+      session: {
+        id: "codex:thread_start",
+        runtime_id: CODEX_RUNTIME_ID,
+        workspace: "/tmp/new-workspace",
+        title: "Fresh session"
+      }
+    });
+
+    expect(client.lastThreadStartParams).toEqual({
+      cwd: "/tmp/new-workspace",
+      title: "Fresh session"
+    });
+  });
+
+  it("starts a turn after sessions.start when an initial prompt is provided", async () => {
+    const client = new FakeCodexClient();
+    client.threadStartResult = {
+      thread: makeThread({
+        id: "thread_start_prompt",
+        turns: []
+      })
+    };
+    client.setThreadReadResult(
+      "thread_start_prompt",
+      {
+        thread: makeThread({
+          id: "thread_start_prompt",
+          status: {
+            type: "active"
+          },
+          turns: [
+            {
+              id: "turn_initial",
+              status: "inProgress",
+              startedAt: 1_745_661_900
+            }
+          ]
+        })
+      }
+    );
+
+    const service = new CodexAdapterService(client);
+
+    await expect(
+      service.sessionsStart({
+        runtime_id: CODEX_RUNTIME_ID,
+        initial_prompt: "hello from start"
+      })
+    ).resolves.toMatchObject({
+      session: {
+        id: "codex:thread_start_prompt"
+      }
+    });
+
+    expect(client.lastTurnStartParams).toEqual({
+      threadId: "thread_start_prompt",
+      input: [
+        {
+          type: "text",
+          text: "hello from start"
+        }
+      ]
+    });
+  });
+
   it("steers the active in-progress turn when sending input", async () => {
     const client = new FakeCodexClient();
     client.threadReadResult = {
@@ -374,6 +467,91 @@ describe("CodexAdapterService", () => {
     });
   });
 
+  it("returns derived pending approvals and inputs for waiting sessions", async () => {
+    const client = new FakeCodexClient();
+    client.setThreadReadResult("thread_waiting_approval", {
+      thread: makeThread({
+        id: "thread_waiting_approval",
+        status: {
+          type: "active",
+          activeFlags: ["waitingOnApproval"]
+        },
+        turns: [
+          {
+            id: "turn_waiting_approval",
+            status: "interrupted",
+            startedAt: 1_745_661_900,
+            items: [
+              {
+                type: "agentMessage",
+                id: "item_approval",
+                text: "I’m requesting elevated access to run the global npm package update."
+              }
+            ]
+          }
+        ]
+      })
+    });
+
+    client.setThreadReadResult("thread_waiting_input", {
+      thread: makeThread({
+        id: "thread_waiting_input",
+        status: {
+          type: "active",
+          activeFlags: ["waitingOnUserInput"]
+        },
+        turns: [
+          {
+            id: "turn_waiting_input",
+            status: "inProgress",
+            startedAt: 1_745_661_900,
+            items: [
+              {
+                type: "agentMessage",
+                id: "item_input",
+                text: "Is this the best structure just yes or no?"
+              }
+            ]
+          }
+        ]
+      })
+    });
+
+    const service = new CodexAdapterService(client);
+
+    const approvalResult = await service.sessionsGet({
+      session_id: "codex:thread_waiting_approval",
+      include_pending_approvals: true
+    });
+    const inputResult = await service.sessionsGet({
+      session_id: "codex:thread_waiting_input",
+      include_pending_inputs: true
+    });
+
+    expect(approvalResult.pending_approvals).toEqual([
+      expect.objectContaining({
+        session_id: "codex:thread_waiting_approval",
+        status: "pending",
+        metadata: expect.objectContaining({
+          source: "host-derived",
+          native_status: "waiting_approval"
+        })
+      })
+    ]);
+    expect(inputResult.pending_inputs).toEqual([
+      expect.objectContaining({
+        session_id: "codex:thread_waiting_input",
+        status: "pending",
+        input_type: "confirm",
+        question: "Is this the best structure just yes or no?",
+        metadata: expect.objectContaining({
+          source: "host-derived",
+          native_status: "waiting_input"
+        })
+      })
+    ]);
+  });
+
   it("creates subscription snapshots and streams mapped live events", async () => {
     const client = new FakeCodexClient();
     client.threadReadResult = {
@@ -467,6 +645,9 @@ describe("CodexAdapterService", () => {
 
   it("lists approval requests observed from Codex approval notifications", async () => {
     const client = new FakeCodexClient();
+    client.threadReadResult = {
+      thread: makeThread()
+    };
     const service = new CodexAdapterService(client);
 
     client.emitNotification({
@@ -491,10 +672,54 @@ describe("CodexAdapterService", () => {
         expect.objectContaining({
           id: "codex:approval_1",
           session_id: "codex:thread_1",
-          status: "pending"
+          status: "pending",
+          metadata: expect.objectContaining({
+            source: "runtime-native"
+          })
         })
       ])
     );
+  });
+
+  it("refreshes approvals.list from waiting approval thread state when no native object exists", async () => {
+    const client = new FakeCodexClient();
+    client.setThreadReadResult("thread_waiting_approval", {
+      thread: makeThread({
+        id: "thread_waiting_approval",
+        status: {
+          type: "active",
+          activeFlags: ["waitingOnApproval"]
+        },
+        turns: [
+          {
+            id: "turn_waiting_approval",
+            status: "interrupted",
+            startedAt: 1_745_661_900,
+            items: [
+              {
+                type: "agentMessage",
+                id: "item_approval",
+                text: "I’m requesting elevated access to run the global npm package update."
+              }
+            ]
+          }
+        ]
+      })
+    });
+
+    const service = new CodexAdapterService(client);
+    const result = await service.approvalsList({
+      session_id: "codex:thread_waiting_approval"
+    });
+
+    expect(result.approvals).toEqual([
+      expect.objectContaining({
+        session_id: "codex:thread_waiting_approval",
+        metadata: expect.objectContaining({
+          source: "host-derived"
+        })
+      })
+    ]);
   });
 
   it("responds to approvals when Codex approval response method is available", async () => {
@@ -534,6 +759,15 @@ describe("CodexAdapterService", () => {
 
   it("returns UNSUPPORTED when approval responses are not available", async () => {
     const client = new FakeCodexClient();
+    client.threadReadResult = {
+      thread: makeThread({
+        status: {
+          type: "idle"
+        },
+        turns: []
+      })
+    };
+    client.threadResumeResult = client.threadReadResult;
     client.requestErrors.set("approval/respond", new CodexJsonRpcError({
       code: -32601,
       message: "Method not found"
@@ -554,8 +788,153 @@ describe("CodexAdapterService", () => {
         approval_id: "codex:approval_3",
         decision: "rejected"
       })
+    ).resolves.toEqual({
+      approval_id: "codex:approval_3",
+      status: "rejected"
+    });
+    expect(client.lastTurnStartParams).toEqual({
+      threadId: "thread_1",
+      input: [
+        {
+          type: "text",
+          text: "rejected"
+        }
+      ]
+    });
+  });
+
+  it("returns CONFLICT when responding to a terminal approval", async () => {
+    const client = new FakeCodexClient();
+    const service = new CodexAdapterService(client);
+
+    client.emitNotification({
+      method: "item/commandExecution/requestApproval",
+      params: {
+        approvalId: "approval_terminal",
+        itemId: "item_terminal",
+        threadId: "thread_1"
+      }
+    });
+
+    await service.approvalsRespond({
+      approval_id: "codex:approval_terminal",
+      decision: "approved"
+    });
+
+    await expect(
+      service.approvalsRespond({
+        approval_id: "codex:approval_terminal",
+        decision: "approved"
+      })
     ).rejects.toMatchObject({
-      code: "UNSUPPORTED"
+      code: "CONFLICT"
+    });
+  });
+
+  it("answers a derived input request through sessions.send_input request metadata", async () => {
+    const client = new FakeCodexClient();
+    client.setThreadReadResult("thread_waiting_input", {
+      thread: makeThread({
+        id: "thread_waiting_input",
+        status: {
+          type: "active",
+          activeFlags: ["waitingOnUserInput"]
+        },
+        turns: [
+          {
+            id: "turn_waiting_input",
+            status: "inProgress",
+            startedAt: 1_745_661_900,
+            items: [
+              {
+                type: "agentMessage",
+                id: "item_input",
+                text: "Choose the deployment target\n1. staging\n2. production"
+              }
+            ]
+          }
+        ]
+      })
+    });
+
+    const service = new CodexAdapterService(client);
+    const session = await service.sessionsGet({
+      session_id: "codex:thread_waiting_input",
+      include_pending_inputs: true
+    });
+    const requestId = session.pending_inputs?.[0]?.id;
+
+    expect(requestId).toBeDefined();
+
+    await expect(
+      service.sessionsSendInput({
+        session_id: "codex:thread_waiting_input",
+        input: "staging",
+        metadata: {
+          request_id: requestId
+        }
+      })
+    ).resolves.toEqual({
+      session_id: "codex:thread_waiting_input",
+      accepted: true
+    });
+
+    await expect(
+      service.sessionsSendInput({
+        session_id: "codex:thread_waiting_input",
+        input: "production",
+        metadata: {
+          request_id: requestId
+        }
+      })
+    ).rejects.toMatchObject({
+      code: "CONFLICT"
+    });
+  });
+
+  it("includes pending inputs in sync.snapshot subscriptions", async () => {
+    const client = new FakeCodexClient();
+    client.threadReadResult = {
+      thread: makeThread({
+        id: "thread_waiting_input",
+        status: {
+          type: "active",
+          activeFlags: ["waitingOnUserInput"]
+        },
+        turns: [
+          {
+            id: "turn_waiting_input",
+            status: "inProgress",
+            startedAt: 1_745_661_900,
+            items: [
+              {
+                type: "agentMessage",
+                id: "item_input",
+                text: "Is this good?"
+              }
+            ]
+          }
+        ]
+      })
+    };
+
+    const service = new CodexAdapterService(client);
+    const subscription = await service.sessionsSubscribe({
+      session_id: "codex:thread_waiting_input",
+      include_snapshot: true
+    });
+    const snapshot = service
+      .drainSubscriptionEvents(subscription.subscription_id)
+      .find((event) => event.type === "sync.snapshot");
+
+    expect(snapshot).toMatchObject({
+      payload: {
+        pending_inputs: [
+          expect.objectContaining({
+            session_id: "codex:thread_waiting_input"
+          })
+        ]
+      }
     });
   });
 

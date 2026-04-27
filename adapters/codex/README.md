@@ -8,30 +8,41 @@ TypeScript workspace for a truthful ASCP adapter over the official `codex app-se
 - deterministic ASCP session, run, approval, and event identifiers
 - `sessions.list`
 - `sessions.get`
+- `sessions.start`
 - `sessions.resume`
 - `sessions.send_input`
 - `sessions.subscribe`
 - `sessions.unsubscribe`
 - `approvals.list`
-- `approvals.respond` (truthful fallback to `UNSUPPORTED` when Codex does not expose a response method)
+- `approvals.respond`
 - `diffs.get` (derived from `fileChange` turn items)
 - `artifacts.list`
 - `artifacts.get`
 - event normalization helpers for `turn/started`, `turn/completed`, `agentMessageDelta`, and `turn/diff/updated`
 - approval request mapping helpers for `item/commandExecution/requestApproval`, `item/fileChange/requestApproval`, and `item/permissions/requestApproval`
+- host-derived interaction translation for `waiting_approval` and `waiting_input` thread states when Codex exposes blocked session state without a native protocol object
 - replay queue behavior for `sessions.subscribe` with `from_seq` and `from_event_id` over sequenced in-memory event history
 
 Operational `thread/*` and `turn/*` requests now lazily perform the required `initialize` handshake with `codex app-server`, so downstream callers do not need to call `client.initialize()` manually before using the service layer.
 
 ## Current capability behavior
 
+- `session_start` is true because the adapter now implements `sessions.start` on top of `thread/start`
 - `stream_events` and `notifications` are true when runtime notifications are observable
-- `approval_requests` becomes true once approval request notifications are observed
-- `approval_respond` stays false until an approval response method succeeds at runtime
+- `approval_requests` is true when `thread/read` is available because the adapter can surface either runtime-native approval notifications or host-derived blocked approval state from Codex session reads
+- `approval_respond` is true when the adapter can route a response either through a native Codex approval method or through truthful blocked-session input fallback
 - `diffs` and `artifacts` are true because the adapter derives metadata from `thread/read` turn items
 - `replay` is true for in-memory subscribe replay behavior (`from_seq` / `from_event_id`) in the running service instance
 
-The adapter does not fake unsupported runtime behavior: if Codex does not expose an approval response method, `approvals.respond` returns `UNSUPPORTED` instead of guessing.
+The adapter does not fake unsupported runtime behavior: it prefers native Codex approval requests when they exist, derives blocked interactions only from observable thread state, and returns `UNSUPPORTED` or `CONFLICT` explicitly when a blocked request cannot be routed or is no longer pending.
+
+## Blocked interaction behavior
+
+- Native approval notifications still win over any derived approval for the same session.
+- `sessions.get(include_pending_approvals=true)` can now populate a host-derived approval object for `waiting_approval` sessions even when Codex only exposes blocked status plus turn content.
+- `sessions.get(include_pending_inputs=true)` can now populate a host-derived input request for `waiting_input` sessions.
+- `sessions.send_input` accepts a `metadata.request_id` value for pending input requests so the adapter can enforce `CONFLICT` when that request is no longer pending.
+- `approvals.respond` first tries native Codex approval methods and falls back to blocked-session message routing only when that is the truthful path available for the session.
 
 ## Validation
 

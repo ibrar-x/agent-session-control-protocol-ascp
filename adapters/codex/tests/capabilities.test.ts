@@ -78,7 +78,7 @@ describe("resolveCodexCapabilities", () => {
       transcript_read: true,
       message_send: true,
       approval_requests: true,
-      approval_respond: false,
+      approval_respond: true,
       artifacts: true,
       diffs: true,
       terminal_passthrough: false,

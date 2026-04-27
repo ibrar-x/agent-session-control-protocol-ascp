@@ -38,6 +38,12 @@ describe("mapApprovalRequest", () => {
         command: "npm test",
         cwd: "/tmp/app"
       },
+      metadata: {
+        source: "runtime-native",
+        adapter_kind: "codex",
+        derivation_reason: null,
+        native_status: "waiting_approval"
+      },
       created_at: NOW
     });
   });
@@ -80,6 +86,12 @@ describe("mapApprovalRequest", () => {
             item_id: "item_9",
             cwd: "/tmp/app",
             permissions: ["network"]
+          },
+          metadata: {
+            source: "runtime-native",
+            adapter_kind: "codex",
+            derivation_reason: null,
+            native_status: "waiting_approval"
           },
           created_at: NOW
         }

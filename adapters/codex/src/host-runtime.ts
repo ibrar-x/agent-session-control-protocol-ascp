@@ -20,6 +20,8 @@ import type {
   SessionsGetResult,
   SessionsListParams,
   SessionsListResult,
+  SessionsStartParams,
+  SessionsStartResult,
   SessionsResumeParams,
   SessionsResumeResult,
   SessionsSendInputParams,
@@ -104,6 +106,10 @@ export class CodexHostRuntime implements AscpHostRuntime {
 
   sessionsList(params?: SessionsListParams): Promise<SessionsListResult> {
     return this.service.sessionsList(params);
+  }
+
+  sessionsStart(params: SessionsStartParams): Promise<SessionsStartResult> {
+    return this.service.sessionsStart(params);
   }
 
   sessionsGet(params: SessionsGetParams): Promise<SessionsGetResult> {

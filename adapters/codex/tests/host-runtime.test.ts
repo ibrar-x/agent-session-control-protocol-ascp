@@ -14,6 +14,7 @@ class FakeCodexClient {
       "initialize",
       "thread/list",
       "thread/read",
+      "thread/start",
       "thread/resume",
       "turn/start",
       "turn/steer"
@@ -42,6 +43,18 @@ class FakeCodexClient {
       turns: []
     }
   };
+  threadStartResult: unknown = {
+    thread: {
+      id: "thread-start",
+      title: "Started session",
+      status: {
+        type: "idle"
+      },
+      createdAt: "2026-04-26T00:00:00.000Z",
+      updatedAt: "2026-04-26T00:00:00.000Z",
+      turns: []
+    }
+  };
 
   async initialize(): Promise<CodexAppServerInitializeResult> {
     return this.initializeResult;
@@ -57,6 +70,10 @@ class FakeCodexClient {
 
   async threadRead(): Promise<unknown> {
     return this.threadReadResult;
+  }
+
+  async threadStart(): Promise<unknown> {
+    return this.threadStartResult;
   }
 
   async threadResume(): Promise<unknown> {
@@ -102,5 +119,14 @@ describe("createCodexHostRuntime", () => {
 
     expect(emptyRuntimes.runtimes).toEqual([]);
     expect(sessions.sessions).toEqual([]);
+  });
+
+  it("forwards sessions.start to the adapter service", async () => {
+    const runtime = createCodexHostRuntime(new FakeCodexClient());
+    const started = await runtime.sessionsStart({
+      runtime_id: "codex_local"
+    });
+
+    expect(started.session.id).toBe("codex:thread-start");
   });
 });

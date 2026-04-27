@@ -102,6 +102,12 @@ function buildCommandApproval(
       ...(readString(params, "command") !== undefined ? { command: readString(params, "command") } : {}),
       ...(readString(params, "cwd") !== undefined ? { cwd: readString(params, "cwd") } : {})
     },
+    metadata: {
+      source: "runtime-native",
+      adapter_kind: "codex",
+      derivation_reason: null,
+      native_status: "waiting_approval"
+    },
     created_at: eventNow(options)
   };
 }
@@ -123,6 +129,12 @@ function buildFileChangeApproval(
     payload: {
       item_id: identity.itemId,
       ...(readString(params, "grantRoot") !== undefined ? { grant_root: readString(params, "grantRoot") } : {})
+    },
+    metadata: {
+      source: "runtime-native",
+      adapter_kind: "codex",
+      derivation_reason: null,
+      native_status: "waiting_approval"
     },
     created_at: eventNow(options)
   };
@@ -149,6 +161,12 @@ function buildPermissionsApproval(
       item_id: identity.itemId,
       ...(readString(params, "cwd") !== undefined ? { cwd: readString(params, "cwd") } : {}),
       ...(permissions !== undefined ? { permissions } : {})
+    },
+    metadata: {
+      source: "runtime-native",
+      adapter_kind: "codex",
+      derivation_reason: null,
+      native_status: "waiting_approval"
     },
     created_at: eventNow(options)
   };

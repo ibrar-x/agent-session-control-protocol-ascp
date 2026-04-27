@@ -31,6 +31,7 @@ export interface CodexThread {
 export interface CodexTurn {
   id: string;
   status?: string;
+  items?: unknown[];
   startedAt?: number | string;
   started_at?: number | string;
   createdAt?: number | string;

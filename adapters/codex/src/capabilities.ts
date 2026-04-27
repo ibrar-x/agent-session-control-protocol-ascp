@@ -53,6 +53,9 @@ export function resolveCodexCapabilities(discovery: CodexDiscovery): CodexResolv
     notifications.has("agentMessageDelta");
   const canReadThreadState = methods.has("thread/read");
   const supportsStreaming = canReadThreadState && hasEventNotifications;
+  const canSendMessages = methods.has("turn/start") || methods.has("turn/steer");
+  const supportsApprovalRequests = canReadThreadState;
+  const supportsApprovalRespond = discovery.supportsApprovalRespond || (supportsApprovalRequests && canSendMessages);
 
   return {
     session_list: methods.has("thread/list"),
@@ -61,9 +64,9 @@ export function resolveCodexCapabilities(discovery: CodexDiscovery): CodexResolv
     session_stop: false,
     stream_events: supportsStreaming,
     transcript_read: canReadThreadState,
-    message_send: methods.has("turn/start") || methods.has("turn/steer"),
-    approval_requests: discovery.supportsApprovalRequests,
-    approval_respond: discovery.supportsApprovalRespond,
+    message_send: canSendMessages,
+    approval_requests: supportsApprovalRequests,
+    approval_respond: supportsApprovalRespond,
     artifacts: canReadThreadState,
     diffs: canReadThreadState,
     terminal_passthrough: false,

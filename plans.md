@@ -12,9 +12,9 @@ This file tracks the active scoped work for the current branch.
 
 ## Active State
 
-- Feature name: Protocol interaction contract for blocked approvals and blocked input
-- Branch: `branch-protocol-interaction-contract`
-- Goal: extend the protocol so mobile and other clients can receive actionable approval and input requests from any adapter while keeping existing core method names and preserving truthful adapter-specific translation boundaries
+- Feature name: Codex interaction translation and blocked-session routing
+- Branch: `branch-codex-interaction-translation`
+- Goal: implement the frozen blocked-interaction contract in the Codex adapter by translating `waiting_approval` and `waiting_input` into actionable ASCP objects, routing responses back into the live Codex session honestly, and fixing overstated `sessions.start` capability behavior on the host path
 - Source inputs:
   - `AGENTS.md`
   - `protocol/ASCP_Protocol_Detailed_Spec_v0_1.md`
@@ -22,28 +22,33 @@ This file tracks the active scoped work for the current branch.
   - `protocol/spec/auth.md`
   - `protocol/spec/methods.md`
   - `protocol/spec/events.md`
+  - `protocol/spec/compatibility.md`
   - `plans.md`
   - `docs/status.md`
-  - `adapters/codex/src/approvals.ts`
   - `adapters/codex/src/service.ts`
+  - `adapters/codex/src/approvals.ts`
+  - `adapters/codex/src/events.ts`
+  - `adapters/codex/src/host-runtime.ts`
 
 ## Scope
 
 Included in this branch:
 
-- define additive protocol support for blocked interaction requests without changing existing core method names
-- extend the protocol core approval contract with normative provenance and actionability rules
-- add a canonical `InputRequest` noun and related session and event surfaces
-- document the translation boundary so adapters, not the host, derive actionable requests from runtime-native blocked state
-- update protocol examples, schemas, and validation assets so future adapter authors can implement the contract without reading Codex-specific code
+- derive host-visible `ApprovalRequest` and `InputRequest` objects from Codex blocked session state when the runtime does not emit native objects
+- preserve native approval notifications when they exist and prefer them over derived objects
+- route approval and input responses back into the live Codex session through truthful adapter-owned translation paths
+- surface pending inputs in `sessions.get` and `sync.snapshot`
+- emit input lifecycle events and any needed derived approval events from the adapter
+- implement `sessions.start` or degrade the advertised host capability so the capability document matches reality
+- update adapter tests and docs for the new interaction behavior
 
 Explicitly out of scope:
 
-- Codex adapter translation logic
-- host-service implementation work
-- browser console or mobile app UI work
-- new top-level core method names such as `respondToApproval` or `respondToInput`
-- non-additive protocol redesign
+- protocol redesign
+- host-service auth or multi-client work
+- mobile or browser UI redesign
+- non-Codex adapters
+- speculative capability claims unsupported by observed Codex runtime behavior
 
 ## Planned Files
 
@@ -51,44 +56,40 @@ Files to add or modify:
 
 - `plans.md`
 - `docs/status.md`
-- `docs/superpowers/specs/2026-04-27-interaction-contract-design.md`
-- `protocol/schema/ascp-core.schema.json`
-- `protocol/schema/ascp-methods.schema.json`
-- `protocol/schema/ascp-events.schema.json`
-- `protocol/spec/auth.md`
-- `protocol/spec/methods.md`
-- `protocol/spec/events.md`
-- `protocol/spec/compatibility.md`
-- `protocol/examples/requests/`
-- `protocol/examples/responses/`
-- `protocol/examples/events/`
-- `protocol/examples/errors/`
-- `protocol/conformance/`
-- `sdks/typescript/src/models/types.ts`
-- `sdks/typescript/src/methods/types.ts`
-- `sdks/typescript/src/events/types.ts`
-- `sdks/typescript/src/validation/`
+- `adapters/codex/src/service.ts`
+- `adapters/codex/src/approvals.ts`
+- `adapters/codex/src/events.ts`
+- `adapters/codex/src/capabilities.ts`
+- `adapters/codex/src/discovery.ts`
+- `adapters/codex/src/host-runtime.ts`
+- `adapters/codex/src/app-server-client.ts`
+- `adapters/codex/tests/service.test.ts`
+- `adapters/codex/tests/approvals.test.ts`
+- `adapters/codex/tests/events.test.ts`
+- `adapters/codex/tests/capabilities.test.ts`
+- `adapters/codex/tests/host-runtime.test.ts`
+- `adapters/codex/README.md`
 
 ## Tasks
 
 | Status | Task | Acceptance Criteria |
 | --- | --- | --- |
-| completed | define interaction-contract design | written design covers approval provenance, input request shape, lifecycle events, actionability rules, and adapter translation boundaries |
-| completed | patch protocol schemas and specs | protocol schemas, method contracts, event contracts, and auth semantics validate the new interaction surfaces without changing existing core method names |
-| completed | patch protocol examples and conformance assets | request, response, and event examples plus validation fixtures prove the new protocol surfaces unambiguously |
-| completed | update TypeScript SDK protocol models | SDK types and bundled validation schemas expose the new core nouns and result fields cleanly |
-| completed | document and checkpoint protocol patch | plans and status log explain the new contract and prepare the follow-up adapter branch |
+| completed | add Codex blocked-interaction translation | `sessions.get` and adapter state can surface pending approvals and pending inputs from either native Codex signals or truthful derived blocked state |
+| completed | add response routing and lifecycle events | `approvals.respond` and `sessions.send_input` resolve live blocked requests through adapter-owned routing, with `CONFLICT` and `UNSUPPORTED` behavior matching the frozen protocol |
+| completed | fix host capability truthfulness | `sessions.start` is either implemented or advertised false, and approval capability flags match the actual response path the adapter exposes |
+| completed | update adapter docs, tests, and checkpointing | adapter docs explain native vs host-derived interaction behavior, tests cover the blocked-session paths, and status log captures the branch outcome |
 
 ## Acceptance Criteria
 
 The task is done only when all of the following are true:
 
-- `ApprovalRequest` provenance and actionability rules are explicit and schema-backed
-- `InputRequest` is defined once in the protocol layer with clear lifecycle semantics
-- `sessions.get` can surface pending blocked inputs without introducing new core method names
-- adapter translation responsibility is documented as adapter-specific, not host-specific
-- examples and validators make the contract implementable for a second adapter author without reading Codex code
+- loading a Codex session in `waiting_approval` yields a populated approval object instead of raw status only
+- loading a Codex session in `waiting_input` yields a populated input request instead of raw status only
+- native approval objects win over derived ones when both are available
+- blocked interaction responses either unblock through a truthful adapter route or return `UNSUPPORTED`/`CONFLICT` explicitly
+- `sessions.start` capability no longer overstates unsupported behavior
+- adapter tests prove the implementation stays downstream of the frozen protocol contract
 
 ## Next Likely Step
 
-Merge the protocol interaction-contract patch into `main`, then start a fresh adapter branch from updated `main` to implement Codex translation and response routing against the frozen protocol contract.
+Merge the Codex adapter interaction translation branch into `main`, then resume live browser and mobile-path validation against a session that exercises both host-derived and runtime-native blocked interactions.

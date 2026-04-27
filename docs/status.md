@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-27 - Codex interaction translation and blocked-session routing
+
+- Branch: `branch-codex-interaction-translation`
+- Commit: `not committed`
+- Summary: implemented Codex-side translation of blocked session state into ASCP interaction objects by deriving pending approvals from `waiting_approval`, deriving pending inputs from `waiting_input`, preserving native approval notifications when present, routing approval responses through native Codex methods or truthful message-send fallback, enforcing `CONFLICT` for terminal requests, and implementing `sessions.start` so the host capability document no longer overstates unsupported behavior
+- Documentation updated: `plans.md`, `docs/status.md`, `adapters/codex/README.md`
+- Next likely step: commit and merge this adapter branch into `main`, then live-validate the blocked interaction flows through the browser host console against sessions that exercise both native and host-derived request paths
+
 ### 2026-04-27 - Protocol interaction contract for blocked approvals and input
 
 - Branch: `branch-protocol-interaction-contract`
