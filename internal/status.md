@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-27 - Docs restructure into Learn/Reference/Build sections
+
+- Branch: `feature/docs-restructure` (outer repo), `master` (apps/web)
+- Commit: `e370e6a` (outer repo), `ea85194` and `c96d433` (apps/web)
+- Summary: restructured all ASCP documentation by moving user-facing docs to `apps/web/content/docs/` with three clear sections (Learn / Reference / Build), moving internal workflow files (plans, status, prompts, superpowers) to `internal/`, removing the old `docs/` directory and root-level design files, merging the authentication section into a single `reference/09-auth-approvals.mdx`, rewriting the landing page with clear entry cards, updating `AGENTS.md` and `README.md` with new paths, and updating all 31 website MDX files with corrected cross-references
+- Documentation updated: `internal/status.md`, `internal/plans.md`, `internal/README.md` (new), `internal/prompts/README.md`, `AGENTS.md`, `README.md`, `apps/web/content/docs/index.mdx`, `apps/web/app/layout.config.tsx`, all 31 website MDX files, all meta.json files
+- Next likely step: deploy the updated docs website to sessio.app
+
 ### 2026-04-27 - Protocol interaction contract for blocked approvals and input
 
 - Branch: `branch-protocol-interaction-contract`
