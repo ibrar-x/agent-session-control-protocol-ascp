@@ -158,15 +158,15 @@ The bootstrap order is:
 
 1. read `AGENTS.md`
 2. read the ASCP source specs
-3. read `plans.md` if it exists
-4. read a status or checkpoint log if it exists
+3. read `internal/plans.md` if it exists
+4. read `internal/status.md` if it exists
 5. inspect recent git history if more context is needed
 6. determine whether there is an active unfinished task
 7. continue the next logical task or create a new plan if no plan exists yet
 
-If `plans.md` does not exist, the agent should create the initial repository plan before building.
+If `internal/plans.md` does not exist, the agent should create the initial repository plan before building.
 
-If `plans.md` does exist, the agent should:
+If `internal/plans.md` does exist, the agent should:
 
 - identify the current active feature
 - find the next unfinished task
@@ -206,7 +206,7 @@ Agents should turn new work into an explicit task flow before implementation:
 
 - Intake the relevant docs, specs, chat requirements, and repository context first.
 - Identify the current feature boundary before writing code or changing repository structure.
-- Convert the current feature into a task plan in `plans.md`.
+- Convert the current feature into a task plan in `internal/plans.md`.
 - Keep the active plan scoped to one feature, refinement, or bugfix at a time.
 - Record which source documents define the current task so later sessions can resume cleanly.
 
@@ -297,10 +297,10 @@ Documentation is a required part of task completion in this repository.
 
 Every completed task should leave a recovery point for the next session.
 
-- Update `plans.md` when task status changes.
-- Add a short checkpoint entry to `docs/status.md` after each completed task.
+- Update `internal/plans.md` when task status changes.
+- Add a short checkpoint entry to `internal/status.md` after each completed task.
 - The checkpoint should state what was completed, what documents were updated, what branch was used, and what the next likely step is.
-- A new session should be able to resume from `plans.md`, `docs/status.md`, and the latest commit history without depending on hidden chat context.
+- A new session should be able to resume from `internal/plans.md`, `internal/status.md`, and the latest commit history without depending on hidden chat context.
 
 ## Expected Repository Growth
 
@@ -309,7 +309,9 @@ As this repository matures, prefer a structure close to:
 ```text
 README.md
 AGENTS.md
-plans.md
+internal/
+  plans.md
+  status.md
 protocol/
 packages/
 sdks/
@@ -317,7 +319,6 @@ adapters/
 apps/
 services/
 tooling/
-docs/
 .agents/skills/
 ```
 
