@@ -42,6 +42,7 @@ import { mapNotificationToEvents } from "./events.js";
 import { buildApprovalResponseInput, deriveApprovalRequest, deriveInputRequest } from "./interactions.js";
 import type { CodexThread, CodexTurn } from "./session-mapper.js";
 import { mapThreadStatus, mapThreadToSession, mapTurnToRun } from "./session-mapper.js";
+import { extractTranscriptEvents } from "./transcript.js";
 
 const APPROVAL_RESPOND_METHOD_CANDIDATES = ["approval/respond"] as const;
 const MAX_SESSION_EVENT_HISTORY = 2_000;
@@ -60,7 +61,7 @@ interface CodexTurnSteerResponse {
 }
 
 interface CodexTurnStartResponse {
-  turn?: CodexTurn;
+  turn: CodexTurn;
 }
 
 export interface CodexServiceClient {
@@ -243,6 +244,11 @@ function isMethodNotFoundError(error: unknown): boolean {
   }
 
   return false;
+}
+
+function isTurnsUnavailableBeforeFirstUserMessage(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return /includeTurns is unavailable before first user message/i.test(message);
 }
 
 function toThreadListResponse(value: unknown): CodexThreadListResponse {
@@ -448,21 +454,43 @@ export class CodexAdapterService {
 
   async sessionsGet(params: SessionsGetParams): Promise<SessionsGetResult> {
     const threadId = parseSessionId(params.session_id);
+    const includeTurns =
+      params.include_runs === true ||
+      params.include_pending_approvals === true ||
+      params.include_pending_inputs === true;
 
     try {
-      const response = await this.readThreadOrThrow(threadId, "thread/read", {
-        includeTurns:
-          params.include_runs === true ||
-          params.include_pending_approvals === true ||
-          params.include_pending_inputs === true
-      });
-      this.syncDerivedInteractions(response.thread, false);
-      const session = mapThreadToSession(response.thread);
+      let response: CodexThreadReadResponse;
+
+      try {
+        response = await this.readThreadOrThrow(threadId, "thread/read", {
+          includeTurns
+        });
+      } catch (error) {
+        if (!includeTurns || !isTurnsUnavailableBeforeFirstUserMessage(error)) {
+          throw error;
+        }
+
+        response = await this.readThreadOrThrow(threadId, "thread/read", {
+          includeTurns: false
+        });
+      }
+
+      const thread = response.thread;
+
+      if (thread == null) {
+        throw createServiceError("NOT_FOUND", `Codex thread not found: ${threadId}`, false, {
+          session_id: params.session_id
+        });
+      }
+
+      this.syncDerivedInteractions(thread, false);
+      const session = mapThreadToSession(thread);
       const runs =
-        params.include_runs === true && Array.isArray(response.thread.turns)
-          ? response.thread.turns.flatMap((turn) => {
+        params.include_runs === true && Array.isArray(thread.turns)
+          ? thread.turns.flatMap((turn) => {
               try {
-                return [mapTurnToRun(turn, response.thread!.id)];
+                return [mapTurnToRun(turn, thread.id)];
               } catch {
                 return [];
               }
@@ -519,13 +547,32 @@ export class CodexAdapterService {
       let thread = response.thread;
 
       if (params.initial_prompt !== undefined && params.initial_prompt.trim().length > 0) {
-        await this.client.turnStart({
+        const startResponse = await this.client.turnStart({
           threadId: thread.id,
           input: buildTextInput(params.initial_prompt)
         });
-        thread = (await this.readThreadOrThrow(thread.id, "thread/read", {
-          includeTurns: true
-        })).thread;
+        const startedRunId =
+          hasTurnObject(startResponse) && typeof startResponse.turn.id === "string"
+            ? toRunId(thread.id, startResponse.turn.id)
+            : undefined;
+        this.emitUserMessageEvent(
+          toSessionId(thread.id),
+          params.initial_prompt,
+          startedRunId
+        );
+        try {
+          thread = (await this.readThreadOrThrow(thread.id, "thread/read", {
+            includeTurns: true
+          })).thread;
+        } catch (error) {
+          if (!isTurnsUnavailableBeforeFirstUserMessage(error)) {
+            throw error;
+          }
+
+          thread = (await this.readThreadOrThrow(thread.id, "thread/read", {
+            includeTurns: false
+          })).thread;
+        }
       }
 
       this.syncDerivedInteractions(thread, false);
@@ -584,7 +631,8 @@ export class CodexAdapterService {
     }
 
     try {
-      await this.deliverInputToSession(params.session_id, params.input);
+      const delivery = await this.deliverInputToSession(params.session_id, params.input);
+      this.emitUserMessageEvent(params.session_id, params.input, delivery.runId);
 
       if (inputRequest !== undefined) {
         const completedAt = new Date().toISOString();
@@ -958,8 +1006,13 @@ export class CodexAdapterService {
   }
 
   private ingestEvent(event: EventEnvelope<Record<string, unknown>>): void {
+    const history = this.sessionEvents.get(event.session_id) ?? [];
+
+    if (history.some((existing) => existing.id === event.id)) {
+      return;
+    }
+
     const sequenced = this.createSequencedEvent(event);
-    const history = this.sessionEvents.get(sequenced.session_id) ?? [];
     history.push(sequenced);
 
     if (history.length > MAX_SESSION_EVENT_HISTORY) {
@@ -1121,6 +1174,8 @@ export class CodexAdapterService {
   }
 
   private syncDerivedInteractions(thread: CodexThread & { turns?: CodexTurn[] }, emitEvents: boolean): void {
+    this.syncTranscriptHistory(thread);
+
     const sessionId = toSessionId(thread.id);
     const nextStatus = mapThreadStatus(thread.status ?? { type: "unknown" });
     const previousStatus = this.sessionStatuses.get(sessionId);
@@ -1156,6 +1211,12 @@ export class CodexAdapterService {
       this.expireDerivedInputs(sessionId, emitEvents);
     } else {
       this.upsertDerivedInput(derivedInput, emitEvents);
+    }
+  }
+
+  private syncTranscriptHistory(thread: CodexThread & { turns?: CodexTurn[] }): void {
+    for (const event of extractTranscriptEvents(thread)) {
+      this.ingestEvent(event);
     }
   }
 
@@ -1325,7 +1386,29 @@ export class CodexAdapterService {
     }
   }
 
-  private async deliverInputToSession(sessionId: string, inputText: string): Promise<void> {
+  private emitUserMessageEvent(
+    sessionId: string,
+    inputText: string,
+    runId: string | undefined
+  ): void {
+    this.ingestEvent(
+      createEventEnvelope({
+        id: `codex:event:user_message:${sessionId}:${Date.now()}`,
+        type: "message.user",
+        ts: new Date().toISOString(),
+        session_id: sessionId,
+        ...(runId !== undefined ? { run_id: runId } : {}),
+        payload: {
+          content: inputText
+        }
+      })
+    );
+  }
+
+  private async deliverInputToSession(
+    sessionId: string,
+    inputText: string
+  ): Promise<{ runId: string | undefined }> {
     const threadId = parseSessionId(sessionId);
     const response = await this.readThreadOrThrow(threadId, "thread/read", {
       includeTurns: true
@@ -1344,7 +1427,9 @@ export class CodexAdapterService {
         throw createServiceError("RUNTIME_ERROR", "Codex turn/steer returned an unexpected shape.", false);
       }
 
-      return;
+      return {
+        runId: toRunId(threadId, activeTurn.id)
+      };
     }
 
     await this.readThreadOrThrow(threadId, "thread/resume");
@@ -1357,6 +1442,10 @@ export class CodexAdapterService {
     if (!hasTurnObject(startResponse)) {
       throw createServiceError("RUNTIME_ERROR", "Codex turn/start returned an unexpected shape.", false);
     }
+
+    return {
+      runId: toRunId(threadId, startResponse.turn.id)
+    };
   }
 
   private extractFileChanges(turn: CodexTurn): FileChangeRecord[] {

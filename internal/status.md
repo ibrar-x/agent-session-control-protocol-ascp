@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-27 - Host console transcript replay and historical chat hydration
+
+- Branch: `branch-host-console-chat-refresh`
+- Commit: `not committed`
+- Summary: fixed the reopened-session chat gap by mapping Codex historical `userMessage.content[].text` and `agentMessage.text` turn items into ASCP transcript events, making the host console subscribe with replay from sequence `0`, and live-validating in the browser that reopened sessions now render real historical chat bubbles instead of only `sync.snapshot`
+- Documentation updated: `internal/plans.md`, `internal/status.md`
+- Next likely step: commit the branch, merge it into `main` if accepted, and then continue with reconnect polish or broader host-service productionization work
+
 ### 2026-04-27 - Host console chat refresh and start-session hardening
 
 - Branch: `branch-host-console-chat-refresh`

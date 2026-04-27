@@ -5,13 +5,15 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
-    "dev": "vite"
+    "dev": "vite",
+    "test": "vitest run"
   },
   "dependencies": {
     "ascp-sdk-typescript": "file:../../sdks/typescript"
   },
   "devDependencies": {
     "typescript": "^5.9.3",
-    "vite": "^7.3.2"
+    "vite": "^7.3.2",
+    "vitest": "^3.2.4"
   }
 }

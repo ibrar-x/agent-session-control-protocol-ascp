@@ -50,7 +50,13 @@ class FakeCodexClient {
     };
 
     if (this.threadReadById.has(threadId)) {
-      return this.threadReadById.get(threadId);
+      const value = this.threadReadById.get(threadId);
+
+      if (value instanceof Error) {
+        throw value;
+      }
+
+      return value;
     }
 
     return this.threadReadResult;
@@ -207,6 +213,54 @@ describe("CodexAdapterService", () => {
     });
   });
 
+  it("hydrates transcript history from thread turns for reopened sessions", async () => {
+    const client = new FakeCodexClient();
+    client.threadReadResult = {
+      thread: makeThread({
+        id: "thread_transcript_history",
+        turns: [
+          {
+            id: "turn_1",
+            status: "completed",
+            startedAt: 1_745_661_900,
+            completedAt: 1_745_662_140,
+            items: [
+              {
+                type: "agentMessage",
+                id: "item_agent_1",
+                text: "I found the issue in the mocked checkout response."
+              }
+            ]
+          }
+        ]
+      })
+    };
+
+    const service = new CodexAdapterService(client);
+
+    await service.sessionsGet({
+      session_id: "codex:thread_transcript_history",
+      include_runs: true
+    });
+
+    const subscription = await service.sessionsSubscribe({
+      session_id: "codex:thread_transcript_history",
+      from_seq: 0
+    });
+    const replayEvents = service.drainSubscriptionEvents(subscription.subscription_id);
+
+    expect(replayEvents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: "message.assistant.completed",
+          payload: expect.objectContaining({
+            content: "I found the issue in the mocked checkout response."
+          })
+        })
+      ])
+    );
+  });
+
   it("skips incomplete turns instead of failing sessions.get when include_runs is requested", async () => {
     const client = new FakeCodexClient();
     client.threadReadResult = {
@@ -339,6 +393,105 @@ describe("CodexAdapterService", () => {
         {
           type: "text",
           text: "hello from start"
+        }
+      ]
+    });
+  });
+
+  it("records a real message.user event when sessions.start sends an initial prompt", async () => {
+    const client = new FakeCodexClient();
+    client.threadStartResult = {
+      thread: makeThread({
+        id: "thread_start_prompt_events",
+        turns: []
+      })
+    };
+    client.setThreadReadResult("thread_start_prompt_events", {
+      thread: makeThread({
+        id: "thread_start_prompt_events",
+        status: {
+          type: "active"
+        }
+      })
+    });
+
+    const service = new CodexAdapterService(client);
+    const seen: Array<{ type: string; payload: Record<string, unknown> }> = [];
+    service.onEvent((event) => {
+      seen.push({
+        type: event.type,
+        payload: event.payload
+      });
+    });
+
+    await service.sessionsStart({
+      runtime_id: CODEX_RUNTIME_ID,
+      initial_prompt: "hello from start"
+    });
+
+    expect(seen).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: "message.user",
+          payload: expect.objectContaining({
+            content: "hello from start"
+          })
+        })
+      ])
+    );
+  });
+
+  it("falls back to a turnless thread read when the initial prompt materializes before includeTurns is available", async () => {
+    const client = new FakeCodexClient();
+    client.threadStartResult = {
+      thread: makeThread({
+        id: "thread_start_pending",
+        turns: []
+      })
+    };
+    client.threadRead = async (threadId: string, options: { includeTurns?: boolean } = {}) => {
+      client.lastThreadReadOptions = {
+        threadId,
+        includeTurns: options.includeTurns
+      };
+
+      if (options.includeTurns === true) {
+        throw new CodexJsonRpcError({
+          code: -32001,
+          message:
+            "thread thread_start_pending is not materialized yet; includeTurns is unavailable before first user message"
+        });
+      }
+
+      return {
+        thread: makeThread({
+          id: "thread_start_pending",
+          status: {
+            type: "active"
+          }
+        })
+      };
+    };
+
+    const service = new CodexAdapterService(client);
+
+    await expect(
+      service.sessionsStart({
+        runtime_id: CODEX_RUNTIME_ID,
+        initial_prompt: "say only yes"
+      })
+    ).resolves.toMatchObject({
+      session: {
+        id: "codex:thread_start_pending"
+      }
+    });
+
+    expect(client.lastTurnStartParams).toEqual({
+      threadId: "thread_start_pending",
+      input: [
+        {
+          type: "text",
+          text: "say only yes"
         }
       ]
     });
@@ -641,6 +794,101 @@ describe("CodexAdapterService", () => {
 
     expect(replayEvents.some((event) => event.type === "sync.replayed")).toBe(true);
     expect(replayEvents.some((event) => event.type === "run.completed")).toBe(true);
+  });
+
+  it("replays real chat transcript events including assistant completion", async () => {
+    const client = new FakeCodexClient();
+    client.threadReadResult = {
+      thread: makeThread({
+        id: "thread_transcript",
+        turns: []
+      })
+    };
+
+    const service = new CodexAdapterService(client);
+
+    client.emitNotification({
+      method: "agentMessageDelta",
+      params: {
+        threadId: "thread_transcript",
+        turnId: "turn_1",
+        itemId: "item_1",
+        delta: "Hello"
+      }
+    });
+    client.emitNotification({
+      method: "turn/completed",
+      params: {
+        threadId: "thread_transcript",
+        turn: {
+          id: "turn_1",
+          status: "completed",
+          completedAt: 1_745_662_050,
+          items: [
+            {
+              type: "agentMessage",
+              id: "item_1",
+              text: "Hello from Codex"
+            }
+          ]
+        }
+      }
+    });
+
+    const subscribeResult = await service.sessionsSubscribe({
+      session_id: "codex:thread_transcript",
+      from_seq: 0
+    });
+    const replayEvents = service.drainSubscriptionEvents(subscribeResult.subscription_id);
+
+    expect(replayEvents.some((event) => event.type === "message.assistant.delta")).toBe(true);
+    expect(replayEvents.some((event) => event.type === "message.assistant.completed")).toBe(true);
+    expect(replayEvents.some((event) => event.type === "run.completed")).toBe(true);
+  });
+
+  it("does not duplicate transcript history when the same session is read repeatedly", async () => {
+    const client = new FakeCodexClient();
+    client.threadReadResult = {
+      thread: makeThread({
+        id: "thread_dedupe",
+        turns: [
+          {
+            id: "turn_1",
+            status: "completed",
+            startedAt: 1_745_661_900,
+            completedAt: 1_745_662_140,
+            items: [
+              {
+                type: "agentMessage",
+                id: "item_agent_1",
+                text: "No duplicate bubbles."
+              }
+            ]
+          }
+        ]
+      })
+    };
+
+    const service = new CodexAdapterService(client);
+
+    await service.sessionsGet({
+      session_id: "codex:thread_dedupe",
+      include_runs: true
+    });
+    await service.sessionsGet({
+      session_id: "codex:thread_dedupe",
+      include_runs: true
+    });
+
+    const subscription = await service.sessionsSubscribe({
+      session_id: "codex:thread_dedupe",
+      from_seq: 0
+    });
+    const replayEvents = service
+      .drainSubscriptionEvents(subscription.subscription_id)
+      .filter((event) => event.type === "message.assistant.completed");
+
+    expect(replayEvents).toHaveLength(1);
   });
 
   it("lists approval requests observed from Codex approval notifications", async () => {

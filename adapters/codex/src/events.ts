@@ -74,6 +74,36 @@ function toMessageId(threadId: string, itemId: string): string {
   return `codex:message:${threadId}:${itemId}`;
 }
 
+function getTurnItems(turnRecord: Record<string, unknown>): Array<Record<string, unknown>> {
+  return Array.isArray(turnRecord.items) ? turnRecord.items.filter(isRecord) : [];
+}
+
+function latestAgentMessage(
+  turnRecord: Record<string, unknown>
+): { itemId: string; text: string } | undefined {
+  const items = getTurnItems(turnRecord);
+
+  for (let index = items.length - 1; index >= 0; index -= 1) {
+    const item = items[index];
+
+    if (item?.type !== "agentMessage") {
+      continue;
+    }
+
+    const itemId = readString(item, "id");
+    const text = readString(item, "text");
+
+    if (itemId !== undefined && text !== undefined) {
+      return {
+        itemId,
+        text
+      };
+    }
+  }
+
+  return undefined;
+}
+
 function withOptionalSeq<TPayload extends Record<string, unknown>>(
   event: EventEnvelope<TPayload>,
   seq: number | undefined
@@ -178,6 +208,30 @@ function mapTurnCompletedEvent(
   switch (mapTurnStatus(turn)) {
     case "completed":
       return [
+        ...(() => {
+          const message = latestAgentMessage(turnRecord);
+
+          if (message === undefined) {
+            return [];
+          }
+
+          return [
+            withOptionalSeq(
+              createEventEnvelope({
+                id: createCodexEventId("agent_message_completed", threadId, turnId, message.itemId),
+                type: "message.assistant.completed",
+                ts: endedAt,
+                session_id: toSessionId(threadId),
+                run_id: runId,
+                payload: {
+                  message_id: toMessageId(threadId, message.itemId),
+                  content: message.text
+                }
+              }),
+              options.seq
+            )
+          ];
+        })(),
         withOptionalSeq(
           createEventEnvelope({
             id: createCodexEventId("turn_completed", threadId, turnId),

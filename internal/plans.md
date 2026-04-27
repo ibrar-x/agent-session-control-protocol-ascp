@@ -12,84 +12,85 @@ This file tracks the active scoped work for the current branch.
 
 ## Active State
 
-- Feature name: Codex interaction translation and blocked-session routing
-- Branch: `branch-codex-interaction-translation`
-- Goal: implement the frozen blocked-interaction contract in the Codex adapter by translating `waiting_approval` and `waiting_input` into actionable ASCP objects, routing responses back into the live Codex session honestly, and fixing overstated `sessions.start` capability behavior on the host path
+- Feature name: Host console chat refresh
+- Branch: `branch-host-console-chat-refresh`
+- Goal: turn `apps/host-console` into a multi-session chat-first operator workspace that proves the ASCP host, Codex adapter, and browser SDK flow together with truthful live-state handling
 - Source inputs:
   - `AGENTS.md`
-  - `protocol/ASCP_Protocol_Detailed_Spec_v0_1.md`
-  - `protocol/ASCP_Protocol_PRD_and_Build_Guide.md`
-  - `protocol/spec/auth.md`
-  - `protocol/spec/methods.md`
-  - `protocol/spec/events.md`
-  - `protocol/spec/compatibility.md`
-  - `plans.md`
+  - `internal/plans.md`
   - `internal/status.md`
+  - `apps/host-console/README.md`
+  - `apps/host-console/src/App.tsx`
+  - `apps/host-console/src/styles.css`
+  - `docs/superpowers/specs/2026-04-27-host-console-chat-refresh-design.md`
+  - `docs/superpowers/plans/2026-04-27-host-console-chat-refresh.md`
   - `adapters/codex/src/service.ts`
-  - `adapters/codex/src/approvals.ts`
-  - `adapters/codex/src/events.ts`
-  - `adapters/codex/src/host-runtime.ts`
+  - `adapters/codex/tests/service.test.ts`
 
 ## Scope
 
 Included in this branch:
 
-- derive host-visible `ApprovalRequest` and `InputRequest` objects from Codex blocked session state when the runtime does not emit native objects
-- preserve native approval notifications when they exist and prefer them over derived objects
-- route approval and input responses back into the live Codex session through truthful adapter-owned translation paths
-- surface pending inputs in `sessions.get` and `sync.snapshot`
-- emit input lifecycle events and any needed derived approval events from the adapter
-- implement `sessions.start` or degrade the advertised host capability so the capability document matches reality
-- update adapter tests and docs for the new interaction behavior
+- replace the old grid console with a multi-session messenger-style workspace
+- keep chat and operator rail backed by one selected-session state model
+- show truthful `loading`, `live`, `snapshot-only`, and `error` modes
+- render approvals and blocked inputs inline in the chat timeline and in the operator rail
+- lazy-load artifacts and diffs only on explicit operator actions
+- support starting a new session from the UI and handle pre-materialized Codex threads truthfully
+- update docs and focused tests for the new browser flow
 
 Explicitly out of scope:
 
 - protocol redesign
 - host-service auth or multi-client work
-- mobile or browser UI redesign
 - non-Codex adapters
-- speculative capability claims unsupported by observed Codex runtime behavior
+- mobile-specific surfaces
+- broad host-console visual polish unrelated to the ASCP flow
 
 ## Planned Files
 
 Files to add or modify:
 
-- `plans.md`
 - `internal/status.md`
+- `internal/plans.md`
+- `apps/host-console/README.md`
+- `apps/host-console/package.json`
+- `apps/host-console/vitest.config.ts`
+- `apps/host-console/src/App.tsx`
+- `apps/host-console/src/styles.css`
+- `apps/host-console/src/model.ts`
+- `apps/host-console/src/model.test.ts`
+- `apps/host-console/src/components/SessionSwitcher.tsx`
+- `apps/host-console/src/components/ChatPane.tsx`
+- `apps/host-console/src/components/OperatorRail.tsx`
+- `apps/host-console/src/components/JsonDisclosure.tsx`
 - `adapters/codex/src/service.ts`
-- `adapters/codex/src/approvals.ts`
-- `adapters/codex/src/events.ts`
-- `adapters/codex/src/capabilities.ts`
-- `adapters/codex/src/discovery.ts`
-- `adapters/codex/src/host-runtime.ts`
-- `adapters/codex/src/app-server-client.ts`
 - `adapters/codex/tests/service.test.ts`
-- `adapters/codex/tests/approvals.test.ts`
-- `adapters/codex/tests/events.test.ts`
-- `adapters/codex/tests/capabilities.test.ts`
-- `adapters/codex/tests/host-runtime.test.ts`
-- `adapters/codex/README.md`
 
 ## Tasks
 
 | Status | Task | Acceptance Criteria |
 | --- | --- | --- |
-| in_progress | add Codex blocked-interaction translation | `sessions.get` and adapter state can surface pending approvals and pending inputs from either native Codex signals or truthful derived blocked state |
-| pending | add response routing and lifecycle events | `approvals.respond` and `sessions.send_input` resolve live blocked requests through adapter-owned routing, with `CONFLICT` and `UNSUPPORTED` behavior matching the frozen protocol |
-| pending | fix host capability truthfulness | `sessions.start` is either implemented or advertised false, and approval capability flags match the actual response path the adapter exposes |
-| pending | update adapter docs, tests, and checkpointing | adapter docs explain native vs host-derived interaction behavior, tests cover the blocked-session paths, and status log captures the branch outcome |
+| completed | add host-console model and focused tests | selected-session loading, snapshot-only, and resolved-interaction retention rules are covered by Vitest |
+| completed | split the UI into session switcher, chat pane, and layered operator rail | the browser console uses a multi-session layout with inline interaction cards and expandable JSON detail |
+| completed | wire truthful live-state and lazy secondary loading | session switching clears stale detail immediately, subscribe failure degrades to `snapshot-only`, and artifacts/diffs load on explicit operator actions |
+| completed | harden new-session startup flow | starting a session from the browser works before first turn materialization, and the adapter falls back cleanly when `includeTurns` is not yet available |
+| completed | restore replayed transcript history for reopened sessions | the host console requests replay on subscribe, Codex historical `userMessage.content[].text` is mapped into transcript events, and browser validation shows reopened sessions with real chat bubbles instead of only `sync.snapshot` |
+| completed | update checkpoint docs and final verification | focused tests, build, and live browser validation are recorded before branch review |
 
 ## Acceptance Criteria
 
 The task is done only when all of the following are true:
 
-- loading a Codex session in `waiting_approval` yields a populated approval object instead of raw status only
-- loading a Codex session in `waiting_input` yields a populated input request instead of raw status only
-- native approval objects win over derived ones when both are available
-- blocked interaction responses either unblock through a truthful adapter route or return `UNSUPPORTED`/`CONFLICT` explicitly
-- `sessions.start` capability no longer overstates unsupported behavior
-- adapter tests prove the implementation stays downstream of the frozen protocol contract
+- the browser console renders a multi-session chat-first workspace rather than the old panel grid
+- the selected chat pane and operator rail share one coherent selected-session state model
+- `snapshot-only` is visible and explicit when snapshot succeeds but live subscribe fails
+- approvals and blocked inputs render inline in the conversation instead of only in side panels
+- artifacts and diff detail stay lazy and load only from explicit operator actions
+- starting a new session from the UI works even when Codex has not materialized turns yet
+- reopened sessions replay truthful historical transcript into the chat timeline when Codex exposes stored turn items
+- focused tests and live browser validation prove the demo flow end to end
 
 ## Next Likely Step
 
-Commit the Codex adapter interaction translation branch, merge it into `main`, and then resume live browser and mobile-path validation against a session that exercises both host-derived and runtime-native blocked interactions.
+Review the host-console refresh branch, commit and merge it to `main` if accepted, and then continue with broader productionization work such as auth/multi-client boundaries or a second runtime integration.

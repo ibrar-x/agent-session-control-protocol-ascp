@@ -3,47 +3,489 @@ import { useEffect, useRef, useState } from "react";
 import {
   type ApprovalRequest,
   type Artifact,
+  type CapabilityDocument,
   type DiffSummary,
   type EventEnvelope,
+  type FlexibleObject,
+  type InputRequest,
   type Run,
   type Session
 } from "ascp-sdk-typescript/models";
-import { createAscpClient, type AscpClient } from "ascp-sdk-typescript/client";
+import {
+  AscpProtocolError,
+  createAscpClient,
+  type AscpClient
+} from "ascp-sdk-typescript/client";
 import type { AscpTransportSubscription } from "ascp-sdk-typescript/transport";
 import { AscpBrowserWebSocketTransport } from "ascp-sdk-typescript/transport/browser-websocket";
 
+import { ChatPane, type ChatTimelineItem } from "./components/ChatPane";
+import { OperatorRail } from "./components/OperatorRail";
+import { SessionSwitcher } from "./components/SessionSwitcher";
+import {
+  buildInteractionTimelineItems,
+  createLoadingSessionView,
+  hydrateSessionSnapshot,
+  mergeApprovals,
+  mergeInputs,
+  type SessionViewState
+} from "./model";
+import { buildSessionSubscriptionRequest } from "./subscriptions";
+
 type ConnectionState = "disconnected" | "connecting" | "connected" | "error";
 
-function formatJson(value: unknown): string {
-  return JSON.stringify(value, null, 2);
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function readString(value: unknown, key: string): string | undefined {
+  if (!isRecord(value)) {
+    return undefined;
+  }
+
+  const candidate = value[key];
+  return typeof candidate === "string" ? candidate : undefined;
 }
 
 function sortRuns(runs: Array<Record<string, unknown>> | undefined): Run[] {
   return (runs ?? [])
-    .filter((run): run is Run => typeof run.id === "string")
+    .filter((run): run is Run => typeof run.id === "string" && typeof run.started_at === "string")
     .sort((left, right) => right.started_at.localeCompare(left.started_at));
+}
+
+function upsertById<T extends { id: string }>(items: T[], nextItem: T): T[] {
+  const existingIndex = items.findIndex((item) => item.id === nextItem.id);
+
+  if (existingIndex === -1) {
+    return [...items, nextItem];
+  }
+
+  return items.map((item) => (item.id === nextItem.id ? nextItem : item));
+}
+
+function appendEvent(events: EventEnvelope[], nextEvent: EventEnvelope): EventEnvelope[] {
+  if (events.some((event) => event.id === nextEvent.id)) {
+    return events;
+  }
+
+  return [...events, nextEvent]
+    .sort((left, right) => {
+      const leftSeq = typeof left.seq === "number" ? left.seq : Number.MAX_SAFE_INTEGER;
+      const rightSeq = typeof right.seq === "number" ? right.seq : Number.MAX_SAFE_INTEGER;
+
+      if (leftSeq !== rightSeq) {
+        return leftSeq - rightSeq;
+      }
+
+      return left.ts.localeCompare(right.ts);
+    })
+    .slice(-120);
+}
+
+function approvalActionLabel(approval: ApprovalRequest): string {
+  return approval.title ?? approval.description ?? approval.id;
+}
+
+function inputActionLabel(input: InputRequest): string {
+  return input.question;
+}
+
+function buildTimeline(events: EventEnvelope[], approvals: ApprovalRequest[], inputs: InputRequest[]): ChatTimelineItem[] {
+  const items: ChatTimelineItem[] = [];
+  const assistantIndexByMessageId = new Map<string, number>();
+  const interactionItems = buildInteractionTimelineItems({
+    approvals,
+    inputs
+  }).map<ChatTimelineItem>((item) =>
+    item.kind === "approval"
+      ? {
+          id: item.id,
+          kind: "approval",
+          title: approvalActionLabel(item.approval!),
+          body: item.approval?.description ?? "Approval is required before the agent can continue.",
+          state: item.state,
+          ts: item.ts,
+          approval: item.approval
+        }
+      : {
+          id: item.id,
+          kind: "input",
+          title: inputActionLabel(item.input!),
+          body:
+            item.input?.input_type === "choice" && Array.isArray(item.input.choices)
+              ? `Choices: ${item.input.choices.join(", ")}`
+              : "The agent is waiting for user input.",
+          state: item.state,
+          ts: item.ts,
+          input: item.input
+        }
+  );
+
+  for (const event of events) {
+    const payload = isRecord(event.payload) ? event.payload : {};
+
+    switch (event.type) {
+      case "message.user":
+        items.push({
+          id: event.id,
+          kind: "user",
+          body: readString(payload, "content") ?? "User input sent.",
+          ts: event.ts
+        });
+        break;
+      case "message.assistant.completed":
+      case "message.assistant.delta": {
+        const messageId = readString(payload, "message_id");
+
+        if (messageId === undefined) {
+          break;
+        }
+
+        const existingIndex = assistantIndexByMessageId.get(messageId);
+
+        if (event.type === "message.assistant.delta") {
+          const delta = readString(payload, "delta") ?? "";
+
+          if (existingIndex === undefined) {
+            assistantIndexByMessageId.set(messageId, items.length);
+            items.push({
+              id: event.id,
+              kind: "assistant",
+              body: delta,
+              ts: event.ts
+            });
+            break;
+          }
+
+          const existingItem = items[existingIndex];
+          items[existingIndex] = {
+            ...existingItem,
+            body: `${existingItem.body}${delta}`,
+            ts: event.ts
+          };
+          break;
+        }
+
+        const content = readString(payload, "content") ?? "Assistant response completed.";
+
+        if (existingIndex === undefined) {
+          assistantIndexByMessageId.set(messageId, items.length);
+          items.push({
+            id: event.id,
+            kind: "assistant",
+            body: content,
+            ts: event.ts
+          });
+          break;
+        }
+
+        items[existingIndex] = {
+          ...items[existingIndex],
+          id: event.id,
+          body: content,
+          ts: event.ts
+        };
+        break;
+      }
+      case "message.system":
+        items.push({
+          id: event.id,
+          kind: "system",
+          body: readString(payload, "content") ?? "System message received.",
+          ts: event.ts
+        });
+        break;
+      case "run.started":
+        items.push({
+          id: event.id,
+          kind: "activity",
+          title: "Run started",
+          body: event.run_id ?? "The agent started a new run.",
+          ts: event.ts
+        });
+        break;
+      case "run.completed":
+        items.push({
+          id: event.id,
+          kind: "activity",
+          title: "Run completed",
+          body: event.run_id ?? "The current run completed.",
+          ts: event.ts
+        });
+        break;
+      case "run.failed":
+        items.push({
+          id: event.id,
+          kind: "activity",
+          title: "Run failed",
+          body: readString(payload, "reason") ?? event.run_id ?? "The current run failed.",
+          ts: event.ts
+        });
+        break;
+      case "run.cancelled":
+        items.push({
+          id: event.id,
+          kind: "activity",
+          title: "Run cancelled",
+          body: readString(payload, "reason") ?? event.run_id ?? "The current run was cancelled.",
+          ts: event.ts
+        });
+        break;
+      case "session.status_changed":
+        items.push({
+          id: event.id,
+          kind: "system",
+          title: "Session status changed",
+          body: `${readString(payload, "from") ?? "unknown"} -> ${readString(payload, "to") ?? "unknown"}`,
+          ts: event.ts
+        });
+        break;
+      case "diff.updated":
+        items.push({
+          id: event.id,
+          kind: "activity",
+          title: "Diff updated",
+          body: "The adapter reported file changes for the current run.",
+          ts: event.ts
+        });
+        break;
+      case "sync.replayed":
+        items.push({
+          id: event.id,
+          kind: "system",
+          title: "Replay loaded",
+          body: "Replay-safe events were restored after subscription attach.",
+          ts: event.ts
+        });
+        break;
+      default:
+        break;
+    }
+  }
+
+  return [...items, ...interactionItems].sort((left, right) =>
+    (left.ts ?? "").localeCompare(right.ts ?? "")
+  );
+}
+
+function pendingInputRequest(inputs: InputRequest[]): InputRequest | undefined {
+  return inputs.find((input) => input.status === "pending");
+}
+
+function updateApprovalStatus(
+  approvals: ApprovalRequest[],
+  approvalId: string,
+  status: ApprovalRequest["status"],
+  resolvedAt?: string
+): ApprovalRequest[] {
+  return approvals.map((approval) =>
+    approval.id === approvalId
+      ? {
+          ...approval,
+          status,
+          ...(resolvedAt !== undefined ? { resolved_at: resolvedAt } : {})
+        }
+      : approval
+  );
+}
+
+function updateInputStatus(
+  inputs: InputRequest[],
+  inputId: string,
+  status: InputRequest["status"]
+): InputRequest[] {
+  return inputs.map((input) => (input.id === inputId ? { ...input, status } : input));
+}
+
+function updateRunCollection(runs: Run[], nextRun: Run): Run[] {
+  return upsertById(runs, nextRun).sort((left, right) => right.started_at.localeCompare(left.started_at));
+}
+
+function updateRunFromCompletion(
+  runs: Run[],
+  runId: string,
+  status: Run["status"],
+  payload: Record<string, unknown>
+): Run[] {
+  return runs
+    .map((run) =>
+      run.id === runId
+        ? {
+            ...run,
+            status,
+            ended_at: readString(payload, "ended_at") ?? run.ended_at,
+            ...(typeof payload.exit_code === "number" ? { exit_code: payload.exit_code } : {})
+          }
+        : run
+    )
+    .sort((left, right) => right.started_at.localeCompare(left.started_at));
+}
+
+function integrateEvent(view: SessionViewState, event: EventEnvelope): SessionViewState {
+  const payload = isRecord(event.payload) ? event.payload : {};
+  const nextView: SessionViewState = {
+    ...view,
+    events: appendEvent(view.events, event)
+  };
+
+  switch (event.type) {
+    case "sync.snapshot": {
+      const session = isRecord(payload.session) ? (payload.session as Session) : view.session;
+      const approvals = Array.isArray(payload.pending_approvals)
+        ? mergeApprovals(view.approvals, payload.pending_approvals as ApprovalRequest[])
+        : view.approvals;
+      const inputs = Array.isArray(payload.pending_inputs)
+        ? mergeInputs(view.inputs, payload.pending_inputs as InputRequest[])
+        : view.inputs;
+
+      return {
+        ...nextView,
+        session,
+        approvals,
+        inputs
+      };
+    }
+    case "approval.requested": {
+      const approval = isRecord(payload.approval) ? (payload.approval as ApprovalRequest) : undefined;
+
+      return approval === undefined
+        ? nextView
+        : {
+            ...nextView,
+            approvals: upsertById(view.approvals, approval)
+          };
+    }
+    case "approval.updated":
+    case "approval.approved":
+    case "approval.rejected":
+    case "approval.expired": {
+      const approvalId = readString(payload, "approval_id");
+
+      if (approvalId === undefined) {
+        return nextView;
+      }
+
+      const status =
+        event.type === "approval.approved"
+          ? "approved"
+          : event.type === "approval.rejected"
+            ? "rejected"
+            : event.type === "approval.expired"
+              ? "expired"
+              : readString(payload, "status") === "approved" || readString(payload, "status") === "rejected"
+                ? (readString(payload, "status") as ApprovalRequest["status"])
+                : "pending";
+
+      return {
+        ...nextView,
+        approvals: updateApprovalStatus(view.approvals, approvalId, status, readString(payload, "resolved_at") ?? event.ts)
+      };
+    }
+    case "input.requested": {
+      const input = isRecord(payload.input) ? (payload.input as InputRequest) : undefined;
+
+      return input === undefined
+        ? nextView
+        : {
+            ...nextView,
+            inputs: upsertById(view.inputs, input)
+          };
+    }
+    case "input.completed": {
+      const inputId = readString(payload, "input_id");
+
+      return inputId === undefined
+        ? nextView
+        : {
+            ...nextView,
+            inputs: updateInputStatus(view.inputs, inputId, "answered")
+          };
+    }
+    case "input.expired": {
+      const inputId = readString(payload, "input_id");
+
+      return inputId === undefined
+        ? nextView
+        : {
+            ...nextView,
+            inputs: updateInputStatus(view.inputs, inputId, "expired")
+          };
+    }
+    case "session.status_changed": {
+      return view.session === null
+        ? nextView
+        : {
+            ...nextView,
+            session: {
+              ...view.session,
+              status: (readString(payload, "to") as Session["status"]) ?? view.session.status,
+              updated_at: event.ts
+            }
+          };
+    }
+    case "run.started": {
+      const run = isRecord(payload.run) ? (payload.run as Run) : undefined;
+
+      return run === undefined
+        ? nextView
+        : {
+            ...nextView,
+            runs: updateRunCollection(view.runs, run),
+            currentRun: run
+          };
+    }
+    case "run.completed":
+    case "run.failed":
+    case "run.cancelled": {
+      if (event.run_id === undefined) {
+        return nextView;
+      }
+
+      const status =
+        event.type === "run.completed"
+          ? "completed"
+          : event.type === "run.failed"
+            ? "failed"
+            : "cancelled";
+      const runs = updateRunFromCompletion(view.runs, event.run_id, status, payload);
+
+      return {
+        ...nextView,
+        runs,
+        currentRun: runs.find((run) => run.id === event.run_id) ?? runs[0] ?? null
+      };
+    }
+    default:
+      return nextView;
+  }
+}
+
+function defaultRuntimeId(capabilities: CapabilityDocument | null): string | null {
+  return capabilities?.runtimes[0]?.id ?? null;
+}
+
+function isUnmaterializedThreadError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return message.includes("includeTurns is unavailable before first user message");
 }
 
 export function App() {
   const clientRef = useRef<AscpClient | null>(null);
   const streamRef = useRef<AscpTransportSubscription | null>(null);
   const subscriptionIdRef = useRef("");
+  const selectedSessionIdRef = useRef<string | null>(null);
+  const loadRequestRef = useRef(0);
 
   const [url, setUrl] = useState("ws://127.0.0.1:8765");
   const [connectionState, setConnectionState] = useState<ConnectionState>("disconnected");
   const [error, setError] = useState<string | null>(null);
   const [sessions, setSessions] = useState<Session[]>([]);
-  const [selectedSession, setSelectedSession] = useState<Session | null>(null);
-  const [runs, setRuns] = useState<Run[]>([]);
-  const [selectedRunId, setSelectedRunId] = useState<string>("");
-  const [subscriptionId, setSubscriptionId] = useState<string>("");
-  const [eventLog, setEventLog] = useState<EventEnvelope[]>([]);
-  const [inputText, setInputText] = useState("say only yes");
-  const [approvals, setApprovals] = useState<ApprovalRequest[]>([]);
-  const [artifacts, setArtifacts] = useState<Artifact[]>([]);
-  const [artifactDetail, setArtifactDetail] = useState<Artifact | null>(null);
-  const [diff, setDiff] = useState<DiffSummary | null>(null);
-  const [capabilities, setCapabilities] = useState<string>("");
+  const [capabilities, setCapabilities] = useState<CapabilityDocument | null>(null);
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
+  const [sessionView, setSessionView] = useState<SessionViewState | null>(null);
+  const [composerValue, setComposerValue] = useState("say only yes");
+  const [startTitle, setStartTitle] = useState("");
+  const [startPrompt, setStartPrompt] = useState("");
 
   useEffect(() => {
     return () => {
@@ -51,78 +493,53 @@ export function App() {
     };
   }, []);
 
-  async function disconnect(): Promise<void> {
-    const client = clientRef.current;
-    const stream = streamRef.current;
+  async function closeSessionSubscription(client: AscpClient | null): Promise<void> {
+    const subscriptionId = subscriptionIdRef.current;
 
-    setConnectionState("disconnected");
-    setSubscriptionId("");
-    subscriptionIdRef.current = "";
+    if (client === null || subscriptionId.length === 0) {
+      subscriptionIdRef.current = "";
+      return;
+    }
 
     try {
-      if (subscriptionIdRef.current.length > 0 && client !== null) {
-        await client.unsubscribe({
-          subscription_id: subscriptionIdRef.current
-        });
-      }
+      await client.unsubscribe({
+        subscription_id: subscriptionId
+      });
     } catch {
       // Best-effort cleanup only.
     }
 
+    subscriptionIdRef.current = "";
+  }
+
+  async function disconnect(): Promise<void> {
+    const client = clientRef.current;
+    const stream = streamRef.current;
+
+    await closeSessionSubscription(client);
+
     try {
       await stream?.close();
     } catch {
-      // Ignore.
+      // Ignore transport close errors during cleanup.
     }
 
     try {
       await client?.close();
     } catch {
-      // Ignore.
+      // Ignore runtime close errors during cleanup.
     }
 
     clientRef.current = null;
     streamRef.current = null;
-  }
+    selectedSessionIdRef.current = null;
+    loadRequestRef.current += 1;
 
-  async function connect(): Promise<void> {
-    await disconnect();
-    setConnectionState("connecting");
-    setError(null);
-    setEventLog([]);
-
-    try {
-      const transport = new AscpBrowserWebSocketTransport({
-        url
-      });
-      const client = createAscpClient({
-        transport
-      });
-      await client.connect();
-      const stream = client.events();
-
-      clientRef.current = client;
-      streamRef.current = stream;
-      setConnectionState("connected");
-
-      void (async () => {
-        try {
-          for await (const event of stream) {
-            setEventLog((current) => [event, ...current].slice(0, 100));
-          }
-        } catch (streamError) {
-          setError(streamError instanceof Error ? streamError.message : String(streamError));
-          setConnectionState("error");
-        }
-      })();
-
-      const capabilityDocument = await client.getCapabilities();
-      setCapabilities(formatJson(capabilityDocument));
-      await refreshSessions(client);
-    } catch (connectError) {
-      setError(connectError instanceof Error ? connectError.message : String(connectError));
-      setConnectionState("error");
-    }
+    setConnectionState("disconnected");
+    setSessions([]);
+    setSelectedSessionId(null);
+    setSessionView(null);
+    setCapabilities(null);
   }
 
   async function refreshSessions(client = clientRef.current): Promise<void> {
@@ -136,86 +553,333 @@ export function App() {
     setSessions(result.sessions);
   }
 
-  async function inspectSession(sessionId: string): Promise<void> {
+  async function attachSessionSubscription(sessionId: string, client = clientRef.current): Promise<void> {
+    if (client === null) {
+      return;
+    }
+
+    await closeSessionSubscription(client);
+
+    const result = await client.subscribe({
+      ...buildSessionSubscriptionRequest(sessionId)
+    });
+    subscriptionIdRef.current = result.subscription_id;
+  }
+
+  async function loadSelectedSession(
+    sessionId: string,
+    options: {
+      markLoading: boolean;
+      resubscribe: boolean;
+    }
+  ): Promise<void> {
     const client = clientRef.current;
 
     if (client === null) {
       return;
     }
 
-    setError(null);
+    const requestId = ++loadRequestRef.current;
+
+    if (options.markLoading) {
+      setSessionView(createLoadingSessionView(sessionId));
+    }
 
     try {
       const result = await client.getSession({
         session_id: sessionId,
         include_runs: true,
-        include_pending_approvals: true
+        include_pending_approvals: true,
+        include_pending_inputs: true
       });
+
+      if (selectedSessionIdRef.current !== sessionId || requestId !== loadRequestRef.current) {
+        return;
+      }
+
       const nextRuns = sortRuns(result.runs);
 
-      setSelectedSession(result.session);
-      setRuns(nextRuns);
-      setSelectedRunId((current) => current || nextRuns[0]?.id || "");
-      setApprovals(result.pending_approvals ?? []);
-      setArtifacts([]);
-      setArtifactDetail(null);
-      setDiff(null);
-      await subscribeToSession(sessionId, client);
-    } catch (sessionError) {
-      setError(sessionError instanceof Error ? sessionError.message : String(sessionError));
+      setSessionView((current) => {
+        const previous = current?.sessionId === sessionId ? current : null;
+        const hydrated = hydrateSessionSnapshot({
+          sessionId,
+          session: result.session,
+          runs: nextRuns,
+          approvals: [],
+          inputs: []
+        });
+
+        return {
+          ...hydrated,
+          approvals: mergeApprovals(previous?.approvals ?? [], result.pending_approvals ?? []),
+          inputs: mergeInputs(previous?.inputs ?? [], result.pending_inputs ?? []),
+          events: previous?.events ?? [],
+          artifacts: previous?.artifacts ?? [],
+          artifactDetail: previous?.artifactDetail ?? null,
+          diff: previous?.diff ?? null,
+          expanded: previous?.expanded ?? hydrated.expanded,
+          mode: previous?.mode === "snapshot-only" ? "snapshot-only" : "live",
+          livePausedReason: previous?.mode === "snapshot-only" ? previous.livePausedReason : undefined
+        };
+      });
+
+      if (options.resubscribe) {
+        try {
+          await attachSessionSubscription(sessionId, client);
+          setSessionView((current) =>
+            current?.sessionId === sessionId
+              ? {
+                  ...current,
+                  mode: "live",
+                  livePausedReason: undefined
+                }
+              : current
+          );
+        } catch (subscribeError) {
+          setSessionView((current) =>
+            current?.sessionId === sessionId
+              ? {
+                  ...current,
+                  mode: "snapshot-only",
+                  livePausedReason: "subscribe_failed"
+                }
+              : current
+          );
+          setError(
+            subscribeError instanceof Error ? subscribeError.message : String(subscribeError)
+          );
+        }
+      }
+    } catch (loadError) {
+      if (selectedSessionIdRef.current !== sessionId || requestId !== loadRequestRef.current) {
+        return;
+      }
+
+      if (isUnmaterializedThreadError(loadError)) {
+        const fallbackSession = sessions.find((session) => session.id === sessionId);
+
+        if (fallbackSession !== undefined) {
+          setSessionView((current) => {
+            const previous = current?.sessionId === sessionId ? current : null;
+            const hydrated = hydrateSessionSnapshot({
+              sessionId,
+              session: fallbackSession,
+              runs: [],
+              approvals: [],
+              inputs: []
+            });
+
+            return {
+              ...hydrated,
+              approvals: previous?.approvals ?? [],
+              inputs: previous?.inputs ?? [],
+              events: previous?.events ?? [],
+              artifacts: previous?.artifacts ?? [],
+              artifactDetail: previous?.artifactDetail ?? null,
+              diff: previous?.diff ?? null,
+              expanded: previous?.expanded ?? hydrated.expanded,
+              mode: "snapshot-only",
+              livePausedReason: "subscribe_failed"
+            };
+          });
+          setError(null);
+          return;
+        }
+      }
+
+      setSessionView({
+        ...createLoadingSessionView(sessionId),
+        mode: "error"
+      });
+      setError(loadError instanceof Error ? loadError.message : String(loadError));
     }
   }
 
-  async function subscribeToSession(sessionId: string, client = clientRef.current): Promise<void> {
-    if (client === null) {
+  async function inspectSession(sessionId: string): Promise<void> {
+    selectedSessionIdRef.current = sessionId;
+    setSelectedSessionId(sessionId);
+    setError(null);
+    setSessionView(createLoadingSessionView(sessionId));
+    await loadSelectedSession(sessionId, {
+      markLoading: false,
+      resubscribe: true
+    });
+  }
+
+  async function connect(): Promise<void> {
+    await disconnect();
+    setConnectionState("connecting");
+    setError(null);
+
+    try {
+      const transport = new AscpBrowserWebSocketTransport({
+        url
+      });
+      const client = createAscpClient({
+        transport
+      });
+
+      await client.connect();
+      const stream = client.events();
+      clientRef.current = client;
+      streamRef.current = stream;
+      setConnectionState("connected");
+
+      void (async () => {
+        try {
+          for await (const event of stream) {
+            if (selectedSessionIdRef.current === event.session_id) {
+              setSessionView((current) =>
+                current?.sessionId === event.session_id ? integrateEvent(current, event) : current
+              );
+            }
+
+            if (
+              event.type === "session.status_changed" ||
+              event.type.startsWith("run.") ||
+              event.type.startsWith("approval.") ||
+              event.type.startsWith("input.")
+            ) {
+              void refreshSessions(clientRef.current);
+            }
+          }
+        } catch (streamError) {
+          setConnectionState("error");
+          setError(streamError instanceof Error ? streamError.message : String(streamError));
+          setSessionView((current) =>
+            current === null
+              ? current
+              : {
+                  ...current,
+                  mode: "snapshot-only",
+                  livePausedReason: "subscription_dropped"
+                }
+          );
+        }
+      })();
+
+      const capabilityDocument = await client.getCapabilities();
+      setCapabilities(capabilityDocument);
+      await refreshSessions(client);
+    } catch (connectError) {
+      setConnectionState("error");
+      setError(connectError instanceof Error ? connectError.message : String(connectError));
+    }
+  }
+
+  async function retryLiveAttach(): Promise<void> {
+    const sessionId = selectedSessionIdRef.current;
+
+    if (sessionId === null) {
       return;
     }
 
-    if (subscriptionId.length > 0) {
-      await client.unsubscribe({
-        subscription_id: subscriptionId
-      });
-      setSubscriptionId("");
+    try {
+      await attachSessionSubscription(sessionId);
+      setSessionView((current) =>
+        current?.sessionId === sessionId
+          ? {
+              ...current,
+              mode: "live",
+              livePausedReason: undefined
+            }
+          : current
+      );
+    } catch (retryError) {
+      setConnectionState("error");
+      setError(retryError instanceof Error ? retryError.message : String(retryError));
+    }
+  }
+
+  async function startSession(): Promise<void> {
+    const client = clientRef.current;
+    const runtimeId = defaultRuntimeId(capabilities);
+
+    if (client === null || runtimeId === null || startPrompt.trim().length === 0) {
+      return;
     }
 
-    setEventLog([]);
+    try {
+      const result = await client.startSession({
+        runtime_id: runtimeId,
+        ...(startTitle.trim().length > 0 ? { title: startTitle.trim() } : {}),
+        initial_prompt: startPrompt.trim()
+      });
+      setStartTitle("");
+      setStartPrompt("");
+      selectedSessionIdRef.current = result.session.id;
+      setSelectedSessionId(result.session.id);
+      setSessionView({
+        ...hydrateSessionSnapshot({
+          sessionId: result.session.id,
+          session: result.session,
+          runs: [],
+          approvals: [],
+          inputs: []
+        }),
+        mode: "snapshot-only",
+        livePausedReason: "subscribe_failed"
+      });
+      setError(null);
+      await refreshSessions(client);
+    } catch (startError) {
+      if (startError instanceof AscpProtocolError) {
+        setError(`${startError.code}: ${startError.message}`);
+        return;
+      }
 
-    const result = await client.subscribe({
-      session_id: sessionId,
-      include_snapshot: true
-    });
-    setSubscriptionId(result.subscription_id);
-    subscriptionIdRef.current = result.subscription_id;
+      setError(startError instanceof Error ? startError.message : String(startError));
+    }
   }
 
   async function sendInput(): Promise<void> {
     const client = clientRef.current;
+    const session = sessionView?.session;
+    const text = composerValue.trim();
 
-    if (client === null || selectedSession === null || inputText.trim().length === 0) {
+    if (client === null || session === null || text.length === 0) {
       return;
     }
+
+    const inputRequest = pendingInputRequest(sessionView?.inputs ?? []);
 
     await client.sendInput({
-      session_id: selectedSession.id,
-      input: inputText
+      session_id: session.id,
+      input: text,
+      ...(inputRequest !== undefined
+        ? {
+            metadata: {
+              request_id: inputRequest.id
+            }
+          }
+        : {})
     });
-    await inspectSession(selectedSession.id);
-  }
 
-  async function loadApprovals(): Promise<void> {
-    const client = clientRef.current;
+    setComposerValue("");
+    setSessionView((current) =>
+      current === null
+        ? current
+        : {
+            ...current,
+            inputs:
+              inputRequest === undefined
+                ? current.inputs
+                : updateInputStatus(current.inputs, inputRequest.id, "answered")
+          }
+    );
 
-    if (client === null || selectedSession === null) {
-      return;
+    if (sessionView?.mode !== "live") {
+      await loadSelectedSession(session.id, {
+        markLoading: false,
+        resubscribe: true
+      });
     }
-
-    const result = await client.listApprovals({
-      session_id: selectedSession.id
-    });
-    setApprovals(result.approvals);
   }
 
-  async function respondApproval(approvalId: string, decision: "approved" | "rejected"): Promise<void> {
+  async function respondApproval(
+    approvalId: string,
+    decision: "approved" | "rejected"
+  ): Promise<void> {
     const client = clientRef.current;
 
     if (client === null) {
@@ -226,24 +890,46 @@ export function App() {
       approval_id: approvalId,
       decision
     });
-    await loadApprovals();
+
+    setSessionView((current) =>
+      current === null
+        ? current
+        : {
+            ...current,
+            approvals: updateApprovalStatus(
+              current.approvals,
+              approvalId,
+              decision === "approved" ? "approved" : "rejected",
+              new Date().toISOString()
+            )
+          }
+    );
   }
 
   async function loadArtifacts(): Promise<void> {
     const client = clientRef.current;
+    const session = sessionView?.session;
 
-    if (client === null || selectedSession === null) {
+    if (client === null || session === null) {
       return;
     }
 
     const result = await client.listArtifacts({
-      session_id: selectedSession.id,
-      ...(selectedRunId.length > 0 ? { run_id: selectedRunId } : {})
+      session_id: session.id,
+      ...(sessionView?.currentRun?.id !== undefined ? { run_id: sessionView.currentRun.id } : {})
     });
-    setArtifacts(result.artifacts);
+
+    setSessionView((current) =>
+      current?.sessionId === session.id
+        ? {
+            ...current,
+            artifacts: result.artifacts
+          }
+        : current
+    );
   }
 
-  async function loadArtifact(artifactId: string): Promise<void> {
+  async function loadArtifactDetail(artifactId: string): Promise<void> {
     const client = clientRef.current;
 
     if (client === null) {
@@ -253,208 +939,184 @@ export function App() {
     const result = await client.getArtifact({
       artifact_id: artifactId
     });
-    setArtifactDetail(result.artifact);
+
+    setSessionView((current) =>
+      current === null
+        ? current
+        : {
+            ...current,
+            artifactDetail: result.artifact
+          }
+    );
   }
 
   async function loadDiff(): Promise<void> {
     const client = clientRef.current;
+    const session = sessionView?.session;
+    const run = sessionView?.currentRun;
 
-    if (client === null || selectedSession === null || selectedRunId.length === 0) {
+    if (client === null || session === null || run === null) {
       return;
     }
 
     const result = await client.getDiff({
-      session_id: selectedSession.id,
-      run_id: selectedRunId
+      session_id: session.id,
+      run_id: run.id
     });
-    setDiff(result.diff);
+
+    setSessionView((current) =>
+      current?.sessionId === session.id
+        ? {
+            ...current,
+            diff: result.diff
+          }
+        : current
+    );
   }
 
+  async function toggleArtifacts(): Promise<void> {
+    if (sessionView === null) {
+      return;
+    }
+
+    const nextExpanded = !sessionView.expanded.artifacts;
+
+    setSessionView((current) =>
+      current === null
+        ? current
+        : {
+            ...current,
+            expanded: {
+              ...current.expanded,
+              artifacts: nextExpanded,
+              ...(nextExpanded ? {} : { diff: false })
+            }
+          }
+    );
+
+    if (nextExpanded && sessionView.artifacts.length === 0) {
+      await loadArtifacts();
+    }
+  }
+
+  async function toggleDiff(): Promise<void> {
+    if (sessionView === null) {
+      return;
+    }
+
+    const nextExpanded = !sessionView.expanded.diff;
+
+    setSessionView((current) =>
+      current === null
+        ? current
+        : {
+            ...current,
+            expanded: {
+              ...current.expanded,
+              diff: nextExpanded
+            }
+          }
+    );
+
+    if (nextExpanded && sessionView.diff === null) {
+      await loadDiff();
+    }
+  }
+
+  const timeline = buildTimeline(
+    sessionView?.events ?? [],
+    sessionView?.approvals ?? [],
+    sessionView?.inputs ?? []
+  );
+  const viewMode = sessionView?.mode ?? "idle";
+
   return (
-    <div className="shell">
-      <header className="hero">
-        <div>
-          <p className="eyebrow">ASCP Local Host</p>
-          <h1>Codex Operator Console</h1>
+    <div className="app-shell">
+      <header className="topbar">
+        <div className="brand-block">
+          <p className="eyebrow">ASCP Host Console</p>
+          <h1>Codex-first operator workspace</h1>
           <p className="subcopy">
-            Connect to the reusable ASCP WebSocket host, inspect live Codex sessions, and test real-time stream control.
+            Live chat on the left, protocol truth on the right. Sessions, blocked interactions,
+            artifacts, and diffs all flow through the same ASCP host surface.
           </p>
         </div>
-        <div className={`state state-${connectionState}`}>{connectionState}</div>
+        <div className="topbar-controls">
+          <label className="host-field">
+            <span>Host URL</span>
+            <input value={url} onChange={(event) => setUrl(event.target.value)} />
+          </label>
+          <div className="topbar-actions">
+            <button type="button" onClick={() => void connect()} disabled={connectionState === "connecting"}>
+              {connectionState === "connected" ? "Reconnect" : "Connect"}
+            </button>
+            <button type="button" className="ghost" onClick={() => void disconnect()}>
+              Disconnect
+            </button>
+          </div>
+          <div className={`connection-pill connection-${connectionState}`}>{connectionState}</div>
+        </div>
       </header>
 
-      <section className="panel connection">
-        <label>
-          Host URL
-          <input value={url} onChange={(event) => setUrl(event.target.value)} />
-        </label>
-        <div className="actions">
-          <button onClick={() => void connect()} disabled={connectionState === "connecting"}>
-            Connect
-          </button>
-          <button onClick={() => void refreshSessions()} disabled={clientRef.current === null}>
-            Refresh Sessions
-          </button>
-          <button onClick={() => void disconnect()}>Disconnect</button>
-        </div>
-        {error !== null ? <pre className="error-box">{error}</pre> : null}
-      </section>
-
-      <main className="grid">
-        <section className="panel">
-          <div className="panel-header">
-            <h2>Sessions</h2>
-            <span>{sessions.length}</span>
-          </div>
-          <div className="session-list">
-            {sessions.map((session) => (
-              <button
-                key={session.id}
-                className={`session-card ${selectedSession?.id === session.id ? "selected" : ""}`}
-                onClick={() => void inspectSession(session.id)}
-              >
-                <strong>{session.title ?? session.id}</strong>
-                <span>{session.status}</span>
-                <small>{session.updated_at}</small>
-              </button>
-            ))}
-          </div>
+      {error !== null ? (
+        <section className="global-alert">
+          <strong>Runtime message</strong>
+          <p>{error}</p>
         </section>
+      ) : null}
 
-        <section className="panel">
-          <div className="panel-header">
-            <h2>Session Control</h2>
-            <span>{selectedSession?.id ?? "none"}</span>
-          </div>
-          <label>
-            Input
-            <textarea
-              rows={4}
-              value={inputText}
-              onChange={(event) => setInputText(event.target.value)}
-            />
-          </label>
-          <div className="actions">
-            <button onClick={() => void sendInput()} disabled={selectedSession === null}>
-              Send Input
-            </button>
-            <button
-              onClick={() => void selectedSession && subscribeToSession(selectedSession.id)}
-              disabled={selectedSession === null}
-            >
-              Subscribe
-            </button>
-            <button onClick={() => void loadApprovals()} disabled={selectedSession === null}>
-              Load Approvals
-            </button>
-          </div>
-          <label>
-            Run For Diff / Artifacts
-            <select
-              value={selectedRunId}
-              onChange={(event) => setSelectedRunId(event.target.value)}
-            >
-              <option value="">Latest / none</option>
-              {runs.map((run) => (
-                <option key={run.id} value={run.id}>
-                  {run.id}
-                </option>
-              ))}
-            </select>
-          </label>
-          <div className="actions">
-            <button onClick={() => void loadArtifacts()} disabled={selectedSession === null}>
-              Load Artifacts
-            </button>
-            <button onClick={() => void loadDiff()} disabled={selectedRunId.length === 0}>
-              Load Diff
-            </button>
-          </div>
-        </section>
+      <main className="workspace">
+        <SessionSwitcher
+          sessions={sessions}
+          selectedSessionId={selectedSessionId}
+          startTitle={startTitle}
+          startPrompt={startPrompt}
+          canStart={connectionState === "connected" && defaultRuntimeId(capabilities) !== null}
+          onSelectSession={(sessionId) => void inspectSession(sessionId)}
+          onRefresh={() => void refreshSessions()}
+          onStartTitleChange={setStartTitle}
+          onStartPromptChange={setStartPrompt}
+          onStartSession={() => void startSession()}
+        />
 
-        <section className="panel wide">
-          <div className="panel-header">
-            <h2>Live Event Stream</h2>
-            <span>{subscriptionId || "not subscribed"}</span>
-          </div>
-          <div className="stream">
-            {eventLog.length === 0 ? <p className="empty">No events yet.</p> : null}
-            {eventLog.map((event) => (
-              <article key={event.id} className="event-card">
-                <div className="event-head">
-                  <strong>{event.type}</strong>
-                  <span>seq {event.seq ?? "?"}</span>
-                </div>
-                <small>{event.ts}</small>
-                <pre>{formatJson(event.payload)}</pre>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="panel">
-          <div className="panel-header">
-            <h2>Approvals</h2>
-            <span>{approvals.length}</span>
-          </div>
-          <div className="stack">
-            {approvals.map((approval) => (
-              <div key={approval.id} className="tile">
-                <strong>{approval.title ?? approval.id}</strong>
-                <span>{approval.status}</span>
-                <small>{approval.kind}</small>
-                <div className="actions">
-                  <button onClick={() => void respondApproval(approval.id, "approved")}>
-                    Approve
-                  </button>
-                  <button
-                    className="ghost"
-                    onClick={() => void respondApproval(approval.id, "rejected")}
-                  >
-                    Reject
-                  </button>
-                </div>
-              </div>
-            ))}
-            {approvals.length === 0 ? <p className="empty">No approvals.</p> : null}
-          </div>
-        </section>
-
-        <section className="panel">
-          <div className="panel-header">
-            <h2>Artifacts</h2>
-            <span>{artifacts.length}</span>
-          </div>
-          <div className="stack">
-            {artifacts.map((artifact) => (
-              <button
-                key={artifact.id}
-                className="tile left"
-                onClick={() => void loadArtifact(artifact.id)}
-              >
-                <strong>{artifact.name ?? artifact.id}</strong>
-                <span>{artifact.kind}</span>
-              </button>
-            ))}
-            {artifacts.length === 0 ? <p className="empty">No artifacts loaded.</p> : null}
-          </div>
-          {artifactDetail !== null ? <pre>{formatJson(artifactDetail)}</pre> : null}
-        </section>
-
-        <section className="panel">
-          <div className="panel-header">
-            <h2>Diff</h2>
-            <span>{selectedRunId || "select a run"}</span>
-          </div>
-          {diff === null ? <p className="empty">No diff loaded.</p> : <pre>{formatJson(diff)}</pre>}
-        </section>
-
-        <section className="panel wide">
-          <div className="panel-header">
-            <h2>Capabilities</h2>
-            <span>discovery</span>
-          </div>
-          <pre>{capabilities || "Connect to load capabilities."}</pre>
+        <section className="workspace-main">
+          <ChatPane
+            mode={viewMode}
+            session={sessionView?.session ?? null}
+            timeline={timeline}
+            composerValue={composerValue}
+            onComposerChange={setComposerValue}
+            onSend={() => void sendInput()}
+            onApprove={(approvalId) => void respondApproval(approvalId, "approved")}
+            onReject={(approvalId) => void respondApproval(approvalId, "rejected")}
+            onRetryLive={() => void retryLiveAttach()}
+            livePausedReason={
+              sessionView?.livePausedReason === "subscription_dropped"
+                ? "The live connection dropped after the snapshot loaded."
+                : sessionView?.livePausedReason === "subscribe_failed"
+                  ? "The live subscription could not attach after the snapshot loaded."
+                  : undefined
+            }
+          />
+          <OperatorRail
+            mode={viewMode}
+            session={sessionView?.session ?? null}
+            currentRun={sessionView?.currentRun ?? null}
+            approvals={sessionView?.approvals ?? []}
+            inputs={sessionView?.inputs ?? []}
+            events={sessionView?.events ?? []}
+            artifacts={sessionView?.artifacts ?? []}
+            artifactDetail={sessionView?.artifactDetail ?? null}
+            diff={sessionView?.diff ?? null}
+            capabilities={capabilities}
+            artifactsExpanded={sessionView?.expanded.artifacts ?? false}
+            diffExpanded={sessionView?.expanded.diff ?? false}
+            selectedArtifactId={sessionView?.artifactDetail?.id ?? null}
+            onToggleArtifacts={() => void toggleArtifacts()}
+            onToggleDiff={() => void toggleDiff()}
+            onSelectArtifact={(artifactId) => void loadArtifactDetail(artifactId)}
+            onRetryLive={() => void retryLiveAttach()}
+          />
         </section>
       </main>
     </div>

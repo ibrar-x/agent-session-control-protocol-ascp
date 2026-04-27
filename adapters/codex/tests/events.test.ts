@@ -42,8 +42,8 @@ describe("mapNotificationToEvents", () => {
     });
   });
 
-  it("maps turn/completed into a run.completed event", () => {
-    const [event] = mapNotificationToEvents(
+  it("maps turn/completed into assistant completion plus run.completed events", () => {
+    const [messageEvent, runEvent] = mapNotificationToEvents(
       {
         method: "turn/completed",
         params: {
@@ -53,7 +53,14 @@ describe("mapNotificationToEvents", () => {
             status: "completed",
             startedAt: 1_745_661_900,
             completedAt: 1_745_662_140,
-            exitCode: 0
+            exitCode: 0,
+            items: [
+              {
+                type: "agentMessage",
+                id: "item_1",
+                text: "Finished the requested change."
+              }
+            ]
           }
         }
       },
@@ -62,7 +69,19 @@ describe("mapNotificationToEvents", () => {
       }
     );
 
-    expect(event).toEqual({
+    expect(messageEvent).toEqual({
+      id: "codex:event:agent_message_completed:thread_1:turn_1:item_1",
+      type: "message.assistant.completed",
+      ts: "2025-04-26T10:09:00.000Z",
+      session_id: "codex:thread_1",
+      run_id: "codex:thread_1:turn_1",
+      payload: {
+        message_id: "codex:message:thread_1:item_1",
+        content: "Finished the requested change."
+      }
+    });
+
+    expect(runEvent).toEqual({
       id: "codex:event:turn_completed:thread_1:turn_1",
       type: "run.completed",
       ts: "2025-04-26T10:09:00.000Z",
