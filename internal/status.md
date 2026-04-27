@@ -14,6 +14,22 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-27 - Host console chat refresh and start-session hardening
+
+- Branch: `branch-host-console-chat-refresh`
+- Commit: `not committed`
+- Summary: rebuilt `apps/host-console` into a multi-session chat-first operator workspace with a split session list, conversation pane, and layered protocol rail; added a selected-session state model plus focused Vitest coverage; lazy-loaded artifacts and diffs from explicit operator actions; and hardened the Codex adapter plus browser flow so newly started sessions degrade truthfully before turn materialization and recover cleanly after the first user message
+- Documentation updated: `internal/plans.md`, `apps/host-console/README.md`, `docs/superpowers/specs/2026-04-27-host-console-chat-refresh-design.md`, `docs/superpowers/plans/2026-04-27-host-console-chat-refresh.md`
+- Next likely step: review the refreshed host console branch, then merge to `main` or continue with host-service auth and multi-runtime follow-up work
+
+### 2026-04-27 - Docs site: fixed links, dark/light mode, fuzzy search
+
+- Branch: `master` (apps/web)
+- Commit: `ab6e80b` (apps/web)
+- Summary: fixed all internal MDX links to use correct paths with trailing slashes for static export (including `/docs/learn/03-core-concepts/` and `/docs/reference/01-overview/` corrections), rewrote the search component with 31 correct URLs, fuzzy character-by-character matching, highlighted results, and keyboard navigation (↑↓↵esc), added a dark/light mode toggle using next-themes with full CSS variable theming across all components, and verified everything works in a browser against the static export
+- Documentation updated: `internal/status.md`, all 31 MDX files in `apps/web/content/docs/`, `apps/web/components/search.tsx`, `apps/web/components/theme-toggle.tsx`, `apps/web/app/globals.css`, `apps/web/app/layout.tsx`, `apps/web/app/page.tsx`, `apps/web/app/docs/layout.tsx`, `apps/web/app/layout.config.tsx`
+- Next likely step: deploy the updated docs site to sessio.app
+
 ### 2026-04-27 - Docs restructure into Learn/Reference/Build sections
 
 - Branch: `feature/docs-restructure` (outer repo), `master` (apps/web)
