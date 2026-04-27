@@ -27,7 +27,8 @@ Codex-first browser workspace for testing the local ASCP WebSocket host with a c
 - If the snapshot loads but live subscribe fails, the UI falls back to `snapshot-only` and shows a visible `Live updates paused` banner.
 - Artifact lists and diff detail load lazily only when the operator expands those sections.
 - A brand-new Codex session can exist before turn materialization. The adapter and UI now degrade gracefully until the first user message lands.
-- Historical transcript is intentionally limited to what the current browser session has observed from ASCP events.
+- Reopened sessions replay historical transcript when the adapter can recover stored ASCP-safe events from Codex turn history.
+- Reconnect preserves the selected session, restores the session list, and reattaches live subscription state after the transport comes back.
 
 ## Run
 

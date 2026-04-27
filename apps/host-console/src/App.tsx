@@ -1,11 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 
 import {
-  type ApprovalRequest,
   type Artifact,
   type CapabilityDocument,
   type DiffSummary,
-  type EventEnvelope,
   type FlexibleObject,
   type InputRequest,
   type Run,
@@ -19,11 +17,10 @@ import {
 import type { AscpTransportSubscription } from "ascp-sdk-typescript/transport";
 import { AscpBrowserWebSocketTransport } from "ascp-sdk-typescript/transport/browser-websocket";
 
-import { ChatPane, type ChatTimelineItem } from "./components/ChatPane";
+import { ChatPane } from "./components/ChatPane";
 import { OperatorRail } from "./components/OperatorRail";
 import { SessionSwitcher } from "./components/SessionSwitcher";
 import {
-  buildInteractionTimelineItems,
   createLoadingSessionView,
   hydrateSessionSnapshot,
   mergeApprovals,
@@ -31,6 +28,7 @@ import {
   type SessionViewState
 } from "./model";
 import { buildSessionSubscriptionRequest } from "./subscriptions";
+import { buildTimeline } from "./timeline";
 
 type ConnectionState = "disconnected" | "connecting" | "connected" | "error";
 
@@ -80,192 +78,6 @@ function appendEvent(events: EventEnvelope[], nextEvent: EventEnvelope): EventEn
       return left.ts.localeCompare(right.ts);
     })
     .slice(-120);
-}
-
-function approvalActionLabel(approval: ApprovalRequest): string {
-  return approval.title ?? approval.description ?? approval.id;
-}
-
-function inputActionLabel(input: InputRequest): string {
-  return input.question;
-}
-
-function buildTimeline(events: EventEnvelope[], approvals: ApprovalRequest[], inputs: InputRequest[]): ChatTimelineItem[] {
-  const items: ChatTimelineItem[] = [];
-  const assistantIndexByMessageId = new Map<string, number>();
-  const interactionItems = buildInteractionTimelineItems({
-    approvals,
-    inputs
-  }).map<ChatTimelineItem>((item) =>
-    item.kind === "approval"
-      ? {
-          id: item.id,
-          kind: "approval",
-          title: approvalActionLabel(item.approval!),
-          body: item.approval?.description ?? "Approval is required before the agent can continue.",
-          state: item.state,
-          ts: item.ts,
-          approval: item.approval
-        }
-      : {
-          id: item.id,
-          kind: "input",
-          title: inputActionLabel(item.input!),
-          body:
-            item.input?.input_type === "choice" && Array.isArray(item.input.choices)
-              ? `Choices: ${item.input.choices.join(", ")}`
-              : "The agent is waiting for user input.",
-          state: item.state,
-          ts: item.ts,
-          input: item.input
-        }
-  );
-
-  for (const event of events) {
-    const payload = isRecord(event.payload) ? event.payload : {};
-
-    switch (event.type) {
-      case "message.user":
-        items.push({
-          id: event.id,
-          kind: "user",
-          body: readString(payload, "content") ?? "User input sent.",
-          ts: event.ts
-        });
-        break;
-      case "message.assistant.completed":
-      case "message.assistant.delta": {
-        const messageId = readString(payload, "message_id");
-
-        if (messageId === undefined) {
-          break;
-        }
-
-        const existingIndex = assistantIndexByMessageId.get(messageId);
-
-        if (event.type === "message.assistant.delta") {
-          const delta = readString(payload, "delta") ?? "";
-
-          if (existingIndex === undefined) {
-            assistantIndexByMessageId.set(messageId, items.length);
-            items.push({
-              id: event.id,
-              kind: "assistant",
-              body: delta,
-              ts: event.ts
-            });
-            break;
-          }
-
-          const existingItem = items[existingIndex];
-          items[existingIndex] = {
-            ...existingItem,
-            body: `${existingItem.body}${delta}`,
-            ts: event.ts
-          };
-          break;
-        }
-
-        const content = readString(payload, "content") ?? "Assistant response completed.";
-
-        if (existingIndex === undefined) {
-          assistantIndexByMessageId.set(messageId, items.length);
-          items.push({
-            id: event.id,
-            kind: "assistant",
-            body: content,
-            ts: event.ts
-          });
-          break;
-        }
-
-        items[existingIndex] = {
-          ...items[existingIndex],
-          id: event.id,
-          body: content,
-          ts: event.ts
-        };
-        break;
-      }
-      case "message.system":
-        items.push({
-          id: event.id,
-          kind: "system",
-          body: readString(payload, "content") ?? "System message received.",
-          ts: event.ts
-        });
-        break;
-      case "run.started":
-        items.push({
-          id: event.id,
-          kind: "activity",
-          title: "Run started",
-          body: event.run_id ?? "The agent started a new run.",
-          ts: event.ts
-        });
-        break;
-      case "run.completed":
-        items.push({
-          id: event.id,
-          kind: "activity",
-          title: "Run completed",
-          body: event.run_id ?? "The current run completed.",
-          ts: event.ts
-        });
-        break;
-      case "run.failed":
-        items.push({
-          id: event.id,
-          kind: "activity",
-          title: "Run failed",
-          body: readString(payload, "reason") ?? event.run_id ?? "The current run failed.",
-          ts: event.ts
-        });
-        break;
-      case "run.cancelled":
-        items.push({
-          id: event.id,
-          kind: "activity",
-          title: "Run cancelled",
-          body: readString(payload, "reason") ?? event.run_id ?? "The current run was cancelled.",
-          ts: event.ts
-        });
-        break;
-      case "session.status_changed":
-        items.push({
-          id: event.id,
-          kind: "system",
-          title: "Session status changed",
-          body: `${readString(payload, "from") ?? "unknown"} -> ${readString(payload, "to") ?? "unknown"}`,
-          ts: event.ts
-        });
-        break;
-      case "diff.updated":
-        items.push({
-          id: event.id,
-          kind: "activity",
-          title: "Diff updated",
-          body: "The adapter reported file changes for the current run.",
-          ts: event.ts
-        });
-        break;
-      case "sync.replayed":
-        items.push({
-          id: event.id,
-          kind: "system",
-          title: "Replay loaded",
-          body: "Replay-safe events were restored after subscription attach.",
-          ts: event.ts
-        });
-        break;
-      default:
-        break;
-    }
-  }
-
-  return [...items, ...interactionItems].sort((left, right) =>
-    (left.ts ?? "").localeCompare(right.ts ?? "")
-  );
 }
 
 function pendingInputRequest(inputs: InputRequest[]): InputRequest | undefined {
@@ -512,9 +324,10 @@ export function App() {
     subscriptionIdRef.current = "";
   }
 
-  async function disconnect(): Promise<void> {
+  async function disconnect(options: { preserveSelection?: boolean } = {}): Promise<void> {
     const client = clientRef.current;
     const stream = streamRef.current;
+    const preservedSessionId = options.preserveSelection === true ? selectedSessionIdRef.current : null;
 
     await closeSessionSubscription(client);
 
@@ -532,14 +345,23 @@ export function App() {
 
     clientRef.current = null;
     streamRef.current = null;
-    selectedSessionIdRef.current = null;
     loadRequestRef.current += 1;
 
     setConnectionState("disconnected");
     setSessions([]);
-    setSelectedSessionId(null);
-    setSessionView(null);
     setCapabilities(null);
+    setError(null);
+
+    if (preservedSessionId === null) {
+      selectedSessionIdRef.current = null;
+      setSelectedSessionId(null);
+      setSessionView(null);
+      return;
+    }
+
+    selectedSessionIdRef.current = preservedSessionId;
+    setSelectedSessionId(preservedSessionId);
+    setSessionView(createLoadingSessionView(preservedSessionId));
   }
 
   async function refreshSessions(client = clientRef.current): Promise<void> {
@@ -707,7 +529,11 @@ export function App() {
   }
 
   async function connect(): Promise<void> {
-    await disconnect();
+    const reconnectSessionId = selectedSessionIdRef.current;
+
+    await disconnect({
+      preserveSelection: reconnectSessionId !== null
+    });
     setConnectionState("connecting");
     setError(null);
 
@@ -761,6 +587,13 @@ export function App() {
       const capabilityDocument = await client.getCapabilities();
       setCapabilities(capabilityDocument);
       await refreshSessions(client);
+
+      if (reconnectSessionId !== null) {
+        await loadSelectedSession(reconnectSessionId, {
+          markLoading: false,
+          resubscribe: true
+        });
+      }
     } catch (connectError) {
       setConnectionState("error");
       setError(connectError instanceof Error ? connectError.message : String(connectError));
@@ -1048,7 +881,7 @@ export function App() {
           </label>
           <div className="topbar-actions">
             <button type="button" onClick={() => void connect()} disabled={connectionState === "connecting"}>
-              {connectionState === "connected" ? "Reconnect" : "Connect"}
+              {connectionState === "disconnected" ? "Connect" : "Reconnect"}
             </button>
             <button type="button" className="ghost" onClick={() => void disconnect()}>
               Disconnect

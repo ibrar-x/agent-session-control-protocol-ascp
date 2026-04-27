@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-27 - Host console reconnect recovery and live timeline polish
+
+- Branch: `branch-host-console-chat-refresh`
+- Commit: `not committed`
+- Summary: polished the host console reconnect path so reconnect keeps the selected session context, repopulates the session list, and restores the selected conversation after transport restart; extracted timeline assembly into a dedicated helper with focused assistant-delta tests; and live-validated in the browser that a selected session survives reconnect and still streams new transcript events after sending input
+- Documentation updated: `internal/plans.md`, `internal/status.md`, `apps/host-console/README.md`
+- Next likely step: merge the refreshed host-console branch into `main`, then move on to auth/multi-client boundaries or second-runtime host integration
+
 ### 2026-04-27 - Host console transcript replay and historical chat hydration
 
 - Branch: `branch-host-console-chat-refresh`

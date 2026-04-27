@@ -76,6 +76,7 @@ Files to add or modify:
 | completed | wire truthful live-state and lazy secondary loading | session switching clears stale detail immediately, subscribe failure degrades to `snapshot-only`, and artifacts/diffs load on explicit operator actions |
 | completed | harden new-session startup flow | starting a session from the browser works before first turn materialization, and the adapter falls back cleanly when `includeTurns` is not yet available |
 | completed | restore replayed transcript history for reopened sessions | the host console requests replay on subscribe, Codex historical `userMessage.content[].text` is mapped into transcript events, and browser validation shows reopened sessions with real chat bubbles instead of only `sync.snapshot` |
+| completed | polish reconnect recovery and delta timeline coverage | reconnect restores the selected session and live attach after transport restart, and assistant delta assembly is covered by focused timeline tests |
 | completed | update checkpoint docs and final verification | focused tests, build, and live browser validation are recorded before branch review |
 
 ## Acceptance Criteria
@@ -89,8 +90,9 @@ The task is done only when all of the following are true:
 - artifacts and diff detail stay lazy and load only from explicit operator actions
 - starting a new session from the UI works even when Codex has not materialized turns yet
 - reopened sessions replay truthful historical transcript into the chat timeline when Codex exposes stored turn items
+- reconnecting the host preserves the selected session and resumes a truthful live timeline after recovery
 - focused tests and live browser validation prove the demo flow end to end
 
 ## Next Likely Step
 
-Review the host-console refresh branch, commit and merge it to `main` if accepted, and then continue with broader productionization work such as auth/multi-client boundaries or a second runtime integration.
+Review the host-console refresh branch, merge it to `main` if accepted, and then continue with broader productionization work such as auth/multi-client boundaries or a second runtime integration.
