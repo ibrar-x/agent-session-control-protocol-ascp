@@ -27,6 +27,7 @@ export interface PairingBackendService {
     sessionId: string;
   }>;
   expireStaleSessions(now?: string): number;
+  listPairingSessions(): PairingSessionRecord[];
   listTrustedDevices(): TrustedDeviceRecord[];
   pollPairing(claimToken: string): Promise<
     | { status: "pending_host_approval" | "rejected" | "expired" }
@@ -130,6 +131,9 @@ export function createPairingService(deps: {
       }
 
       return expired;
+    },
+    listPairingSessions() {
+      return deps.sessionStore.listSessions();
     },
     listTrustedDevices() {
       return deps.trustStore.listDevices();

@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-28 - Host pairing UI slice
+
+- Branch: `branch-host-pairing-ui`
+- Commit: `not committed`
+- Summary: added a separate host-console pairing workspace with inline pairing-session creation, lifecycle visibility, pending-claim approval queue, trusted-device inventory, and polling scoped to pending and approved device onboarding states
+- Documentation updated: `internal/plans.md`, `internal/status.md`, `README.md`, `apps/host-console/README.md`, `docs/superpowers/specs/2026-04-28-host-pairing-ui-design.md`, `docs/superpowers/plans/2026-04-28-host-pairing-ui.md`
+- Next likely step: build the mobile claim UI on top of the completed daemon pairing backend and host pairing workspace, or harden the daemon transport toward TLS-backed pairing flows
+
 ### 2026-04-28 - Host daemon pairing backend slice
 
 - Branch: `branch-host-daemon`

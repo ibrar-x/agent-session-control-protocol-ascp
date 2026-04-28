@@ -65,6 +65,9 @@ export function createPairingService(deps) {
             }
             return expired;
         },
+        listPairingSessions() {
+            return deps.sessionStore.listSessions();
+        },
         listTrustedDevices() {
             return deps.trustStore.listDevices();
         },
