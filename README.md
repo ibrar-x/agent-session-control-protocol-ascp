@@ -83,6 +83,7 @@ ASCP does not standardize model APIs, prompt formats, tool schemas, UI systems, 
 - `services/host-daemon/` now also owns SQLite-backed replay persistence plus host-wide paired-device auth/trust above adapters, while preserving frozen ASCP method and event semantics.
 - `services/host-daemon/` now also exposes a loopback-only pairing backend for host-approved mobile onboarding on top of that auth/trust foundation.
 - `apps/` should consume SDKs rather than adapter internals.
+- `apps/host-console/` now also exposes a host-side pairing workspace for daemon-admin onboarding and trusted-device management above the loopback pairing backend.
 - `services/` can depend directly on protocol truth when they are protocol-facing infrastructure.
 
 ## More Context

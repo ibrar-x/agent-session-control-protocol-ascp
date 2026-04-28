@@ -65,6 +65,12 @@ class LoopbackPairingAdminServer {
         try {
             const url = new URL(request.url ?? "/", "http://127.0.0.1");
             const pathname = url.pathname;
+            if (request.method === "OPTIONS") {
+                sendCorsHeaders(response);
+                response.statusCode = 204;
+                response.end();
+                return;
+            }
             if (request.method === "POST" && pathname === "/admin/pairing/sessions") {
                 const body = await readJsonBody(request);
                 const created = this.pairingService.startPairing({
@@ -78,6 +84,14 @@ class LoopbackPairingAdminServer {
                     expires_at: created.expiresAt,
                     qr_payload: created.qrPayload,
                     session_id: created.sessionId
+                });
+                return;
+            }
+            if (request.method === "GET" && pathname === "/admin/pairing/sessions") {
+                sendJson(response, 200, {
+                    sessions: this.pairingService
+                        .listPairingSessions()
+                        .map((session) => serializePairingSession(session))
                 });
                 return;
             }
@@ -159,6 +173,27 @@ class LoopbackPairingAdminServer {
         }
     }
 }
+function serializePairingSession(session) {
+    return {
+        approved_at: session.approvedAt,
+        claim_token: session.claimToken,
+        claimed_at: session.claimedAt,
+        code: session.code,
+        consumed_at: session.consumedAt,
+        created_at: session.createdAt,
+        device_label: session.deviceLabel,
+        expires_at: session.expiresAt,
+        issued_device_id: session.issuedDeviceId,
+        qr_payload: JSON.stringify({
+            code: session.code,
+            session_id: session.sessionId
+        }),
+        rejected_at: session.rejectedAt,
+        requested_scopes: session.requestedScopes,
+        session_id: session.sessionId,
+        status: session.status
+    };
+}
 async function readJsonBody(request) {
     const chunks = [];
     for await (const chunk of request) {
@@ -171,7 +206,13 @@ async function readJsonBody(request) {
 }
 function sendJson(response, statusCode, payload) {
     response.statusCode = statusCode;
+    sendCorsHeaders(response);
     response.setHeader("content-type", "application/json");
     response.end(JSON.stringify(payload));
+}
+function sendCorsHeaders(response) {
+    response.setHeader("access-control-allow-origin", "*");
+    response.setHeader("access-control-allow-methods", "GET,POST,OPTIONS");
+    response.setHeader("access-control-allow-headers", "content-type");
 }
 //# sourceMappingURL=admin-server.js.map

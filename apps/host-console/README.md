@@ -30,6 +30,27 @@ Codex-first browser workspace for testing the local ASCP WebSocket host with a c
 - Reopened sessions replay historical transcript when the adapter can recover stored ASCP-safe events from Codex turn history.
 - Reconnect preserves the selected session, restores the session list, and reattaches live subscription state after the transport comes back.
 
+
+## Pairing workspace
+
+The host console now includes a separate `Pairing` workspace for daemon-admin onboarding flows.
+
+It exercises the loopback pairing backend through:
+
+- `GET /admin/pairing/sessions`
+- `POST /admin/pairing/sessions`
+- `POST /admin/pairing/sessions/:id/approve`
+- `POST /admin/pairing/sessions/:id/reject`
+- `GET /admin/trusted-devices`
+- `POST /admin/trusted-devices/:id/revoke`
+
+Behavior notes:
+
+- pairing creation is inline within the lifecycle panel
+- `pending_host_approval` sessions appear both in the lifecycle list and the approval queue
+- v1 shows copyable pairing codes only; `qr_payload` is not rendered as an image yet
+- polling runs every 3 seconds while pending or approved sessions exist, then slows to 30 seconds when all sessions are terminal
+
 ## Run
 
 Start the Codex-backed host:

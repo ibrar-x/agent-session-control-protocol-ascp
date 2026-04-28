@@ -20,6 +20,7 @@ import { AscpBrowserWebSocketTransport } from "ascp-sdk-typescript/transport/bro
 import { ChatPane } from "./components/ChatPane";
 import { OperatorRail } from "./components/OperatorRail";
 import { SessionSwitcher } from "./components/SessionSwitcher";
+import { WorkspaceSwitcher } from "./components/WorkspaceSwitcher";
 import {
   createLoadingSessionView,
   hydrateSessionSnapshot,
@@ -27,10 +28,26 @@ import {
   mergeInputs,
   type SessionViewState
 } from "./model";
+import { createPairingAdminClient } from "./pairing/api";
+import {
+  ACTIVE_POLLING_MS,
+  IDLE_REFRESH_MS,
+  createPairingWorkspaceState,
+  markCopiedCode,
+  mergePairingSession,
+  replacePairingSessions,
+  shouldUseActivePolling,
+  updateCreateForm,
+  updateTrustedDeviceList
+} from "./pairing/model";
+import { PairingWorkspace } from "./pairing/components/PairingWorkspace";
 import { buildSessionSubscriptionRequest } from "./subscriptions";
 import { buildTimeline } from "./timeline";
 
 type ConnectionState = "disconnected" | "connecting" | "connected" | "error";
+type ConsoleWorkspace = "sessions" | "pairing";
+
+const DEFAULT_PAIRING_ADMIN_URL = "http://127.0.0.1:8766";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -283,6 +300,8 @@ function isUnmaterializedThreadError(error: unknown): boolean {
 
 export function App() {
   const clientRef = useRef<AscpClient | null>(null);
+  const pairingClientRef = useRef(createPairingAdminClient(DEFAULT_PAIRING_ADMIN_URL));
+  const copyResetTimersRef = useRef(new Map<string, number>());
   const streamRef = useRef<AscpTransportSubscription | null>(null);
   const subscriptionIdRef = useRef("");
   const selectedSessionIdRef = useRef<string | null>(null);
@@ -291,6 +310,9 @@ export function App() {
   const [url, setUrl] = useState("ws://127.0.0.1:8765");
   const [connectionState, setConnectionState] = useState<ConnectionState>("disconnected");
   const [error, setError] = useState<string | null>(null);
+  const [activeWorkspace, setActiveWorkspace] = useState<ConsoleWorkspace>("sessions");
+  const [pairingAdminUrl, setPairingAdminUrl] = useState(DEFAULT_PAIRING_ADMIN_URL);
+  const [pairingState, setPairingState] = useState(createPairingWorkspaceState());
   const [sessions, setSessions] = useState<Session[]>([]);
   const [capabilities, setCapabilities] = useState<CapabilityDocument | null>(null);
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
@@ -300,10 +322,112 @@ export function App() {
   const [startPrompt, setStartPrompt] = useState("");
 
   useEffect(() => {
+    pairingClientRef.current = createPairingAdminClient(pairingAdminUrl);
+  }, [pairingAdminUrl]);
+
+  useEffect(() => {
     return () => {
+      for (const timer of copyResetTimersRef.current.values()) {
+        window.clearTimeout(timer);
+      }
+      copyResetTimersRef.current.clear();
       void disconnect();
     };
   }, []);
+
+  async function reloadPairingWorkspace(options: { refreshDevices: boolean }): Promise<void> {
+    const sessions = await pairingClientRef.current.listPairingSessions();
+    const devices = options.refreshDevices
+      ? await pairingClientRef.current.listTrustedDevices()
+      : pairingState.devices;
+
+    setPairingState((current) => ({
+      ...current,
+      devices: options.refreshDevices
+        ? updateTrustedDeviceList(current.devices, devices)
+        : current.devices,
+      error: null,
+      isLoaded: true,
+      isLoading: false,
+      lastLoadedAt: new Date().toISOString(),
+      sessions: replacePairingSessions(current.sessions, sessions)
+    }));
+  }
+
+  useEffect(() => {
+    if (activeWorkspace !== "pairing") {
+      return;
+    }
+
+    let cancelled = false;
+
+    async function loadPairingWorkspace() {
+      setPairingState((current) => ({
+        ...current,
+        error: null,
+        isLoading: true
+      }));
+
+      try {
+        const [loadedSessions, loadedDevices] = await Promise.all([
+          pairingClientRef.current.listPairingSessions(),
+          pairingClientRef.current.listTrustedDevices()
+        ]);
+
+        if (cancelled) {
+          return;
+        }
+
+        setPairingState((current) => ({
+          ...current,
+          devices: updateTrustedDeviceList(current.devices, loadedDevices),
+          error: null,
+          isLoaded: true,
+          isLoading: false,
+          lastLoadedAt: new Date().toISOString(),
+          sessions: replacePairingSessions(current.sessions, loadedSessions)
+        }));
+      } catch (loadError) {
+        if (!cancelled) {
+          setPairingState((current) => ({
+            ...current,
+            error: loadError instanceof Error ? loadError.message : "Failed to load pairing workspace.",
+            isLoading: false
+          }));
+        }
+      }
+    }
+
+    void loadPairingWorkspace();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeWorkspace, pairingAdminUrl]);
+
+  useEffect(() => {
+    if (activeWorkspace !== "pairing") {
+      return;
+    }
+
+    const intervalMs = shouldUseActivePolling(pairingState.sessions)
+      ? ACTIVE_POLLING_MS
+      : IDLE_REFRESH_MS;
+
+    const timer = window.setInterval(() => {
+      void reloadPairingWorkspace({ refreshDevices: true }).catch((reloadError) => {
+        setPairingState((current) => ({
+          ...current,
+          error:
+            reloadError instanceof Error ? reloadError.message : "Failed to refresh pairing workspace."
+        }));
+      });
+    }, intervalMs);
+
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, [activeWorkspace, pairingAdminUrl, pairingState.sessions]);
 
   async function closeSessionSubscription(client: AscpClient | null): Promise<void> {
     const subscriptionId = subscriptionIdRef.current;
@@ -856,6 +980,94 @@ export function App() {
     }
   }
 
+  async function createPairingSession(): Promise<void> {
+    setPairingState((current) => ({
+      ...current,
+      error: null,
+      isSubmitting: true
+    }));
+
+    try {
+      const created = await pairingClientRef.current.createPairingSession(pairingState.createForm);
+      setPairingState((current) => ({
+        ...current,
+        isSubmitting: false,
+        sessions: mergePairingSession(current.sessions, created)
+      }));
+    } catch (createError) {
+      setPairingState((current) => ({
+        ...current,
+        error: createError instanceof Error ? createError.message : "Failed to create pairing session.",
+        isSubmitting: false
+      }));
+    }
+  }
+
+  async function approvePairing(sessionId: string): Promise<void> {
+    try {
+      await pairingClientRef.current.approvePairing(sessionId);
+      await reloadPairingWorkspace({ refreshDevices: true });
+    } catch (approveError) {
+      setPairingState((current) => ({
+        ...current,
+        error: approveError instanceof Error ? approveError.message : "Failed to approve pairing session."
+      }));
+    }
+  }
+
+  async function rejectPairing(sessionId: string): Promise<void> {
+    try {
+      await pairingClientRef.current.rejectPairing(sessionId);
+      await reloadPairingWorkspace({ refreshDevices: true });
+    } catch (rejectError) {
+      setPairingState((current) => ({
+        ...current,
+        error: rejectError instanceof Error ? rejectError.message : "Failed to reject pairing session."
+      }));
+    }
+  }
+
+  async function revokeTrustedDevice(deviceId: string): Promise<void> {
+    try {
+      await pairingClientRef.current.revokeTrustedDevice(deviceId);
+      await reloadPairingWorkspace({ refreshDevices: true });
+    } catch (revokeError) {
+      setPairingState((current) => ({
+        ...current,
+        error: revokeError instanceof Error ? revokeError.message : "Failed to revoke trusted device."
+      }));
+    }
+  }
+
+  function copyPairingCode(sessionId: string): void {
+    const item = pairingState.sessions.find((session) => session.sessionId === sessionId);
+
+    if (item === undefined) {
+      return;
+    }
+
+    void navigator.clipboard.writeText(item.code);
+
+    const existingTimer = copyResetTimersRef.current.get(sessionId);
+    if (existingTimer !== undefined) {
+      window.clearTimeout(existingTimer);
+    }
+
+    setPairingState((current) => ({
+      ...current,
+      sessions: markCopiedCode(current.sessions, sessionId, true)
+    }));
+
+    const timer = window.setTimeout(() => {
+      setPairingState((current) => ({
+        ...current,
+        sessions: markCopiedCode(current.sessions, sessionId, false)
+      }));
+      copyResetTimersRef.current.delete(sessionId);
+    }, 2_000);
+    copyResetTimersRef.current.set(sessionId, timer);
+  }
+
   const timeline = buildTimeline(
     sessionView?.events ?? [],
     sessionView?.approvals ?? [],
@@ -875,9 +1087,21 @@ export function App() {
           </p>
         </div>
         <div className="topbar-controls">
+          <WorkspaceSwitcher
+            activeWorkspace={activeWorkspace}
+            onSelectWorkspace={setActiveWorkspace}
+          />
           <label className="host-field">
             <span>Host URL</span>
             <input value={url} onChange={(event) => setUrl(event.target.value)} />
+          </label>
+          <label className="host-field">
+            <span>Pairing admin URL</span>
+            <input
+              value={pairingAdminUrl}
+              onChange={(event) => setPairingAdminUrl(event.target.value)}
+              placeholder={DEFAULT_PAIRING_ADMIN_URL}
+            />
           </label>
           <div className="topbar-actions">
             <button type="button" onClick={() => void connect()} disabled={connectionState === "connecting"}>
@@ -898,60 +1122,87 @@ export function App() {
         </section>
       ) : null}
 
-      <main className="workspace">
-        <SessionSwitcher
-          sessions={sessions}
-          selectedSessionId={selectedSessionId}
-          startTitle={startTitle}
-          startPrompt={startPrompt}
-          canStart={connectionState === "connected" && defaultRuntimeId(capabilities) !== null}
-          onSelectSession={(sessionId) => void inspectSession(sessionId)}
-          onRefresh={() => void refreshSessions()}
-          onStartTitleChange={setStartTitle}
-          onStartPromptChange={setStartPrompt}
-          onStartSession={() => void startSession()}
-        />
+      {activeWorkspace === "sessions" ? (
+        <main className="workspace">
+          <SessionSwitcher
+            sessions={sessions}
+            selectedSessionId={selectedSessionId}
+            startTitle={startTitle}
+            startPrompt={startPrompt}
+            canStart={connectionState === "connected" && defaultRuntimeId(capabilities) !== null}
+            onSelectSession={(sessionId) => void inspectSession(sessionId)}
+            onRefresh={() => void refreshSessions()}
+            onStartTitleChange={setStartTitle}
+            onStartPromptChange={setStartPrompt}
+            onStartSession={() => void startSession()}
+          />
 
-        <section className="workspace-main">
-          <ChatPane
-            mode={viewMode}
-            session={sessionView?.session ?? null}
-            timeline={timeline}
-            composerValue={composerValue}
-            onComposerChange={setComposerValue}
-            onSend={() => void sendInput()}
-            onApprove={(approvalId) => void respondApproval(approvalId, "approved")}
-            onReject={(approvalId) => void respondApproval(approvalId, "rejected")}
-            onRetryLive={() => void retryLiveAttach()}
-            livePausedReason={
-              sessionView?.livePausedReason === "subscription_dropped"
-                ? "The live connection dropped after the snapshot loaded."
-                : sessionView?.livePausedReason === "subscribe_failed"
-                  ? "The live subscription could not attach after the snapshot loaded."
-                  : undefined
+          <section className="workspace-main">
+            <ChatPane
+              mode={viewMode}
+              session={sessionView?.session ?? null}
+              timeline={timeline}
+              composerValue={composerValue}
+              onComposerChange={setComposerValue}
+              onSend={() => void sendInput()}
+              onApprove={(approvalId) => void respondApproval(approvalId, "approved")}
+              onReject={(approvalId) => void respondApproval(approvalId, "rejected")}
+              onRetryLive={() => void retryLiveAttach()}
+              livePausedReason={
+                sessionView?.livePausedReason === "subscription_dropped"
+                  ? "The live connection dropped after the snapshot loaded."
+                  : sessionView?.livePausedReason === "subscribe_failed"
+                    ? "The live subscription could not attach after the snapshot loaded."
+                    : undefined
+              }
+            />
+            <OperatorRail
+              mode={viewMode}
+              session={sessionView?.session ?? null}
+              currentRun={sessionView?.currentRun ?? null}
+              approvals={sessionView?.approvals ?? []}
+              inputs={sessionView?.inputs ?? []}
+              events={sessionView?.events ?? []}
+              artifacts={sessionView?.artifacts ?? []}
+              artifactDetail={sessionView?.artifactDetail ?? null}
+              diff={sessionView?.diff ?? null}
+              capabilities={capabilities}
+              artifactsExpanded={sessionView?.expanded.artifacts ?? false}
+              diffExpanded={sessionView?.expanded.diff ?? false}
+              selectedArtifactId={sessionView?.artifactDetail?.id ?? null}
+              onToggleArtifacts={() => void toggleArtifacts()}
+              onToggleDiff={() => void toggleDiff()}
+              onSelectArtifact={(artifactId) => void loadArtifactDetail(artifactId)}
+              onRetryLive={() => void retryLiveAttach()}
+            />
+          </section>
+        </main>
+      ) : (
+        <main className="pairing-main">
+          <PairingWorkspace
+            state={pairingState}
+            onApprove={(sessionId) => void approvePairing(sessionId)}
+            onChangeScopes={(requestedScopes) =>
+              setPairingState((current) => ({
+                ...current,
+                createForm: updateCreateForm(current.createForm, { requestedScopes })
+              }))
             }
+            onChangeTtlMinutes={(ttlMinutes) =>
+              setPairingState((current) => ({
+                ...current,
+                createForm: updateCreateForm(current.createForm, { ttlMinutes })
+              }))
+            }
+            onCopyCode={copyPairingCode}
+            onCreate={() => void createPairingSession()}
+            onRefreshDevices={() => void reloadPairingWorkspace({ refreshDevices: true })}
+            onRefreshSessions={() => void reloadPairingWorkspace({ refreshDevices: true })}
+            onReject={(sessionId) => void rejectPairing(sessionId)}
+            onRevokeDevice={(deviceId) => void revokeTrustedDevice(deviceId)}
           />
-          <OperatorRail
-            mode={viewMode}
-            session={sessionView?.session ?? null}
-            currentRun={sessionView?.currentRun ?? null}
-            approvals={sessionView?.approvals ?? []}
-            inputs={sessionView?.inputs ?? []}
-            events={sessionView?.events ?? []}
-            artifacts={sessionView?.artifacts ?? []}
-            artifactDetail={sessionView?.artifactDetail ?? null}
-            diff={sessionView?.diff ?? null}
-            capabilities={capabilities}
-            artifactsExpanded={sessionView?.expanded.artifacts ?? false}
-            diffExpanded={sessionView?.expanded.diff ?? false}
-            selectedArtifactId={sessionView?.artifactDetail?.id ?? null}
-            onToggleArtifacts={() => void toggleArtifacts()}
-            onToggleDiff={() => void toggleDiff()}
-            onSelectArtifact={(artifactId) => void loadArtifactDetail(artifactId)}
-            onRetryLive={() => void retryLiveAttach()}
-          />
-        </section>
-      </main>
+        </main>
+      )}
     </div>
   );
 }
