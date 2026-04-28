@@ -14,6 +14,30 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-04-28 - Host daemon pairing backend slice
+
+- Branch: `branch-host-daemon`
+- Commit: `not committed`
+- Summary: added loopback-only pairing session persistence, explicit host approval flow, mobile claim/poll endpoints, consumed-session handling, and trusted-device list/revoke endpoints above the existing daemon auth engine without changing ASCP WebSocket method or event semantics
+- Documentation updated: `internal/plans.md`, `internal/status.md`, `README.md`, `services/host-daemon/README.md`, `docs/superpowers/plans/2026-04-28-host-daemon-pairing-backend.md`
+- Next likely step: build host-console and mobile pairing UI flows on top of the completed pairing backend, or extend the daemon surface toward TLS-backed transport
+
+### 2026-04-28 - Host daemon auth and trust slice
+
+- Branch: `branch-host-daemon`
+- Commit: `not committed`
+- Summary: added daemon-owned trusted-device storage with `scrypt` verifier persistence, host-wide pairing primitives, loopback-only socket authentication, per-method scope authorization, daemon-generated correlation ids, additive `auth.transport` capability metadata, and request audit logging above the replay-backed daemon/runtime boundary without moving auth into adapters or rewriting ASCP core semantics
+- Documentation updated: `internal/plans.md`, `internal/status.md`, `README.md`, `services/host-daemon/README.md`, `docs/superpowers/specs/2026-04-28-host-daemon-auth-trust-design.md`, `docs/superpowers/plans/2026-04-28-host-daemon-auth-trust.md`
+- Next likely step: add a host-side pairing UX surface for real mobile onboarding, or upgrade the daemon surface toward TLS-backed network transport while preserving the host-wide trust model
+
+### 2026-04-27 - Host daemon replay persistence slice
+
+- Branch: `branch-host-daemon`
+- Commit: `not committed`
+- Summary: added daemon-owned SQLite-backed session, event, and cursor stores; added `attachment_manager` so attached sessions seed truthful baseline state and persist live events even with zero subscribers; added `replay_broker` and a replay-backed runtime wrapper so subscribe paths now serve daemon-stored `sync.snapshot`, stored replay events, and `sync.replayed`; and exposed additive snapshot metadata for completeness and detached state without changing frozen ASCP method or event names
+- Documentation updated: `internal/plans.md`, `internal/status.md`, `services/host-daemon/README.md`, `docs/superpowers/specs/2026-04-27-host-daemon-replay-persistence-design.md`, `docs/superpowers/plans/2026-04-27-host-daemon-replay-persistence.md`
+- Next likely step: add daemon auth or trust hooks on top of the durable replay boundary, or prepare the replay stores for relay-readiness
+
 ### 2026-04-27 - Host console reconnect recovery and live timeline polish
 
 - Branch: `branch-host-console-chat-refresh`
@@ -61,7 +85,6 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 - Summary: implemented Codex-side translation of blocked session state into ASCP interaction objects by deriving pending approvals from `waiting_approval`, deriving pending inputs from `waiting_input`, preserving native approval notifications when present, routing approval responses through native Codex methods or truthful message-send fallback, enforcing `CONFLICT` for terminal requests, and implementing `sessions.start` so the host capability document no longer overstates unsupported behavior
 - Documentation updated: `internal/plans.md`, `internal/status.md`, `adapters/codex/README.md`
 - Next likely step: commit and merge this adapter branch into `main`, then live-validate the blocked interaction flows through the browser host console against sessions that exercise both native and host-derived request paths
->>>>>>> feature/docs-restructure:internal/status.md
 
 ### 2026-04-27 - Protocol interaction contract for blocked approvals and input
 

@@ -7,7 +7,8 @@
     "sdks/typescript",
     "adapters/*",
     "apps/reference-client",
-    "apps/host-console"
+    "apps/host-console",
+    "services/host-daemon"
   ],
   "scripts": {
     "build": "turbo run build",

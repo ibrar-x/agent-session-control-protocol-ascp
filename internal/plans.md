@@ -12,87 +12,88 @@ This file tracks the active scoped work for the current branch.
 
 ## Active State
 
-- Feature name: Host console chat refresh
-- Branch: `branch-host-console-chat-refresh`
-- Goal: turn `apps/host-console` into a multi-session chat-first operator workspace that proves the ASCP host, Codex adapter, and browser SDK flow together with truthful live-state handling
+- Feature name: Host daemon pairing backend slice
+- Branch: `branch-host-daemon`
+- Goal: add a loopback-only pairing backend above the completed daemon auth engine so a host-side UI can create short-lived pairing sessions, explicitly approve or reject pending mobile claims, and issue trusted device credentials without changing frozen ASCP semantics
 - Source inputs:
   - `AGENTS.md`
   - `internal/plans.md`
   - `internal/status.md`
-  - `apps/host-console/README.md`
-  - `apps/host-console/src/App.tsx`
-  - `apps/host-console/src/styles.css`
-  - `docs/superpowers/specs/2026-04-27-host-console-chat-refresh-design.md`
-  - `docs/superpowers/plans/2026-04-27-host-console-chat-refresh.md`
-  - `adapters/codex/src/service.ts`
-  - `adapters/codex/tests/service.test.ts`
+  - `README.md`
+  - `protocol/ASCP_Protocol_Detailed_Spec_v0_1.md`
+  - `protocol/spec/methods.md`
+  - `protocol/spec/events.md`
+  - `protocol/spec/auth.md`
+  - `protocol/spec/compatibility.md`
+  - `docs/superpowers/specs/2026-04-27-host-daemon-replay-persistence-design.md`
+  - `docs/superpowers/specs/2026-04-28-host-daemon-auth-trust-design.md`
+  - `docs/superpowers/plans/2026-04-28-host-daemon-pairing-backend.md`
+  - `packages/host-service/src/index.ts`
+  - `services/host-daemon/src/main.ts`
+  - `services/host-daemon/src/auth/`
 
 ## Scope
 
 Included in this branch:
 
-- replace the old grid console with a multi-session messenger-style workspace
-- keep chat and operator rail backed by one selected-session state model
-- show truthful `loading`, `live`, `snapshot-only`, and `error` modes
-- render approvals and blocked inputs inline in the chat timeline and in the operator rail
-- lazy-load artifacts and diffs only on explicit operator actions
-- support starting a new session from the UI and handle pre-materialized Codex threads truthfully
-- update docs and focused tests for the new browser flow
+- add SQLite-backed pairing session persistence and expiry handling
+- add a daemon-local admin HTTP surface for pairing session create/approve/reject and trusted-device list/revoke
+- add a mobile-facing claim/poll backend contract for onboarding completion
+- keep the existing ASCP WebSocket auth path unchanged after credential issuance
+- update daemon docs and branch tracking for the pairing backend slice
 
 Explicitly out of scope:
 
 - protocol redesign
-- host-service auth or multi-client work
-- non-Codex adapters
-- mobile-specific surfaces
-- broad host-console visual polish unrelated to the ASCP flow
+- QR rendering or host/mobile pairing UI
+- TLS network transport
+- relay transport auth
+- runtime-specific trust policy
+- moving pairing logic into adapters
 
 ## Planned Files
 
-Files to add or modify:
+Files added or modified in this slice:
 
-- `internal/status.md`
+- `docs/superpowers/plans/2026-04-28-host-daemon-pairing-backend.md`
 - `internal/plans.md`
-- `apps/host-console/README.md`
-- `apps/host-console/package.json`
-- `apps/host-console/vitest.config.ts`
-- `apps/host-console/src/App.tsx`
-- `apps/host-console/src/styles.css`
-- `apps/host-console/src/model.ts`
-- `apps/host-console/src/model.test.ts`
-- `apps/host-console/src/components/SessionSwitcher.tsx`
-- `apps/host-console/src/components/ChatPane.tsx`
-- `apps/host-console/src/components/OperatorRail.tsx`
-- `apps/host-console/src/components/JsonDisclosure.tsx`
-- `adapters/codex/src/service.ts`
-- `adapters/codex/tests/service.test.ts`
+- `internal/status.md`
+- `README.md`
+- `services/host-daemon/README.md`
+- `services/host-daemon/src/config.ts`
+- `services/host-daemon/src/index.ts`
+- `services/host-daemon/src/main.ts`
+- `services/host-daemon/src/sqlite.ts`
+- `services/host-daemon/src/pairing/types.ts`
+- `services/host-daemon/src/pairing/session-store.ts`
+- `services/host-daemon/src/pairing/service.ts`
+- `services/host-daemon/src/pairing/admin-server.ts`
+- `services/host-daemon/tests/pairing/session-store.test.ts`
+- `services/host-daemon/tests/pairing/service.test.ts`
+- `services/host-daemon/tests/pairing/admin-server.test.ts`
+- `services/host-daemon/tests/config.test.ts`
+- `services/host-daemon/tests/main.test.ts`
 
 ## Tasks
 
 | Status | Task | Acceptance Criteria |
 | --- | --- | --- |
-| completed | add host-console model and focused tests | selected-session loading, snapshot-only, and resolved-interaction retention rules are covered by Vitest |
-| completed | split the UI into session switcher, chat pane, and layered operator rail | the browser console uses a multi-session layout with inline interaction cards and expandable JSON detail |
-| completed | wire truthful live-state and lazy secondary loading | session switching clears stale detail immediately, subscribe failure degrades to `snapshot-only`, and artifacts/diffs load on explicit operator actions |
-| completed | harden new-session startup flow | starting a session from the browser works before first turn materialization, and the adapter falls back cleanly when `includeTurns` is not yet available |
-| completed | restore replayed transcript history for reopened sessions | the host console requests replay on subscribe, Codex historical `userMessage.content[].text` is mapped into transcript events, and browser validation shows reopened sessions with real chat bubbles instead of only `sync.snapshot` |
-| completed | polish reconnect recovery and delta timeline coverage | reconnect restores the selected session and live attach after transport restart, and assistant delta assembly is covered by focused timeline tests |
-| completed | update checkpoint docs and final verification | focused tests, build, and live browser validation are recorded before branch review |
+| completed | add pairing session store | pairing sessions persist with code, expiry, status, claim metadata, and issued-device linkage |
+| completed | add pairing state machine | host approval is required before credentials issue, rejected and expired sessions are truthful, and trusted-device admin flows reuse the existing trust store |
+| completed | add loopback admin server and daemon wiring | admin endpoints can create, claim, approve, reject, poll, list, and revoke over local HTTP without changing ASCP WebSocket semantics |
+| completed | update docs and verify the slice | daemon docs and branch tracker describe the pairing backend contract, and focused verification passes |
 
 ## Acceptance Criteria
 
-The task is done only when all of the following are true:
+This slice is done only when all of the following are true:
 
-- the browser console renders a multi-session chat-first workspace rather than the old panel grid
-- the selected chat pane and operator rail share one coherent selected-session state model
-- `snapshot-only` is visible and explicit when snapshot succeeds but live subscribe fails
-- approvals and blocked inputs render inline in the conversation instead of only in side panels
-- artifacts and diff detail stay lazy and load only from explicit operator actions
-- starting a new session from the UI works even when Codex has not materialized turns yet
-- reopened sessions replay truthful historical transcript into the chat timeline when Codex exposes stored turn items
-- reconnecting the host preserves the selected session and resumes a truthful live timeline after recovery
-- focused tests and live browser validation prove the demo flow end to end
+- host-side code can create a short-lived pairing session and receive a code plus expiry
+- a mobile claim cannot receive credentials until explicit host approval happens
+- approved pairing returns `device_id + secret` once and persists only verifier data in the trust store
+- expired and rejected pairing sessions are surfaced truthfully
+- trusted devices can be listed and revoked through the daemon-local admin surface
+- no ASCP core method or event names are changed, and the existing WebSocket auth flow remains the reconnect path after pairing
 
 ## Next Likely Step
 
-Review the host-console refresh branch, merge it to `main` if accepted, and then continue with broader productionization work such as auth/multi-client boundaries or a second runtime integration.
+After this slice lands, build host-console and mobile UI flows on top of the completed pairing backend, or extend the daemon toward TLS-backed transport without changing the host-wide trust model.
