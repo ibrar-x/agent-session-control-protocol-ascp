@@ -31,6 +31,7 @@ ascp/
 - [`adapters/`](./adapters/): placeholder runtime-adapter boundaries for Codex, Claude, and Gemini
 - [`apps/reference-client/`](./apps/reference-client/): downstream proof client
 - [`apps/web/`](./apps/web/): placeholder future web app boundary
+- [`services/host-daemon/`](./services/host-daemon/): production-style local daemon bootstrap above the reusable host-service transport
 - [`services/mock-server/`](./services/mock-server/): deterministic protocol mock server
 - [`tooling/`](./tooling/): validation wrappers and future generators
 - [`internal/`](./internal/): repository workflow, planning, and continuation docs
@@ -78,6 +79,9 @@ ASCP does not standardize model APIs, prompt formats, tool schemas, UI systems, 
 - `packages/` are scaffolded now so shared code has a dedicated home instead of leaking into SDKs or apps later.
 - `sdks/` hold language bindings only.
 - `adapters/` are downstream integration boundaries and are scaffold-only in this branch.
+- `services/host-daemon/` composes runtime bindings with `packages/host-service` rather than reimplementing ASCP transport semantics.
+- `services/host-daemon/` now also owns SQLite-backed replay persistence plus host-wide paired-device auth/trust above adapters, while preserving frozen ASCP method and event semantics.
+- `services/host-daemon/` now also exposes a loopback-only pairing backend for host-approved mobile onboarding on top of that auth/trust foundation.
 - `apps/` should consume SDKs rather than adapter internals.
 - `services/` can depend directly on protocol truth when they are protocol-facing infrastructure.
 

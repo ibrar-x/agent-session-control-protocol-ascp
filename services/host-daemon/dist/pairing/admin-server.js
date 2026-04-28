@@ -1,0 +1,177 @@
+import { createServer } from "node:http";
+export function createPairingAdminServer(options) {
+    return new LoopbackPairingAdminServer(options);
+}
+class LoopbackPairingAdminServer {
+    host;
+    port;
+    pairingService;
+    httpServer;
+    listening = false;
+    resolvedUrl = "";
+    constructor(options) {
+        this.host = options.host ?? "127.0.0.1";
+        this.port = options.port ?? 0;
+        this.pairingService = options.pairingService;
+        this.httpServer = createServer((request, response) => {
+            void this.handleRequest(request, response);
+        });
+    }
+    get url() {
+        if (this.resolvedUrl.length === 0) {
+            throw new Error("Pairing admin server is not listening.");
+        }
+        return this.resolvedUrl;
+    }
+    async listen() {
+        if (this.listening) {
+            return;
+        }
+        await new Promise((resolve, reject) => {
+            const onError = (error) => {
+                this.httpServer.off("listening", onListening);
+                reject(error);
+            };
+            const onListening = () => {
+                this.httpServer.off("error", onError);
+                resolve();
+            };
+            this.httpServer.once("error", onError);
+            this.httpServer.once("listening", onListening);
+            this.httpServer.listen(this.port, this.host);
+        });
+        const address = this.httpServer.address();
+        if (address === null || typeof address === "string") {
+            throw new Error("Pairing admin server failed to resolve a listening address.");
+        }
+        this.resolvedUrl = `http://${this.host}:${address.port}`;
+        this.listening = true;
+    }
+    async close() {
+        if (!this.listening) {
+            return;
+        }
+        await new Promise((resolve, reject) => {
+            this.httpServer.close((error) => {
+                if (error) {
+                    reject(error);
+                    return;
+                }
+                resolve();
+            });
+        });
+    }
+    async handleRequest(request, response) {
+        try {
+            const url = new URL(request.url ?? "/", "http://127.0.0.1");
+            const pathname = url.pathname;
+            if (request.method === "POST" && pathname === "/admin/pairing/sessions") {
+                const body = await readJsonBody(request);
+                const created = this.pairingService.startPairing({
+                    requestedScopes: Array.isArray(body.requested_scopes)
+                        ? body.requested_scopes
+                        : [],
+                    ttlMs: typeof body.ttl_ms === "number" ? body.ttl_ms : undefined
+                });
+                sendJson(response, 201, {
+                    code: created.code,
+                    expires_at: created.expiresAt,
+                    qr_payload: created.qrPayload,
+                    session_id: created.sessionId
+                });
+                return;
+            }
+            if (request.method === "POST" && pathname === "/pairing/claim") {
+                const body = await readJsonBody(request);
+                try {
+                    const claimed = await this.pairingService.claimPairing({
+                        code: String(body.code ?? ""),
+                        deviceLabel: String(body.device_label ?? "")
+                    });
+                    sendJson(response, 200, {
+                        claim_token: claimed.claimToken,
+                        session_id: claimed.sessionId
+                    });
+                }
+                catch (error) {
+                    if (error instanceof Error && error.message === "Already claimed.") {
+                        sendJson(response, 409, {
+                            code: "ALREADY_CLAIMED",
+                            message: "Already claimed."
+                        });
+                        return;
+                    }
+                    throw error;
+                }
+                return;
+            }
+            const approveMatch = pathname.match(/^\/admin\/pairing\/sessions\/([^/]+)\/approve$/);
+            if (request.method === "POST" && approveMatch !== null) {
+                const sessionId = decodeURIComponent(approveMatch[1] ?? "");
+                this.pairingService.approvePairing(sessionId);
+                sendJson(response, 200, {
+                    session_id: sessionId,
+                    status: "approved"
+                });
+                return;
+            }
+            const rejectMatch = pathname.match(/^\/admin\/pairing\/sessions\/([^/]+)\/reject$/);
+            if (request.method === "POST" && rejectMatch !== null) {
+                const sessionId = decodeURIComponent(rejectMatch[1] ?? "");
+                this.pairingService.rejectPairing(sessionId);
+                sendJson(response, 200, {
+                    session_id: sessionId,
+                    status: "rejected"
+                });
+                return;
+            }
+            const claimMatch = pathname.match(/^\/pairing\/claims\/([^/]+)$/);
+            if (request.method === "GET" && claimMatch !== null) {
+                const claimToken = decodeURIComponent(claimMatch[1] ?? "");
+                const status = await this.pairingService.pollPairing(claimToken);
+                sendJson(response, 200, status);
+                return;
+            }
+            if (request.method === "GET" && pathname === "/admin/trusted-devices") {
+                sendJson(response, 200, {
+                    devices: this.pairingService.listTrustedDevices()
+                });
+                return;
+            }
+            const revokeMatch = pathname.match(/^\/admin\/trusted-devices\/([^/]+)\/revoke$/);
+            if (request.method === "POST" && revokeMatch !== null) {
+                const deviceId = decodeURIComponent(revokeMatch[1] ?? "");
+                this.pairingService.revokeTrustedDevice(deviceId);
+                sendJson(response, 200, {
+                    device_id: deviceId,
+                    revoked: true
+                });
+                return;
+            }
+            sendJson(response, 404, {
+                message: "Not found."
+            });
+        }
+        catch (error) {
+            sendJson(response, 400, {
+                message: error instanceof Error ? error.message : "Request failed."
+            });
+        }
+    }
+}
+async function readJsonBody(request) {
+    const chunks = [];
+    for await (const chunk of request) {
+        chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+    }
+    if (chunks.length === 0) {
+        return {};
+    }
+    return JSON.parse(Buffer.concat(chunks).toString("utf8"));
+}
+function sendJson(response, statusCode, payload) {
+    response.statusCode = statusCode;
+    response.setHeader("content-type", "application/json");
+    response.end(JSON.stringify(payload));
+}
+//# sourceMappingURL=admin-server.js.map

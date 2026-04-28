@@ -1,0 +1,31 @@
+{
+  "name": "@ascp/host-daemon",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "build": "npm --workspace @ascp/host-service run build --silent && npm --workspace @ascp/adapter-codex run build --silent && tsc -p tsconfig.json",
+    "start": "npm run build --silent && node ./dist/cli.js",
+    "test": "vitest run",
+    "check": "npm run build && npm run test"
+  },
+  "dependencies": {
+    "@ascp/adapter-codex": "file:../../adapters/codex",
+    "@ascp/host-service": "file:../../packages/host-service"
+  },
+  "devDependencies": {
+    "@types/node": "^24.9.1",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  }
+}

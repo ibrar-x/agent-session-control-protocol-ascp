@@ -1,4 +1,5 @@
-import { createServer, type Server as HttpServer } from "node:http";
+import { createServer, type IncomingMessage, type Server as HttpServer } from "node:http";
+import { randomUUID } from "node:crypto";
 import type {
   ApprovalsListParams,
   ApprovalsListResult,
@@ -70,6 +71,15 @@ export interface AscpHostServiceOptions {
   runtime: AscpHostRuntime;
   host?: string;
   port?: number;
+  authorizeConnection?: (request: IncomingMessage) => MaybePromise<ConnectionAuthState>;
+  createRequestContext?: (input: {
+    connectionAuth: ConnectionAuthState;
+    correlationId: string;
+    method: CoreMethodName;
+    params: JsonObject;
+    requestId: RequestId;
+  }) => MaybePromise<RequestContext>;
+  onRequestAudit?: (entry: RequestAuditEntry) => MaybePromise<void>;
 }
 
 export interface AscpHostService {
@@ -99,6 +109,39 @@ interface JsonRpcFailure {
   };
   id: RequestId | null;
   jsonrpc: "2.0";
+}
+
+export interface ConnectionAuthState {
+  authenticated: boolean;
+  deviceId?: string;
+  actorId?: string;
+  scopes: string[];
+  transportMode: "loopback" | "tls";
+  errorMessage?: string;
+}
+
+export interface RequestContext {
+  correlationId: string;
+  method: CoreMethodName;
+  requestId: RequestId;
+  deviceId?: string;
+  actorId?: string;
+  scopes: string[];
+  transportMode: "loopback" | "tls";
+}
+
+export interface RequestAuditEntry {
+  stage: "received" | "completed";
+  correlationId: string;
+  method: CoreMethodName;
+  requestId: RequestId;
+  deviceId?: string;
+  actorId?: string;
+  transportMode: "loopback" | "tls";
+  authenticated: boolean;
+  authorized: boolean;
+  outcome: "allowed" | "rejected";
+  errorCode?: ErrorCode;
 }
 
 const METHOD_NAMES: readonly CoreMethodName[] = [
@@ -207,7 +250,18 @@ class WebSocketAscpHostService implements AscpHostService {
   private readonly webSocketServer: WebSocketServer;
   private readonly sockets = new Set<WebSocket>();
   private readonly subscriptions = new Map<string, SocketSubscription>();
+  private readonly socketAuth = new Map<WebSocket, ConnectionAuthState>();
+  private readonly socketAuthReady = new Map<WebSocket, Promise<void>>();
   private readonly removeRuntimeListener: (() => void) | null;
+  private readonly authorizeConnection?: (request: IncomingMessage) => MaybePromise<ConnectionAuthState>;
+  private readonly createRequestContext?: (input: {
+    connectionAuth: ConnectionAuthState;
+    correlationId: string;
+    method: CoreMethodName;
+    params: JsonObject;
+    requestId: RequestId;
+  }) => MaybePromise<RequestContext>;
+  private readonly onRequestAudit?: (entry: RequestAuditEntry) => MaybePromise<void>;
   private listening = false;
   private resolvedUrl = "";
 
@@ -215,6 +269,9 @@ class WebSocketAscpHostService implements AscpHostService {
     this.runtime = options.runtime;
     this.host = options.host ?? "127.0.0.1";
     this.port = options.port ?? 0;
+    this.authorizeConnection = options.authorizeConnection;
+    this.createRequestContext = options.createRequestContext;
+    this.onRequestAudit = options.onRequestAudit;
     this.httpServer = createServer((_request, response) => {
       response.statusCode = 404;
       response.end("Not Found");
@@ -233,8 +290,9 @@ class WebSocketAscpHostService implements AscpHostService {
       });
     });
 
-    this.webSocketServer.on("connection", (socket: WebSocket) => {
+    this.webSocketServer.on("connection", (socket: WebSocket, request: IncomingMessage) => {
       this.sockets.add(socket);
+      void this.initializeSocketAuth(socket, request);
 
       socket.on("message", (chunk: RawData) => {
         const text =
@@ -244,6 +302,8 @@ class WebSocketAscpHostService implements AscpHostService {
 
       socket.on("close", () => {
         this.sockets.delete(socket);
+        this.socketAuth.delete(socket);
+        this.socketAuthReady.delete(socket);
         void this.cleanupSocketSubscriptions(socket);
       });
     });
@@ -303,6 +363,8 @@ class WebSocketAscpHostService implements AscpHostService {
 
     this.sockets.clear();
     this.subscriptions.clear();
+    this.socketAuth.clear();
+    this.socketAuthReady.clear();
     this.removeRuntimeListener?.();
     await this.runtime.close?.();
 
@@ -363,10 +425,38 @@ class WebSocketAscpHostService implements AscpHostService {
       return;
     }
 
-    try {
-      const result = await this.dispatch(value.method as CoreMethodName, value.params ?? {});
+    const method = value.method as CoreMethodName;
+    const requestId = value.id;
+    const params = value.params ?? {};
+    const correlationId = randomUUID();
+    await this.socketAuthReady.get(socket);
+    const connectionAuth = this.socketAuth.get(socket) ?? defaultConnectionAuthState();
+    let requestContext: RequestContext | undefined;
 
-      if (value.method === "sessions.subscribe") {
+    await this.onRequestAudit?.({
+      stage: "received",
+      correlationId,
+      method,
+      requestId,
+      deviceId: connectionAuth.deviceId,
+      actorId: connectionAuth.actorId,
+      transportMode: connectionAuth.transportMode,
+      authenticated: connectionAuth.authenticated,
+      authorized: false,
+      outcome: "allowed"
+    });
+
+    try {
+      requestContext = await this.createRequestContext?.({
+        connectionAuth,
+        correlationId,
+        method,
+        params,
+        requestId
+      });
+      const result = await this.dispatch(method, params);
+
+      if (method === "sessions.subscribe") {
         const subscribeResult = result as SessionsSubscribeResult;
         this.subscriptions.set(subscribeResult.subscription_id, {
           socket,
@@ -377,23 +467,63 @@ class WebSocketAscpHostService implements AscpHostService {
         for (const event of this.runtime.drainSubscriptionEvents?.(subscribeResult.subscription_id) ?? []) {
           this.sendEvent(socket, event);
         }
-      } else if (value.method === "sessions.unsubscribe") {
+      } else if (method === "sessions.unsubscribe") {
         const unsubscribeParams = value.params as SessionsUnsubscribeParams;
         this.subscriptions.delete(unsubscribeParams.subscription_id);
       }
 
+      await this.onRequestAudit?.({
+        stage: "completed",
+        correlationId: requestContext?.correlationId ?? correlationId,
+        method,
+        requestId,
+        deviceId: requestContext?.deviceId ?? connectionAuth.deviceId,
+        actorId: requestContext?.actorId ?? connectionAuth.actorId,
+        transportMode: requestContext?.transportMode ?? connectionAuth.transportMode,
+        authenticated: connectionAuth.authenticated,
+        authorized: true,
+        outcome: "allowed"
+      });
+
       this.sendSuccess(socket, {
         jsonrpc: "2.0",
-        id: value.id,
+        id: requestId,
         result
       });
     } catch (error) {
+      const normalized = normalizeError(error, method);
+      await this.onRequestAudit?.({
+        stage: "completed",
+        correlationId: requestContext?.correlationId ?? correlationId,
+        method,
+        requestId,
+        deviceId: requestContext?.deviceId ?? connectionAuth.deviceId,
+        actorId: requestContext?.actorId ?? connectionAuth.actorId,
+        transportMode: requestContext?.transportMode ?? connectionAuth.transportMode,
+        authenticated: connectionAuth.authenticated,
+        authorized: false,
+        outcome: "rejected",
+        errorCode: normalized.code
+      });
       this.sendFailure(socket, {
         jsonrpc: "2.0",
-        id: value.id,
-        error: normalizeError(error, value.method)
+        id: requestId,
+        error: normalized
       });
     }
+  }
+
+  private async initializeSocketAuth(socket: WebSocket, request: IncomingMessage): Promise<void> {
+    const ready = (async () => {
+      try {
+        const state = await this.authorizeConnection?.(request);
+        this.socketAuth.set(socket, state ?? defaultConnectionAuthState());
+      } catch {
+        this.socketAuth.set(socket, defaultConnectionAuthState());
+      }
+    })();
+    this.socketAuthReady.set(socket, ready);
+    await ready;
   }
 
   private async cleanupSocketSubscriptions(socket: WebSocket): Promise<void> {
@@ -536,4 +666,12 @@ class WebSocketAscpHostService implements AscpHostService {
 
 export function createAscpHostService(options: AscpHostServiceOptions): AscpHostService {
   return new WebSocketAscpHostService(options);
+}
+
+function defaultConnectionAuthState(): ConnectionAuthState {
+  return {
+    authenticated: false,
+    scopes: [],
+    transportMode: "loopback"
+  };
 }

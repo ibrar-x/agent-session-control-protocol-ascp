@@ -33,6 +33,7 @@ import type {
 } from "ascp-sdk-typescript";
 import type { AscpHostRuntime } from "@ascp/host-service";
 
+import { CodexAppServerClient } from "./app-server-client.js";
 import { resolveCodexCapabilities } from "./capabilities.js";
 import { CODEX_RUNTIME_ID, discoverCodexRuntime, type CodexDiscoveryClient } from "./discovery.js";
 import type { CodexServiceClient } from "./service.js";
@@ -183,4 +184,10 @@ export function createCodexHostRuntime(
   client: CodexServiceClient & CodexDiscoveryClient
 ): CodexHostRuntime {
   return new CodexHostRuntime(client);
+}
+
+export function createDefaultCodexHostRuntime(
+  client: CodexServiceClient & CodexDiscoveryClient = new CodexAppServerClient()
+): CodexHostRuntime {
+  return createCodexHostRuntime(client);
 }

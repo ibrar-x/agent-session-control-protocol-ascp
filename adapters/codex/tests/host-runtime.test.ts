@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { createCodexHostRuntime } from "../src/host-runtime.js";
+import { CodexHostRuntime, createCodexHostRuntime, createDefaultCodexHostRuntime } from "../src/host-runtime.js";
 import type {
   CodexAppServerInitializeResult,
   CodexJsonRpcNotification,
@@ -128,5 +128,11 @@ describe("createCodexHostRuntime", () => {
     });
 
     expect(started.session.id).toBe("codex:thread-start");
+  });
+
+  it("exposes a default runtime constructor so daemon bootstrap does not build Codex wiring itself", () => {
+    const runtime = createDefaultCodexHostRuntime(new FakeCodexClient());
+
+    expect(runtime).toBeInstanceOf(CodexHostRuntime);
   });
 });

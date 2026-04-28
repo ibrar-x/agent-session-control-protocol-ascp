@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
+import WebSocket from "ws";
 import {
   createAscpClient,
   createEventEnvelope,
@@ -12,7 +13,8 @@ import { AscpWebSocketTransport } from "ascp-sdk-typescript/transport";
 import {
   createAscpHostService,
   type AscpHostRuntime,
-  type AscpHostService
+  type AscpHostService,
+  type RequestAuditEntry
 } from "../src/index.js";
 
 class FakeRuntime implements AscpHostRuntime {
@@ -227,4 +229,154 @@ describe("createAscpHostService", () => {
 
     await client.close();
   });
+
+  it("returns UNAUTHORIZED when an unauthenticated socket tries to call a method", async () => {
+    const runtime = new FakeRuntime();
+    const service = createAscpHostService({
+      runtime,
+      port: 0,
+      authorizeConnection: async () => ({
+        authenticated: false,
+        errorMessage: "Device authentication required.",
+        scopes: [],
+        transportMode: "loopback"
+      }),
+      createRequestContext: async ({ connectionAuth, correlationId, method, requestId }) => {
+        if (!connectionAuth.authenticated) {
+          throw {
+            code: "UNAUTHORIZED",
+            message: connectionAuth.errorMessage ?? "Device authentication required.",
+            retryable: false,
+            details: {
+              correlation_id: correlationId,
+              method
+            }
+          };
+        }
+
+        return {
+          correlationId,
+          method,
+          requestId,
+          scopes: connectionAuth.scopes,
+          transportMode: connectionAuth.transportMode
+        };
+      }
+    });
+    servicesToClose.add(service);
+
+    await service.listen();
+
+    const response = await sendRawJsonRpc(service.url, {
+      id: "1",
+      jsonrpc: "2.0",
+      method: "sessions.list",
+      params: {}
+    });
+
+    expect(response).toMatchObject({
+      error: {
+        code: "UNAUTHORIZED"
+      },
+      id: "1"
+    });
+  });
+
+  it("returns FORBIDDEN and emits audit entries when a socket lacks scope", async () => {
+    const runtime = new FakeRuntime();
+    const auditEntries: RequestAuditEntry[] = [];
+    const service = createAscpHostService({
+      runtime,
+      port: 0,
+      authorizeConnection: async () => ({
+        authenticated: true,
+        deviceId: "daemon:device:test-1",
+        scopes: ["read:sessions"],
+        transportMode: "loopback"
+      }),
+      createRequestContext: async ({ connectionAuth, correlationId, method, requestId }) => {
+        if (!connectionAuth.scopes.includes("write:sessions")) {
+          throw {
+            code: "FORBIDDEN",
+            message: "Missing scope: write:sessions",
+            retryable: false,
+            details: {
+              correlation_id: correlationId,
+              method
+            }
+          };
+        }
+
+        return {
+          correlationId,
+          method,
+          requestId,
+          deviceId: connectionAuth.deviceId,
+          scopes: connectionAuth.scopes,
+          transportMode: connectionAuth.transportMode
+        };
+      },
+      onRequestAudit: async (entry) => {
+        auditEntries.push(entry);
+      }
+    });
+    servicesToClose.add(service);
+
+    await service.listen();
+
+    const response = await sendRawJsonRpc(service.url, {
+      id: "2",
+      jsonrpc: "2.0",
+      method: "sessions.send_input",
+      params: {
+        session_id: "session:1",
+        input: {
+          text: "hi",
+          type: "text"
+        }
+      }
+    });
+
+    expect(response).toMatchObject({
+      error: {
+        code: "FORBIDDEN"
+      }
+    });
+    expect(auditEntries).toHaveLength(2);
+    expect(auditEntries[0]).toMatchObject({
+      stage: "received",
+      authenticated: true,
+      method: "sessions.send_input"
+    });
+    expect(auditEntries[1]).toMatchObject({
+      stage: "completed",
+      errorCode: "FORBIDDEN",
+      outcome: "rejected"
+    });
+    expect(auditEntries[0]?.correlationId).toBe(auditEntries[1]?.correlationId);
+  });
 });
+
+async function sendRawJsonRpc(url: string, payload: Record<string, unknown>): Promise<Record<string, unknown>> {
+  const socket = new WebSocket(url);
+
+  await new Promise<void>((resolve, reject) => {
+    socket.once("open", () => resolve());
+    socket.once("error", (error) => reject(error));
+  });
+
+  const response = await new Promise<Record<string, unknown>>((resolve, reject) => {
+    socket.once("message", (chunk) => {
+      try {
+        resolve(JSON.parse(chunk.toString()) as Record<string, unknown>);
+      } catch (error) {
+        reject(error);
+      }
+    });
+    socket.once("error", (error) => reject(error));
+    socket.send(JSON.stringify(payload));
+  });
+
+  socket.close();
+  return response;
+}
