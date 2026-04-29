@@ -37,6 +37,7 @@ Every prompt in this directory assumes the agent reads these files first:
 - `mock-server.md`
 - `reference-client.md`
 - `codex-adapter.md`
+- `mobile-companion.md`
 
 ## Status
 
@@ -47,3 +48,5 @@ Use the first eight prompts to reproduce or extend the protocol build sequence o
 Use `reference-client.md` only for optional downstream consumer work that builds on the finished protocol workspace without reopening the ASCP contracts.
 
 Use `codex-adapter.md` only for optional downstream runtime-integration work that maps the frozen ASCP v0.1 surface onto a real Codex runtime without reopening protocol-core behavior.
+
+Use `mobile-companion.md` only for downstream mobile companion work that builds on the completed daemon pairing backend and host trust model without reopening protocol-core behavior.
