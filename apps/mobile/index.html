@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Continuum · Design System</title>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; width: 100%; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: #080c14;
+      color: #e6eef6;
+    }
+    #root { min-height: 100vh; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    /* ═══════════════════════ Continuum Design Tokens ═══════════════════════ */
+    const t = {
+      surface: { base: '#0f1724', elevated: '#1a2436', overlay: '#243049' },
+      border: '#2d3f57',
+      text:   { primary: '#e6eef6', muted: '#8da0b8' },
+      accent: { cyan: '#06b6d4', fg: '#0a0f1a', ring: '#06b6d440' },
+      sem:    { success: '#10b981', warning: '#f59e0b', danger: '#ef4444' },
+      mono:   '#94a3b8',
+      space:  [4,8,12,16,20,24,32,48],
+      radius: { sm: 6, md: 12, lg: 16 },
+    };
+
+    /* ═══════════════════════ IosFrame ═══════════════════════ */
+    const f = {
+      wrapper: { display:'inline-block', padding:12, background:'#000', borderRadius:60, boxShadow:'0 0 0 2px #1f2937, 0 20px 60px rgba(0,0,0,0.5)', position:'relative' },
+      screen: { position:'relative', borderRadius:48, overflow:'hidden' },
+      statusBar: { position:'absolute', top:0, left:0, right:0, height:54, display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 32px', fontSize:16, fontWeight:600, fontFamily:'-apple-system, "SF Pro Text", sans-serif', zIndex:20, pointerEvents:'none' },
+      island: { position:'absolute', top:12, left:'50%', transform:'translateX(-50%)', width:124, height:36, background:'#000', borderRadius:999, zIndex:30 },
+      icons: { display:'flex', alignItems:'center', gap:6 },
+      signal: { display:'flex', alignItems:'flex-end', gap:2, height:12 },
+      bar: { width:3, background:'currentColor', borderRadius:1 },
+      battery: { width:26, height:12, border:'1.5px solid currentColor', borderRadius:3, padding:1, position:'relative', opacity:0.8 },
+      batteryCap: { position:'absolute', top:3, right:-3, width:2, height:6, background:'currentColor', borderRadius:'0 1px 1px 0' },
+      content: { position:'absolute', top:54, left:0, right:0, bottom:34, overflow:'auto' },
+      home: { position:'absolute', bottom:10, left:'50%', transform:'translateX(-50%)', width:140, height:5, borderRadius:999, zIndex:10 },
+    };
+
+    function IosFrame({ children, w=393, h=852, time='9:41', bat=85 }) {
+      return (
+        React.createElement('div', { style: f.wrapper },
+          React.createElement('div', { style: {...f.screen, width:w, height:h, background:'#000'} },
+            React.createElement('div', { style: {...f.statusBar, color:'#fff'} },
+              React.createElement('span', null, time),
+              React.createElement('div', { style: f.icons },
+                React.createElement('div', { style: f.signal },
+                  React.createElement('div', { style: {...f.bar, height:4} }),
+                  React.createElement('div', { style: {...f.bar, height:6} }),
+                  React.createElement('div', { style: {...f.bar, height:9} }),
+                  React.createElement('div', { style: {...f.bar, height:11} })
+                ),
+                React.createElement('svg', { width:16, height:12, viewBox:'0 0 16 12', fill:'none', style:{color:'#fff'} },
+                  React.createElement('path', { d:'M8 11.5a1 1 0 100-2 1 1 0 000 2z', fill:'currentColor' }),
+                  React.createElement('path', { d:'M3 7.5a7 7 0 0110 0', stroke:'currentColor', strokeWidth:1.3, fill:'none', strokeLinecap:'round' }),
+                  React.createElement('path', { d:'M1 4.5a11 11 0 0114 0', stroke:'currentColor', strokeWidth:1.3, fill:'none', strokeLinecap:'round', opacity:0.7 })
+                ),
+                React.createElement('div', { style: f.battery },
+                  React.createElement('div', { style: {width:`${bat}%`, height:'100%', background:'currentColor', borderRadius:1, opacity:0.9} }),
+                  React.createElement('div', { style: f.batteryCap })
+                )
+              )
+            ),
+            React.createElement('div', { style: f.island }),
+            React.createElement('div', { style: f.content }, children),
+            React.createElement('div', { style: {...f.home, background:'rgba(255,255,255,0.5)'} })
+          )
+        )
+      );
+    }
+
+    /* ═══════════════════════ Shared Primitives ═══════════════════════ */
+    function ScreenTitle({ label }) {
+      return React.createElement('div', { style: { fontSize:18, fontWeight:700, color:t.text.primary, padding:'18px 16px 10px 16px', letterSpacing:'-0.02em' } }, label);
+    }
+
+    function Block({ children, pad=true }) {
+      return React.createElement('div', { style: { margin: '0 12px 12px', background: t.surface.elevated, borderRadius: t.radius.md, border: `1px solid ${t.border}`, padding: pad ? 12 : 0 } }, children);
+    }
+
+    function BlockLabel({ label, token }) {
+      return React.createElement('div', { style: { display:'flex', justifyContent:'space-between', alignItems:'baseline', padding: '0 0 10px 0' } },
+        React.createElement('div', { style: { fontSize: 11, fontWeight: 600, color: t.text.muted, textTransform: 'uppercase', letterSpacing: '0.06em' } }, label),
+        token ? React.createElement('div', { style: { fontSize: 10, color: t.mono, fontFamily: 'JetBrains Mono, monospace' } }, token) : null
+      );
+    }
+
+    function TokenRef({ token, val }) {
+      return React.createElement('div', { style: { fontSize: 9, color: t.accent.cyan, fontFamily: 'JetBrains Mono, monospace', opacity: 0.75 } }, `--${token}${val ? ': '+val : ''}`);
+    }
+
+    /* ═══════════════════════ Screen 1: Color System ═══════════════════════ */
+    function ColorScreen() {
+      const swatch = (hex, name, usage, sz=40) => {
+        const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+        const lum = (0.299*r+0.587*g+0.114*b)/255;
+        return React.createElement('div', { style: { display:'flex', alignItems:'center', gap:10, padding:'4px 0' } },
+          React.createElement('div', { style: { width:sz, height:sz, borderRadius:t.radius.sm, background:hex, flexShrink:0, border: hex===t.surface.base ? `1px solid ${t.border}` : 'none', display:'flex', alignItems:'center', justifyContent:'center', fontSize:sz>36?10:9, fontWeight:500, color:lum>0.55?t.accent.fg:t.text.primary, fontFamily:'JetBrains Mono' } },
+            hex
+          ),
+          React.createElement('div', { style:{ flex:1, minWidth:0 } },
+            React.createElement('div', { style:{ fontSize:12, fontWeight:600, color:t.text.primary } }, name),
+            React.createElement('div', { style:{ fontSize:10, color:t.mono, fontFamily:'JetBrains Mono', marginTop:1 } }, hex),
+            React.createElement('div', { style:{ fontSize:10, color:t.text.muted, marginTop:1 } }, usage)
+          )
+        );
+      };
+
+      return React.createElement('div', { style:{ background:t.surface.base, minHeight:'100%', paddingBottom:20 } },
+        React.createElement(ScreenTitle, { label:'Color Tokens' }),
+        React.createElement(Block, null,
+          React.createElement(BlockLabel, { label:'Surface', token:'bg-surface → bg-overlay' }),
+          swatch(t.surface.base, 'bg-surface', 'Base background', 42),
+          swatch(t.surface.elevated, 'bg-elevated', 'Cards, list items', 42),
+          swatch(t.surface.overlay, 'bg-overlay', 'Sheets, modals', 42),
+          swatch(t.border, 'border', 'Dividers, card edges', 36)
+        ),
+        React.createElement(Block, null,
+          React.createElement(BlockLabel, { label:'Typography', token:'text-primary · muted-text' }),
+          swatch(t.text.primary, 'text-primary', 'Headings, body copy'),
+          swatch(t.text.muted, 'muted-text', 'Captions, timestamps, hints')
+        ),
+        React.createElement(Block, null,
+          React.createElement(BlockLabel, { label:'Accent', token:'accent-cyan · accent-foreground' }),
+          React.createElement('div', { style:{ display:'flex', gap:8 } },
+            React.createElement('div', { style:{ flex:1 } }, swatch(t.accent.cyan, 'accent-cyan', 'CTAs, active, focus', 44)),
+            React.createElement('div', { style:{ flex:1 } }, swatch(t.accent.fg, 'accent-fg', 'Text on cyan', 44))
+          )
+        ),
+        React.createElement(Block, null,
+          React.createElement(BlockLabel, { label:'Semantic', token:'success · warning · danger' }),
+          swatch(t.sem.success, 'success', 'Connected, paired, approved'),
+          swatch(t.sem.warning, 'warning', 'Pending, attention-needed'),
+          swatch(t.sem.danger, 'danger', 'Error, revoke, destructive'),
+          swatch(t.mono, 'mono', 'Pairing codes, device IDs')
+        ),
+        React.createElement('div', { style:{ height:16 } })
+      );
+    }
+
+    /* ═══════════════════════ Screen 2: Typography & Spacing ═══════════════════════ */
+    function TypographyScreen() {
+      const typeRow = (name, spec, sample, style) =>
+        React.createElement('div', { style: { padding:'10px 0', borderBottom:`1px solid ${t.border}30` } },
+          React.createElement('div', { style: { display:'flex', justifyContent:'space-between', marginBottom:6 } },
+            React.createElement('div', { style: { fontSize:11, fontWeight:600, color:t.text.muted, textTransform:'uppercase', letterSpacing:'0.06em' } }, name),
+            React.createElement('div', { style: { fontSize:10, color:t.mono, fontFamily:'JetBrains Mono' } }, spec)
+          ),
+          React.createElement('div', { style: {...style, color: t.text.primary, wordBreak: 'break-word' } }, sample)
+        );
+
+      return React.createElement('div', { style:{ background:t.surface.base, minHeight:'100%', paddingBottom:20 } },
+        React.createElement(ScreenTitle, { label:'Typography' }),
+        React.createElement(Block, null,
+          React.createElement(BlockLabel, { label:'Type Scale', token:'Inter 400-700' }),
+          typeRow('Heading', '18px · 600 · line-height 24px', 'Session Dashboard', { fontSize:18, fontWeight:600, lineHeight:'24px' }),
+          typeRow('Body', '15px · 400 · line-height 22px', 'Agent is processing your request. Results appear when the turn completes.', { fontSize:15, fontWeight:400, lineHeight:'22px' }),
+          typeRow('Label', '13px · 500 · tracking 0.03em', 'ACTIVE SESSION', { fontSize:13, fontWeight:500, letterSpacing:'0.03em', textTransform:'uppercase', color:t.accent.cyan }),
+          typeRow('Caption', '12px · 400', 'Last active 2 min ago · 3 pending approvals', { fontSize:12, fontWeight:400, color:t.text.muted }),
+          typeRow('Mono', '14px · 400 · JetBrains Mono', 'HK-A7F3 · 4829-0911', { fontSize:14, fontWeight:400, fontFamily:'JetBrains Mono', color:t.mono, background:t.surface.base, padding:'6px 10px', borderRadius:t.radius.sm, letterSpacing:'0.05em' })
+        ),
+        React.createElement(Block, null,
+          React.createElement(BlockLabel, { label:'Spacing Scale', token:'--space-1 → --space-8' }),
+          React.createElement('div', { style:{ display:'flex', flexDirection:'column', gap:3 } },
+            t.space.map(s =>
+              React.createElement('div', { key:s, style:{ display:'flex', alignItems:'center', gap:8 } },
+                React.createElement('div', { style:{ width:28, textAlign:'right', fontSize:10, color:t.mono, fontFamily:'JetBrains Mono', flexShrink:0 } }, s),
+                React.createElement('div', { style:{ width:Math.min(s*3,120), height:14, background:t.accent.cyan, borderRadius:2, opacity:0.4+(s/100) } }),
+                React.createElement('div', { style:{ fontSize:9, color:t.mono, fontFamily:'JetBrains Mono' } }, `space-${t.space.indexOf(s)+1}`)
+              )
+            )
+          )
+        ),
+        React.createElement(Block, null,
+          React.createElement(BlockLabel, { label:'Corner Radius', token:'--radius-sm/md/lg' }),
+          React.createElement('div', { style:{ display:'flex', gap:16 } },
+            [{k:'sm',v:6},{k:'md',v:12},{k:'lg',v:16}].map(r =>
+              React.createElement('div', { key:r.k, style:{ display:'flex', flexDirection:'column', alignItems:'center', gap:6 } },
+                React.createElement('div', { style:{ width:44, height:44, background:t.surface.base, borderRadius:r.v, border:`1px solid ${t.border}` } }),
+                React.createElement('div', { style:{ fontSize:11, fontWeight:500, color:t.text.primary } }, `r-${r.k}`),
+                React.createElement('div', { style:{ fontSize:10, color:t.mono, fontFamily:'JetBrains Mono' } }, `${r.v}px`)
+              )
+            )
+          )
+        ),
+        React.createElement('div', { style:{ height:16 } })
+      );
+    }
+
+    /* ═══════════════════════ Screen 3: Components A ═══════════════════════ */
+    function ComponentsA() {
+      /* PairingCard */
+      const pairingCard = (title, subtitle, right, borderColor) =>
+        React.createElement('div', { style:{ background:t.surface.elevated, borderRadius:t.radius.md, border:`1px solid ${borderColor||t.border}`, padding:12, display:'flex', alignItems:'center', gap:10 } },
+          React.createElement('div', { style:{ flex:1, minWidth:0 } },
+            React.createElement('div', { style:{ fontSize:13, fontWeight:500, color:t.text.primary } }, title),
+            React.createElement('div', { style:{ fontSize:10, color:t.text.muted, marginTop:2 } }, subtitle)
+          ),
+          right
+        );
+
+      /* SessionListItem */
+      const sessionItem = (title, status, meta, dotColor) =>
+        React.createElement('div', { style:{ background:t.surface.elevated, borderRadius:t.radius.md, border:`1px solid ${t.border}`, padding:'10px 12px', display:'flex', alignItems:'center', gap:10 } },
+          React.createElement('div', { style:{ width:8, height:8, borderRadius:999, background:dotColor, flexShrink:0 } }),
+          React.createElement('div', { style:{ flex:1, minWidth:0 } },
+            React.createElement('div', { style:{ fontSize:13, fontWeight:500, color:t.text.primary, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' } }, title),
+            React.createElement('div', { style:{ display:'flex', gap:6, marginTop:3 } },
+              React.createElement('div', { style:{ fontSize:10, fontWeight:500, color:dotColor } }, status),
+              React.createElement('div', { style:{ fontSize:10, color:t.text.muted } }, '\u00B7 '+meta)
+            )
+          ),
+          React.createElement('div', { style:{ fontSize:14, color:t.text.muted, opacity:0.5 } }, '\u203A')
+        );
+
+      /* ConnectionChip */
+      const chip = (label, dot) =>
+        React.createElement('div', { style:{ display:'flex', alignItems:'center', gap:5, padding:'3px 10px', borderRadius:999, background:dot+'15', border:`1px solid ${dot}30` } },
+          React.createElement('div', { style:{ width:6, height:6, borderRadius:999, background:dot } }),
+          React.createElement('div', { style:{ fontSize:10, fontWeight:500, color:dot } }, label)
+        );
+
+      return React.createElement('div', { style:{ background:t.surface.base, minHeight:'100%', paddingBottom:20 } },
+        React.createElement(ScreenTitle, { label:'Component Gallery' }),
+
+        /* PairingCard */
+        React.createElement(Block, null,
+          React.createElement(BlockLabel, { label:'PairingCard', token:'Card + Input + Button' }),
+          React.createElement('div', { style:{ display:'flex', flexDirection:'column', gap:8 } },
+            pairingCard('Scanning for host', 'Ensure host is on same network',
+              React.createElement('div', { style:{ width:8, height:8, borderRadius:999, background:t.accent.cyan } }),
+            ),
+            React.createElement('div', { style:{ background:t.surface.elevated, borderRadius:t.radius.md, border:`1px solid ${t.border}`, padding:12 } },
+              React.createElement('div', { style:{ fontSize:13, fontWeight:500, color:t.text.primary, marginBottom:8 } }, 'Enter pairing code'),
+              React.createElement('div', { style:{ display:'flex', gap:5, marginBottom:8 } },
+                '482909'.split('').map((ch,i)=>React.createElement('div', { key:i, style:{ width:26, height:34, background:t.surface.base, borderRadius:t.radius.sm, border:`1px solid ${t.border}`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:15, fontWeight:500, color:t.text.primary, fontFamily:'JetBrains Mono' } }, ch))
+              ),
+              React.createElement('div', { style:{ height:32, background:t.accent.cyan, borderRadius:t.radius.sm, display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, fontWeight:500, color:t.accent.fg } }, 'Pair Device'),
+              React.createElement(TokenRef, { token:'accent-cyan', val:t.accent.cyan })
+            ),
+            pairingCard('Connecting to daemon...', 'Establishing secure channel',
+              React.createElement('div', { style:{ width:16, height:16, borderRadius:999, border:`2px solid ${t.accent.cyan}`, borderTopColor:'transparent' } })
+            ),
+            pairingCard('Paired', 'MacBook Pro · Trusted',
+              React.createElement('div', { style:{ width:20, height:20, borderRadius:999, background:t.sem.success, display:'flex', alignItems:'center', justifyContent:'center', color:'#064e3b', fontSize:12, fontWeight:700 } }, '\u2713'),
+              t.sem.success
+            ),
+            pairingCard('Pairing failed', 'Code expired · Request new code',
+              React.createElement('div', { style:{ width:20, height:20, borderRadius:999, background:t.sem.danger, display:'flex', alignItems:'center', justifyContent:'center', color:'#fff', fontSize:12, fontWeight:700 } }, '\u2717'),
+              t.sem.danger
+            ),
+          )
+        ),
+
+        /* SessionListItem */
+        React.createElement(Block, null,
+          React.createElement(BlockLabel, { label:'SessionListItem', token:'Card (list variant)' }),
+          React.createElement('div', { style:{ display:'flex', flexDirection:'column', gap:6 } },
+            sessionItem('Code Review · main', 'Running', 'Turn 4 · 2 min ago', t.sem.success),
+            sessionItem('Fix Build Pipeline', 'Waiting Input', 'Awaiting response', t.sem.warning),
+            sessionItem('Deploy Config', 'Completed', 'Finished · 12 min', t.mono),
+            sessionItem('API Migration', 'Failed', 'Build error at step 3', t.sem.danger),
+          )
+        ),
+
+        /* ConnectionStatusChip */
+        React.createElement(Block, null,
+          React.createElement(BlockLabel, { label:'ConnectionStatusChip', token:'Badge' }),
+          React.createElement('div', { style:{ display:'flex', gap:8, flexWrap:'wrap' } },
+            chip('Connected', t.sem.success),
+            chip('Connecting', t.sem.warning),
+            chip('Disconnected', '#6b7280'),
+            chip('Error', t.sem.danger),
+          )
+        ),
+        React.createElement('div', { style:{ height:16 } })
+      );
+    }
+
+    /* ═══════════════════════ Screen 4: Components B ═══════════════════════ */
+    function ComponentsB() {
+      const toastRow = (label, color, bg, icon) =>
+        React.createElement('div', { style:{ display:'flex', alignItems:'center', gap:8, padding:'8px 10px', borderRadius:t.radius.sm, background:bg, border:`1px solid ${color}30` } },
+          React.createElement('div', { style:{ width:20, height:20, borderRadius:999, background:color, display:'flex', alignItems:'center', justifyContent:'center', color:t.accent.fg, fontSize:10, fontWeight:700, flexShrink:0 } }, icon),
+          React.createElement('div', { style:{ fontSize:11, fontWeight:500, color } }, label)
+        );
+
+      return React.createElement('div', { style:{ background:t.surface.base, minHeight:'100%', paddingBottom:20 } },
+        React.createElement(ScreenTitle, { label:'Component Gallery' }),
+
+        /* ApprovalDialog */
+        React.createElement(Block, null,
+          React.createElement(BlockLabel, { label:'ApprovalDialog', token:'Dialog + Button' }),
+          React.createElement('div', { style:{ background:t.surface.overlay, borderRadius:t.radius.md, border:`1px solid ${t.border}`, padding:14 } },
+            React.createElement('div', { style:{ fontSize:13, fontWeight:600, color:t.text.primary, marginBottom:3 } }, 'Approve file write?'),
+            React.createElement('div', { style:{ fontSize:11, color:t.text.muted, marginBottom:12 } }, 'Agent wants to modify \u2192 src/config.ts'),
+            React.createElement('div', { style:{ display:'flex', gap:8 } },
+              React.createElement('div', { style:{ flex:1, height:30, borderRadius:t.radius.sm, border:`1px solid ${t.sem.danger}`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:500, color:t.sem.danger } }, 'Deny'),
+              React.createElement('div', { style:{ flex:1, height:30, borderRadius:t.radius.sm, background:t.sem.success, display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:500, color:'#064e3b' } }, 'Approve')
+            ),
+            React.createElement('div', { style:{ marginTop:8, display:'flex', gap:12 } },
+              React.createElement(TokenRef, { token:'danger', val:t.sem.danger }),
+              React.createElement(TokenRef, { token:'success', val:t.sem.success })
+            )
+          )
+        ),
+
+        /* Toast / Alert */
+        React.createElement(Block, null,
+          React.createElement(BlockLabel, { label:'Toast / Alert', token:'Toast (variant-based)' }),
+          React.createElement('div', { style:{ display:'flex', flexDirection:'column', gap:5 } },
+            toastRow('Session resumed', t.accent.cyan, '#042f3a', 'i'),
+            toastRow('Paired successfully', t.sem.success, '#0a2e1f', '\u2713'),
+            toastRow('3 pending approvals', t.sem.warning, '#3d2e00', '!'),
+            toastRow('Daemon disconnected', t.sem.danger, '#3b1010', '\u2717'),
+          )
+        ),
+
+        /* IconButton */
+        React.createElement(Block, null,
+          React.createElement(BlockLabel, { label:'IconButton', token:'Button (icon/glyph)' }),
+          React.createElement('div', { style:{ display:'flex', gap:12, alignItems:'flex-end' } },
+            [
+              { label:'Default', ring:'none', op:1 },
+              { label:'Hover', ring:t.accent.ring, op:1 },
+              { label:'Active', ring:t.accent.cyan, op:1 },
+              { label:'Disabled', ring:'none', op:0.35 },
+            ].map((b,i) =>
+              React.createElement('div', { key:i, style:{ display:'flex', flexDirection:'column', alignItems:'center', gap:4 } },
+                React.createElement('div', { style:{ width:40, height:40, borderRadius:t.radius.sm, background:t.surface.elevated, border:`1.5px solid ${b.ring}`, display:'flex', alignItems:'center', justifyContent:'center', opacity:b.op } },
+                  React.createElement('div', { style:{ width:18, height:18, background:b.ring==='none'?t.mono:t.accent.cyan, borderRadius:3, opacity:b.op } })
+                ),
+                React.createElement('div', { style:{ fontSize:9, color:t.text.muted } }, b.label)
+              )
+            )
+          ),
+          React.createElement('div', { style:{ marginTop:8 } },
+            React.createElement(TokenRef, { token:'bg-elevated', val:t.surface.elevated }),
+            React.createElement('span', null, '\u00A0'),
+            React.createElement(TokenRef, { token:'accent-ring', val:t.accent.ring })
+          )
+        ),
+
+        /* BottomNav */
+        React.createElement(Block, null,
+          React.createElement(BlockLabel, { label:'BottomNav', token:'Tabs (navigation)' }),
+          React.createElement('div', { style:{ background:t.surface.elevated, borderRadius:t.radius.md, border:`1px solid ${t.border}`, padding:'10px 6px 6px', display:'flex', justifyContent:'space-around' } },
+            [
+              { label:'Home', icon:'\u2302', active:false, badge:null },
+              { label:'Sessions', icon:'\u2261', active:true, badge:null },
+              { label:'Approvals', icon:'\u2714', active:false, badge:3 },
+              { label:'Inspect', icon:'\u25C9', active:false, badge:null },
+              { label:'Settings', icon:'\u2699', active:false, badge:null },
+            ].map((tab,i) =>
+              React.createElement('div', { key:i, style:{ display:'flex', flexDirection:'column', alignItems:'center', gap:2, position:'relative' } },
+                tab.badge ? React.createElement('div', { style:{ position:'absolute', top:-4, right:-10, minWidth:15, height:15, borderRadius:999, background:t.sem.danger, display:'flex', alignItems:'center', justifyContent:'center', fontSize:9, fontWeight:600, color:'#fff', padding:'0 4px' } }, tab.badge) : null,
+                React.createElement('div', { style:{ width:26, height:26, borderRadius:t.radius.sm, background:tab.active?t.accent.cyan:'transparent', display:'flex', alignItems:'center', justifyContent:'center', fontSize:14, fontWeight:600, color:tab.active?t.accent.fg:t.text.muted } }, tab.icon),
+                React.createElement('div', { style:{ fontSize:9, fontWeight:500, color:tab.active?t.accent.cyan:t.text.muted } }, tab.label)
+              )
+            )
+          ),
+          React.createElement('div', { style:{ marginTop:8, display:'flex', gap:12 } },
+            React.createElement(TokenRef, { token:'accent-cyan (active)', val:t.accent.cyan }),
+            React.createElement(TokenRef, { token:'danger (badge)', val:t.sem.danger })
+          )
+        ),
+
+        /* DeviceDetailSheet */
+        React.createElement(Block, null,
+          React.createElement(BlockLabel, { label:'DeviceDetailSheet', token:'Sheet' }),
+          React.createElement('div', { style:{ background:t.surface.overlay, borderRadius:t.radius.lg, border:`1px solid ${t.border}`, padding:14 } },
+            React.createElement('div', { style:{ width:36, height:4, borderRadius:999, background:t.border, margin:'0 auto 10px' } }),
+            React.createElement('div', { style:{ fontSize:13, fontWeight:600, color:t.text.primary, marginBottom:8 } }, 'MacBook Pro 16\u201D'),
+            React.createElement('div', { style:{ fontSize:11, color:t.text.muted, marginBottom:4 } }, 'Trusted since Apr 28, 2026'),
+            React.createElement('div', { style:{ fontSize:10, color:t.mono, fontFamily:'JetBrains Mono', background:t.surface.base, padding:'5px 8px', borderRadius:t.radius.sm, marginBottom:8 } }, 'device_7f3a \u00B7 ASCP Core'),
+            React.createElement('div', { style:{ display:'flex', alignItems:'center', gap:5, marginBottom:10 } },
+              React.createElement('div', { style:{ width:6, height:6, borderRadius:999, background:t.sem.success } }),
+              React.createElement('div', { style:{ fontSize:11, color:t.sem.success, fontWeight:500 } }, 'Connected')
+            ),
+            React.createElement('div', { style:{ height:30, borderRadius:t.radius.sm, border:`1px solid ${t.sem.danger}`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:500, color:t.sem.danger } }, 'Revoke Trust'),
+            React.createElement('div', { style:{ marginTop:6 } }, React.createElement(TokenRef, { token:'bg-overlay', val:t.surface.overlay }))
+          )
+        ),
+
+        /* Settings Toggles */
+        React.createElement(Block, null,
+          React.createElement(BlockLabel, { label:'SettingsForm', token:'Toggle + Input' }),
+          React.createElement('div', { style:{ display:'flex', flexDirection:'column' } },
+            [
+              { label:'Push Notifications', on:true },
+              { label:'Auto-approve Diffs', on:false },
+              { label:'Background Sync', on:true },
+            ].map((s,i) =>
+              React.createElement('div', { key:i, style:{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'9px 0', borderBottom: i<2?`1px solid ${t.border}30`:'none' } },
+                React.createElement('div', { style:{ fontSize:12, color:t.text.primary } }, s.label),
+                React.createElement('div', { style:{ width:42, height:24, borderRadius:999, background: s.on?t.accent.cyan:t.surface.base, border:`1px solid ${s.on?t.accent.cyan:t.border}`, position:'relative' } },
+                  React.createElement('div', { style:{ width:18, height:18, borderRadius:999, background:'#fff', position:'absolute', top:2, left: s.on?22:2 } })
+                )
+              )
+            )
+          )
+        ),
+        React.createElement('div', { style:{ height:16 } })
+      );
+    }
+
+    /* ═══════════════════════ Screen 5: Accessibility ═══════════════════════ */
+    function A11yScreen() {
+      const lum = (hex) => { const h=hex.slice(1); const r=parseInt(h.slice(0,2),16)/255; const g=parseInt(h.slice(2,4),16)/255; const b=parseInt(h.slice(4,6),16)/255; const l=v=>v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4); return 0.2126*l(r)+0.7152*l(g)+0.0722*l(b); };
+      const ratio = (fg,bg) => { const L1=lum(fg), L2=lum(bg); return (Math.max(L1,L2)+0.05)/(Math.min(L1,L2)+0.05); };
+
+      const pairs = [
+        ['text-primary / bg-surface', t.text.primary, t.surface.base],
+        ['muted-text / bg-surface',   t.text.muted,   t.surface.base],
+        ['accent-fg / accent-cyan',   t.accent.fg,    t.accent.cyan],
+        ['danger / bg-surface',       t.sem.danger,   t.surface.base],
+        ['success / bg-surface',      t.sem.success,  t.surface.base],
+        ['warning / bg-surface',      t.sem.warning,  t.surface.base],
+      ];
+
+      return React.createElement('div', { style:{ background:t.surface.base, minHeight:'100%', paddingBottom:20 } },
+        React.createElement(ScreenTitle, { label:'Accessibility' }),
+
+        React.createElement(Block, null,
+          React.createElement(BlockLabel, { label:'Contrast Ratios', token:'WCAG 2.2' }),
+          React.createElement('div', { style:{ display:'flex', fontSize:9, fontWeight:600, color:t.mono, padding:'4px 0 6px', borderBottom:`1px solid ${t.border}` } },
+            React.createElement('div', { style:{ flex:1 } }, 'Color Pair'),
+            React.createElement('div', { style:{ width:40, textAlign:'center' } }, 'Ratio'),
+            React.createElement('div', { style:{ width:28, textAlign:'center' } }, 'AA'),
+            React.createElement('div', { style:{ width:32, textAlign:'center' } }, 'AAA'),
+          ),
+          pairs.map((p,i) => {
+            const r = ratio(p[1], p[2]); const aa=r>=4.5, aaa=r>=7;
+            return React.createElement('div', { key:i, style:{ display:'flex', alignItems:'center', padding:'7px 0', borderBottom: i<pairs.length-1?`1px solid ${t.border}20`:'none' } },
+              React.createElement('div', { style:{ flex:1, minWidth:0, display:'flex', alignItems:'center', gap:5 } },
+                React.createElement('div', { style:{ width:12, height:12, borderRadius:2, background:p[1], border:`1px solid ${t.border}40`, flexShrink:0 } }),
+                React.createElement('div', { style:{ width:12, height:12, borderRadius:2, background:p[2], border:`1px solid ${t.border}40`, flexShrink:0 } }),
+                React.createElement('div', { style:{ fontSize:10, color:t.text.primary, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' } }, p[0])
+              ),
+              React.createElement('div', { style:{ width:40, textAlign:'center', fontSize:11, fontWeight:600, fontFamily:'JetBrains Mono', color:aa?t.sem.success:t.sem.danger } }, r.toFixed(1)),
+              React.createElement('div', { style:{ width:28, textAlign:'center', fontSize:10, fontWeight:600, color:aa?t.sem.success:t.sem.danger } }, aa?'\u2713':'\u2717'),
+              React.createElement('div', { style:{ width:32, textAlign:'center', fontSize:10, fontWeight:600, color:aaa?t.sem.success:t.sem.danger } }, aaa?'\u2713':'\u2717'),
+            );
+          })
+        ),
+
+        React.createElement(Block, null,
+          React.createElement(BlockLabel, { label:'Touch Targets', token:'48\u00D748px minimum' }),
+          React.createElement('div', { style:{ display:'flex', alignItems:'center', gap:14 } },
+            React.createElement('div', { style:{ width:48, height:48, borderRadius:t.radius.sm, border:`2px dashed ${t.accent.cyan}60`, display:'flex', alignItems:'center', justifyContent:'center' } },
+              React.createElement('div', { style:{ fontSize:9, fontWeight:600, color:t.accent.cyan, textAlign:'center', lineHeight:'11px' } }, '48\u00D748')
+            ),
+            React.createElement('div', null,
+              React.createElement('div', { style:{ fontSize:12, fontWeight:500, color:t.text.primary } }, 'Minimum tappable area'),
+              React.createElement('div', { style:{ fontSize:10, color:t.text.muted, marginTop:2 } }, 'WCAG 2.2 AAA \u00B7 8px hit slop'),
+              React.createElement(TokenRef, { token:'space-2 (8px hit)', val:'8px' })
+            )
+          )
+        ),
+
+        React.createElement(Block, null,
+          React.createElement(BlockLabel, { label:'Motion Tokens', token:'Transition durations' }),
+          React.createElement('div', { style:{ display:'flex', flexDirection:'column', gap:6 } },
+            [
+              ['motion-fast', '120ms ease-out', 'Button press, toggle, chip'],
+              ['motion-medium', '200ms cubic-bezier(.16,.84,.36,1)', 'Sheet open, nav switch'],
+              ['motion-slow', '320ms ease-in-out', 'Page transition, pairing success'],
+              ['reduced-motion', 'instant (no anim)', 'Accessibility preference'],
+            ].map((m,i) =>
+              React.createElement('div', { key:i, style:{ background:t.surface.base, borderRadius:t.radius.sm, border:`1px solid ${t.border}30`, padding:'8px 10px' } },
+                React.createElement('div', { style:{ fontSize:11, fontWeight:600, color:t.accent.cyan, fontFamily:'JetBrains Mono' } }, m[0]),
+                React.createElement('div', { style:{ fontSize:10, color:t.mono, fontFamily:'JetBrains Mono', marginTop:2 } }, m[1]),
+                React.createElement('div', { style:{ fontSize:10, color:t.text.muted, marginTop:2 } }, m[2])
+              )
+            )
+          )
+        ),
+
+        React.createElement(Block, null,
+          React.createElement(BlockLabel, { label:'Minimum Sizes', token:'Label dimensions' }),
+          React.createElement('div', { style:{ display:'flex', flexDirection:'column' } },
+            [
+              ['Body text', '14px minimum'],
+              ['Primary action label', '16px minimum'],
+              ['Caption', '12px minimum'],
+            ].map((s,i) =>
+              React.createElement('div', { key:i, style:{ display:'flex', justifyContent:'space-between', padding:'5px 0', borderBottom: i<2?`1px solid ${t.border}20`:'none', fontSize:11 } },
+                React.createElement('div', { style:{ color:t.text.primary } }, s[0]),
+                React.createElement('div', { style:{ color:t.text.muted, fontFamily:'JetBrains Mono' } }, s[1])
+              )
+            )
+          )
+        ),
+        React.createElement('div', { style:{ height:16 } })
+      );
+    }
+
+    /* ═══════════════════════ App ═══════════════════════ */
+    function App() {
+      const screens = [
+        { id:1, label:'Color Tokens',           cmp:ColorScreen },
+        { id:2, label:'Typography & Spacing',   cmp:TypographyScreen },
+        { id:3, label:'Components A',           cmp:ComponentsA },
+        { id:4, label:'Components B',           cmp:ComponentsB },
+        { id:5, label:'Accessibility & Motion', cmp:A11yScreen },
+      ];
+
+      return React.createElement('div', { style: {
+        display:'flex', gap:28, flexWrap:'wrap', padding:40,
+        alignItems:'flex-start', justifyContent:'center',
+        background:'#080c14', minHeight:'100vh',
+      } },
+        React.createElement('div', { style: { width:'100%', textAlign:'center', marginBottom:4 } },
+          React.createElement('div', { style: { fontSize:26, fontWeight:700, color:t.text.primary, letterSpacing:'-0.02em' } }, 'Continuum'),
+          React.createElement('div', { style: { fontSize:12, color:t.text.muted, marginTop:4 } }, 'Dark-mode design system \u00B7 ASCP mobile companion \u00B7 shadcn/ui blocks')
+        ),
+        screens.map(s =>
+          React.createElement('div', { key: s.id },
+            React.createElement('div', { style: { fontSize:11, fontWeight:600, color:t.mono, marginBottom:10, textAlign:'center', letterSpacing:'0.06em', textTransform:'uppercase' } }, s.label),
+            React.createElement(IosFrame, { w:393, h:852, time:'9:41', bat:85 },
+              React.createElement(s.cmp)
+            )
+          )
+        )
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(React.createElement(App));
+  </script>
+</body>
+</html>

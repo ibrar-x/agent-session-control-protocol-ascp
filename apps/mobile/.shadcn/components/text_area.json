@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "text_area",
+  "name": "Text Area",
+  "version": "1.0.0",
+  "tags": [
+    "form",
+    "input",
+    "textarea"
+  ],
+  "installedAt": "2026-05-25T11:23:18.331277Z",
+  "shared": [
+    "theme"
+  ],
+  "dependsOn": [
+    "text_field"
+  ],
+  "files": [
+    "registry/components/form/text_area/_impl/core/text_area_handle.dart",
+    "registry/components/form/text_area/_impl/state/text_area_state.dart",
+    "registry/components/form/text_area/text_area.dart"
+  ],
+  "registryNamespace": "shadcn",
+  "manifestSource": "componentsJson",
+  "registryRoot": "/Users/ibrar/.config/superpowers/worktrees/shadcn_flutter_kit/branch-v1-registry-overlay-nav-manifests/flutter_shadcn_kit/lib/registry"
+}

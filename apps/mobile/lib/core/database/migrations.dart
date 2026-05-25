@@ -1,0 +1,1 @@
+const currentContinuumDatabaseSchemaVersion = 2;

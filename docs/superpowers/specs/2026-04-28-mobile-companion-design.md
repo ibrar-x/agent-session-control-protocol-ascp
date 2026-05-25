@@ -2,9 +2,9 @@
 
 ## Goal
 
-Design a mobile companion app for ASCP that supports host pairing, trusted-device onboarding, session browsing, remote session control, approvals, and lightweight operational inspection from a phone-first interface.
+Design a Flutter mobile companion app for ASCP that supports host pairing, trusted-device onboarding, session browsing, remote session control, approvals, and lightweight operational inspection from a phone-first interface.
 
-This is a mobile client design only. It must stay downstream of the existing daemon pairing backend, host trust model, and frozen ASCP contracts.
+This is a mobile client design only. It must stay downstream of the existing daemon pairing backend, host trust model, and frozen ASCP contracts. The implementation plan for this design is `docs/superpowers/plans/2026-04-28-mobile-companion.md`.
 
 ## Scope
 
@@ -18,7 +18,7 @@ Included:
 - approvals queue for pending actions
 - artifacts, diffs, and trusted-device inspection
 - app settings, connection status, and transport-state messaging
-- a shadcn-style mobile design system and component guidance
+- a Flutter shadcn mobile design system and component guidance
 
 Excluded:
 
@@ -197,9 +197,30 @@ Constraints:
 - when the user cannot act, the UI should explain why with a visible permission or state badge
 - long text should collapse into readable cards, not overflow the viewport
 
+## Flutter Architecture
+
+Use a feature-first Flutter architecture under `apps/mobile/lib/features`.
+
+Each feature owns:
+
+- `domain/` for pure Dart models and state rules
+- `data/` for repositories, DTO mappers, remote data sources, and local cache bindings
+- `application/` for Riverpod providers, notifiers, and use-case orchestration
+- `presentation/` for screens, feature widgets, and shadcn component composition
+
+Shared code belongs in `apps/mobile/lib/core` only when it is genuinely cross-feature:
+
+- `core/ascp` for protocol method names, envelopes, errors, events, and models
+- `core/network` for Dio HTTP and WebSocket JSON-RPC clients
+- `core/security` for secure storage, local auth, and trust material
+- `core/database` for Drift persistence and replay cursors
+- `core/design_system` for Continuum tokens, theme, and shared widgets
+
+State management default: Riverpod 3 with generated providers. BLoC is allowed only for a feature-local event machine that benefits from explicit event logs and must not become a second app-wide architecture.
+
 ## Data Model
 
-The mobile app should organize state into five main stores:
+The mobile app should organize state into five main Riverpod-backed stores:
 
 - `connectionState`
 - `pairingState`
@@ -218,7 +239,7 @@ The pairing and trust state must remain separate from session browsing state so 
 
 ## Design System
 
-Use shadcn-style components as the foundation and extend them with a focused mobile system.
+Use Flutter shadcn registry components as the foundation and extend them with a focused mobile system. The CLI command `flutter_shadcn` is the source of truth for initialization, registry discovery, dry runs, component installation, validation, audits, and dependency checks.
 
 ### Core primitives
 
@@ -245,6 +266,30 @@ Use shadcn-style components as the foundation and extend them with a focused mob
 - `ActionSheet` - mobile-first confirm or choose action surface
 - `EmptyState` - clear next-step messaging for no data or blocked states
 - `CodeBlock` - copyable code and identifiers in mono style
+
+### Flutter shadcn CLI requirement
+
+Implementation must initialize the Flutter app with:
+
+```bash
+flutter pub get
+flutter_shadcn init --yes
+flutter_shadcn registries --json
+flutter_shadcn default
+flutter_shadcn doctor --json
+```
+
+Component installation must use namespace-qualified addresses, a JSON dry run first, and validation after install:
+
+```bash
+flutter_shadcn dry-run @shadcn/button @shadcn/card @shadcn/dialog --json
+flutter_shadcn add @shadcn/button @shadcn/card @shadcn/dialog
+flutter_shadcn validate --json
+flutter_shadcn audit --json
+flutter_shadcn deps --json
+```
+
+Do not hand-copy registry components or introduce Material/Cupertino controls when the shadcn registry has an equivalent.
 
 ### Visual system
 
@@ -327,6 +372,8 @@ Rules:
 
 ## Testing Direction
 
+This slice must be implemented with test-driven development. Each implementation task should write the failing test first, run it, implement the minimum code, then add widget or golden coverage for the UI state.
+
 This slice should define tests for:
 
 - onboarding state transitions
@@ -352,5 +399,6 @@ This design is satisfied when:
 - the mobile app supports pairing and remote control as a single coherent companion flow
 - the app exposes clear trust and transport status at all times
 - sessions, approvals, inspection, and settings each have a focused mobile surface
-- the UI uses shadcn-style components as the base system
+- the UI uses Flutter shadcn components as the base system
 - the design system is reusable enough to guide implementation without inventing new patterns ad hoc
+- TDD, widget tests, golden tests, integration tests, `flutter analyze`, and `flutter_shadcn validate/audit/deps` checks are part of the development workflow

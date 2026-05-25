@@ -14,6 +14,78 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-05-25 - Mobile live wiring and scanner path
+
+- Branch: `branch-mobile-flutter-app`
+- Commit: `not committed`
+- Summary: completed the mobile app production-wiring slice with Codex as orchestrator and a bounded Blackbox read-only advisory route through the cost-aware workflow; Blackbox timed out after partial context, so no external patch was applied. Added `MobileDependencies` memory/live factories, wired the trusted shell to injected controllers, replaced the static first-run card with the controller-backed pairing screen, added a `mobile_scanner` QR scanner route, and connected live pairing to the daemon claim/poll repository. Added integration-style shell coverage and golden smoke baselines for first-run pairing and trusted sessions.
+- Documentation updated: `internal/plans.md`, `internal/status.md`, `apps/mobile/README.md`
+- Next likely step: run on a physical/simulator device against a live ASCP host daemon endpoint and split any visual or provider-generation polish into separate tickets.
+
+### 2026-05-25 - Mobile cache and controller-backed screens
+
+- Branch: `branch-mobile-flutter-app`
+- Commit: `not committed`
+- Summary: continued the mobile companion build with Codex as orchestrator and attempted a bounded Blackbox read-only review through the cost-aware route; the Blackbox request timed out, so the local wrapper was patched to report timeout bytes cleanly for future runs. Added Drift-backed offline metadata cache for session summaries, artifact details, and diff details; wired session list/detail, approvals, inspect, and settings screens to tested controllers with widget coverage for list rendering and user actions.
+- Documentation updated: `internal/plans.md`, `internal/status.md`, `apps/mobile/README.md`
+- Next likely step: connect the default providers to live daemon endpoints, wire the real mobile scanner path, and add integration/golden validation.
+
+### 2026-05-25 - Mobile Drift replay cursor persistence
+
+- Branch: `branch-mobile-flutter-app`
+- Commit: `not committed`
+- Summary: replaced the in-memory replay cursor placeholder with a generated Drift database table keyed by host id and session id. Added `drift_dev`, generated `continuum_database.g.dart`, and kept the existing cursor behavior covered by a focused database test.
+- Documentation updated: `internal/plans.md`, `internal/status.md`, `apps/mobile/README.md`
+- Next likely step: add offline session/artifact metadata cache, then wire production feature screens to the tested controllers and adapters.
+
+### 2026-05-25 - Mobile session subscription adapter
+
+- Branch: `branch-mobile-flutter-app`
+- Commit: `not committed`
+- Summary: added a WebSocket-backed `sessions.subscribe` adapter that requests replay from an optional sequence cursor, filters incoming ASCP event envelopes by session id, maps them into timeline events, and sends `sessions.unsubscribe` on cleanup.
+- Documentation updated: `internal/plans.md`, `internal/status.md`, `apps/mobile/README.md`
+- Next likely step: add Drift-backed persistence for replay cursors/session metadata, then wire production feature screens to the tested controllers and adapters.
+
+### 2026-05-25 - Mobile ASCP and daemon repository adapters
+
+- Branch: `branch-mobile-flutter-app`
+- Commit: `not committed`
+- Summary: continued the mobile companion build with Codex as the orchestrator and external CLI routes attempted through the cost-aware workflow; because Blackbox still rejected the registry-listed free model, OpenCode Go write tasks hung, and Kiro returned no usable patch for this slice, the final integration was implemented locally and independently verified. Added daemon REST adapters for pairing claim/poll and trusted-device list/revoke, on top of the ASCP JSON-RPC adapters already added for sessions, approvals, and inspect.
+- Documentation updated: `internal/plans.md`, `internal/status.md`, `apps/mobile/README.md`
+- Next likely step: wire WebSocket `sessions.subscribe` replay streams and Drift-backed persistence, then replace placeholder feature screens with controller-backed production mobile flows.
+
+### 2026-05-25 - Mobile pairing, sessions, and approvals controllers
+
+- Branch: `branch-mobile-flutter-app`
+- Commit: `not committed`
+- Summary: used the cost-aware orchestrator to route work through external CLIs instead of native Codex subagents; Blackbox rejected the registry-listed free model names, OpenCode Go completed read-only planning but hung on the pairing write task, and Kiro returned partial/no-op write results that were integrated locally. The app now has a richer pairing controller and widgets, tested secure-write gate, session repository/list/detail controllers, and approval queue/response controller.
+- Documentation updated: `internal/status.md`
+- Next likely step: replace remaining in-memory repositories with ASCP-backed repositories and Drift persistence, then build production artifact/diff/settings screens and integration tests.
+
+### 2026-05-25 - Mobile ASCP foundation and app shell
+
+- Branch: `branch-mobile-flutter-app`
+- Commit: `not committed`
+- Summary: resolved the local Flutter shadcn registry validation gap, installed the broader planned shadcn primitive set through dry-run/add, added exact ASCP method/error/session/event foundation types, added HTTP and WebSocket JSON-RPC clients with reconnect policy, added secure trust and replay cursor boundaries, added pairing/session/approval/inspect/settings domain slices, and replaced the first-run-only app with a trusted/untrusted mobile shell
+- Documentation updated: `apps/mobile/README.md`, `internal/plans.md`, `internal/status.md`, `docs/superpowers/plans/2026-04-28-mobile-companion.md`
+- Next likely step: turn the placeholder feature screens into production flows backed by pairing claim/polling, secure storage, ASCP repositories, session subscriptions, approval responses, artifact/diff reads, and Drift persistence
+
+### 2026-05-25 - Mobile Flutter scaffold and design foundation
+
+- Branch: `branch-mobile-flutter-app`
+- Commit: `not committed`
+- Summary: scaffolded the Flutter app under `apps/mobile`, added the planned runtime and dev dependencies with a generator-compatible `json_serializable`/`riverpod_generator` set, initialized `flutter_shadcn`, switched to a local registry fallback after the remote registry returned 403/404 errors, installed shadcn app/card/button/badge foundation components, replaced the generated counter app with a Continuum first-run shell, and added passing bootstrap/token/widget tests
+- Documentation updated: `internal/plans.md`, `internal/status.md`, `docs/superpowers/plans/2026-04-28-mobile-companion.md`
+- Next likely step: resolve or quarantine the shadcn registry-wide validation gap for missing `registry/components/display/markdown/_impl/state/markdown_live_preview.dart`, then implement the ASCP method/envelope/event model foundation
+
+### 2026-05-25 - Mobile Flutter architecture plan
+
+- Branch: `main`
+- Commit: `not committed`
+- Summary: converted the mobile companion planning assets from a React prototype plan into a Flutter-first implementation plan with feature-first architecture, Riverpod-first state management, WebSocket/HTTP transport boundaries, current pub.dev package choices, Flutter shadcn CLI registry workflow, Continuum Design System build-order translation, and TDD/widget/golden/integration verification requirements
+- Documentation updated: `internal/plans.md`, `internal/status.md`, `docs/superpowers/specs/2026-04-28-mobile-companion-design.md`, `docs/superpowers/plans/2026-04-28-mobile-companion.md`
+- Next likely step: scaffold the real Flutter app in `apps/mobile`, run `flutter_shadcn init --yes`, port the design tokens, and implement pairing first
+
 ### 2026-04-28 - Host pairing UI slice
 
 - Branch: `branch-host-pairing-ui`

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sessio · App Screens</title>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;width:100%}
+    body{font-family:'Inter',-apple-system,sans-serif;background:#080c14;color:#e6eef6}
+    .scrollbar::-webkit-scrollbar{width:3px}
+    .scrollbar::-webkit-scrollbar-track{background:transparent}
+    .scrollbar::-webkit-scrollbar-thumb{background:#2d3f57;border-radius:3px}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+  </style>
+</head>
+<body><div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect}=React;
+
+/* ═══ Tokens ═══ */
+const C={
+  s:{base:'#0f1724',elevated:'#1a2436',overlay:'#243049'},
+  border:'#2d3f57',
+  t:{primary:'#e6eef6',muted:'#8da0b8'},
+  a:{cyan:'#06b6d4',fg:'#0a0f1a',ring:'#06b6d440'},
+  sem:{success:'#10b981',warning:'#f59e0b',danger:'#ef4444'},
+  mono:'#94a3b8',r:{sm:6,md:12,lg:16},sp:[4,8,12,16,20,24,32,48]
+};
+
+/* ═══ IosFrame ═══ */
+const F={
+  wrapper:{display:'inline-block',padding:12,background:'#000',borderRadius:60,boxShadow:'0 0 0 2px #1f2937, 0 20px 60px rgba(0,0,0,0.5)',position:'relative'},
+  screen:{position:'relative',borderRadius:48,overflow:'hidden'},
+  sb:{position:'absolute',top:0,left:0,right:0,height:54,display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0 32px',fontSize:16,fontWeight:600,fontFamily:'-apple-system,"SF Pro Text",sans-serif',zIndex:20,pointerEvents:'none'},
+  island:{position:'absolute',top:12,left:'50%',transform:'translateX(-50%)',width:124,height:36,background:'#000',borderRadius:999,zIndex:30},
+  icons:{display:'flex',alignItems:'center',gap:6},
+  sig:{display:'flex',alignItems:'flex-end',gap:2,height:12},
+  bar:{width:3,background:'currentColor',borderRadius:1},
+  bat:{width:26,height:12,border:'1.5px solid currentColor',borderRadius:3,padding:1,position:'relative',opacity:.8},
+  batCap:{position:'absolute',top:3,right:-3,width:2,height:6,background:'currentColor',borderRadius:'0 1px 1px 0'},
+  content:{position:'absolute',top:54,left:0,right:0,bottom:34,overflow:'auto'},
+  home:{position:'absolute',bottom:10,left:'50%',transform:'translateX(-50%)',width:140,height:5,borderRadius:999,zIndex:10,background:'rgba(255,255,255,.5)'}
+};
+
+function IosFrame({children,w:W=393,h:H=852,time='9:41',bat=85}){
+  return React.createElement('div',{style:F.wrapper},
+    React.createElement('div',{style:{...F.screen,width:W,height:H,background:'#000'}},
+      React.createElement('div',{style:{...F.sb,color:'#fff'}},
+        React.createElement('span',null,time),
+        React.createElement('div',{style:F.icons},
+          React.createElement('div',{style:F.sig},
+            React.createElement('div',{style:{...F.bar,height:4}}),
+            React.createElement('div',{style:{...F.bar,height:6}}),
+            React.createElement('div',{style:{...F.bar,height:9}}),
+            React.createElement('div',{style:{...F.bar,height:11}})),
+          React.createElement('svg',{width:16,height:12,viewBox:'0 0 16 12',fill:'none',style:{color:'#fff'}},
+            React.createElement('path',{d:'M8 11.5a1 1 0 100-2 1 1 0 000 2z',fill:'currentColor'}),
+            React.createElement('path',{d:'M3 7.5a7 7 0 0110 0',stroke:'currentColor',strokeWidth:1.3,fill:'none',strokeLinecap:'round'}),
+            React.createElement('path',{d:'M1 4.5a11 11 0 0114 0',stroke:'currentColor',strokeWidth:1.3,fill:'none',strokeLinecap:'round',opacity:.7})),
+          React.createElement('div',{style:F.bat},
+            React.createElement('div',{style:{width:`${bat}%`,height:'100%',background:'currentColor',borderRadius:1,opacity:.9}}),
+            React.createElement('div',{style:F.batCap})))),
+      React.createElement('div',{style:F.island}),
+      React.createElement('div',{style:F.content},children),
+      React.createElement('div',{style:F.home})));}
+
+/* ═══ Shared Components ═══ */
+function StatusChip({label,color}){return React.createElement('div',{style:{display:'inline-flex',alignItems:'center',gap:5,padding:'3px 10px',borderRadius:999,background:color+'18',border:`1px solid ${color}30`,fontSize:10,fontWeight:500,color,fontFamily:'Inter,-apple-system,sans-serif'}},
+  React.createElement('div',{style:{width:6,height:6,borderRadius:999,background:color}}),label);}
+
+function Card({children,style:sty}){return React.createElement('div',{style:{background:C.s.elevated,borderRadius:C.r.md,border:`1px solid ${C.border}`,padding:14,...sty}},children);}
+
+function Pill({label,color,bg}){return React.createElement('div',{style:{padding:'2px 8px',borderRadius:999,background:bg||color+'20',border:`1px solid ${color}40`,fontSize:10,fontWeight:500,color,fontFamily:'Inter,-apple-system,sans-serif',display:'inline-flex',alignItems:'center',gap:4}},label);}
+
+function Badge({n}){return React.createElement('div',{style:{minWidth:18,height:18,borderRadius:999,background:C.sem.danger,display:'flex',alignItems:'center',justifyContent:'center',fontSize:10,fontWeight:700,color:'#fff',padding:'0 5px',fontFamily:'Inter,-apple-system,sans-serif'}},n);}
+
+function BottomNav({active}){const tabs=[
+  {id:'home',label:'Home',icon:'\u2302'},
+  {id:'sessions',label:'Sessions',icon:'\u2630'},
+  {id:'approvals',label:'Approvals',icon:'\u2714',badge:3},
+  {id:'inspect',label:'Inspect',icon:'\u25CB'},
+  {id:'settings',label:'Settings',icon:'\u2699'},
+];return React.createElement('div',{style:{flexShrink:0,background:C.s.elevated,borderTop:`1px solid ${C.border}`,padding:'8px 8px 20px',display:'flex',justifyContent:'space-around'}},
+  tabs.map(t=>React.createElement('div',{key:t.id,style:{display:'flex',flexDirection:'column',alignItems:'center',gap:3,position:'relative'}},
+    t.badge?React.createElement(Badge,{n:t.badge}):null,
+    React.createElement('div',{style:{fontSize:16,fontWeight:500,color:t.id===active?C.a.cyan:C.t.muted}},t.icon),
+    React.createElement('div',{style:{fontSize:9,fontWeight:500,color:t.id===active?C.a.cyan:C.t.muted}},t.label))));}
+
+/* ═══ Screen 1: Home Dashboard ═══ */
+function HomeScreen(){
+  const sessions=[
+    {name:'code-review \u00B7 main',status:'Running',color:C.sem.success,time:'2 min ago'},
+    {name:'refactor-auth',status:'Waiting Input',color:C.sem.warning,time:'5 min ago'},
+    {name:'deploy-config',status:'Completed',color:C.mono,time:'12 min ago'},
+  ];
+  return React.createElement('div',{style:{background:C.s.base,minHeight:'100%',display:'flex',flexDirection:'column'}},
+    React.createElement('div',{style:{flex:1,overflow:'auto'}},
+      /* Header */
+      React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'16px 16px 8px'}},
+        React.createElement('div',{style:{fontSize:22,fontWeight:700,color:C.t.primary,letterSpacing:'-0.02em'}},'Continuum'),
+        React.createElement('div',{style:{fontSize:18,color:C.t.muted}},'\u2699')),
+      /* Connection card */
+      React.createElement(Card,{style:{margin:'0 16px 16px'}},
+        React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:8}},
+          React.createElement('div',{style:{display:'flex',alignItems:'center',gap:8}},
+            React.createElement('div',{style:{width:10,height:10,borderRadius:999,background:C.sem.success}}),
+            React.createElement('div',null,
+              React.createElement('div',{style:{fontSize:14,fontWeight:600,color:C.t.primary}},'MacBook Pro \u00B7 Local'),
+              React.createElement('div',{style:{fontSize:11,color:C.t.muted,marginTop:1}},'Connected \u00B7 12ms'))),
+          React.createElement(StatusChip,{label:'Trusted',color:C.sem.success})),
+        React.createElement('div',{style:{fontSize:11,color:C.t.muted,marginBottom:10}},'Uptime: 3h 42m'),
+        React.createElement('div',{style:{display:'flex',gap:8}},
+          React.createElement('div',{style:{flex:1,background:C.s.base,borderRadius:C.r.sm,padding:'6px 0',textAlign:'center',border:`1px solid ${C.border}`}},
+            React.createElement('div',{style:{fontSize:14,fontWeight:700,color:C.t.primary,fontFamily:'JetBrains Mono'}},'34%'),
+            React.createElement('div',{style:{fontSize:9,color:C.t.muted,marginTop:1}},'CPU')),
+          React.createElement('div',{style:{flex:1,background:C.s.base,borderRadius:C.r.sm,padding:'6px 0',textAlign:'center',border:`1px solid ${C.border}`}},
+            React.createElement('div',{style:{fontSize:14,fontWeight:700,color:C.t.primary,fontFamily:'JetBrains Mono'}},'62%'),
+            React.createElement('div',{style:{fontSize:9,color:C.t.muted,marginTop:1}},'Memory')),
+          React.createElement('div',{style:{flex:1,background:C.s.base,borderRadius:C.r.sm,padding:'6px 0',textAlign:'center',border:`1px solid ${C.border}`}},
+            React.createElement('div',{style:{fontSize:14,fontWeight:700,color:C.t.primary,fontFamily:'JetBrains Mono'}},'2'),
+            React.createElement('div',{style:{fontSize:9,color:C.t.muted,marginTop:1}},'Agents')))),
+      /* Active sessions */
+      React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0 16px 8px'}},
+        React.createElement('div',{style:{fontSize:11,fontWeight:600,color:C.t.muted,textTransform:'uppercase',letterSpacing:'0.06em'}},'Active sessions'),
+        React.createElement('div',{style:{fontSize:11,color:C.a.cyan,fontWeight:500}},'View all')),
+      React.createElement('div',{style:{padding:'0 16px'}},
+        sessions.map(s=>React.createElement('div',{key:s.name,style:{display:'flex',alignItems:'center',gap:10,padding:'10px 0',borderBottom:`1px solid ${C.border}20`}},
+          React.createElement('div',{style:{width:8,height:8,borderRadius:999,background:s.color,flexShrink:0}}),
+          React.createElement('div',{style:{flex:1,minWidth:0}},
+            React.createElement('div',{style:{fontSize:12,fontWeight:500,color:C.t.primary,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}},s.name),
+            React.createElement('div',{style:{fontSize:10,color:C.t.muted,marginTop:1}},s.time)),
+          React.createElement(StatusChip,{label:s.status,color:s.color})))),
+      /* Pending approvals */
+      React.createElement('div',{style:{margin:'12px 16px 0',background:C.sem.warning+'10',borderRadius:C.r.md,border:`1px solid ${C.sem.warning}25`,padding:'12px 14px',display:'flex',alignItems:'center',gap:10}},
+        React.createElement('div',{style:{width:8,height:8,borderRadius:999,background:C.sem.warning}}),
+        React.createElement('div',{style:{flex:1,minWidth:0}},
+          React.createElement('div',{style:{fontSize:12,fontWeight:600,color:C.sem.warning}},'Pending approvals'),
+          React.createElement('div',{style:{fontSize:10,color:C.t.muted,marginTop:1}},'3 requests need your attention')),
+        React.createElement('div',{style:{minWidth:18,height:18,borderRadius:999,background:C.sem.danger,display:'flex',alignItems:'center',justifyContent:'center',fontSize:10,fontWeight:700,color:'#fff',padding:'0 5px'}},'3'),
+        React.createElement('div',{style:{fontSize:14,color:C.t.muted}},'\u203A'))),
+    React.createElement(BottomNav,{active:'home'}));}
+
+/* ═══ Screen 2: Pairing (HIGHEST PRIORITY) ═══ */
+function PairingScreen(){
+  const [step, setStep] = useState('scanning');
+
+  return React.createElement('div',{style:{background:C.s.base,minHeight:'100%',display:'flex',flexDirection:'column'}},
+    /* Nav bar */
+    React.createElement('div',{style:{display:'flex',alignItems:'center',padding:'12px 16px'}},
+      React.createElement('div',{style:{fontSize:20,color:C.t.muted,marginRight:10}},'\u2039'),
+      React.createElement('div',{style:{fontSize:18,fontWeight:600,color:C.t.primary}},'Pair a host')),
+
+    step==='scanning'?React.createElement('div',{style:{flex:1,display:'flex',flexDirection:'column',alignItems:'center',padding:'0 24px 24px'}},
+      React.createElement('div',{style:{fontSize:12,color:C.t.muted,marginBottom:28,textAlign:'center'}},'Scan the QR code shown in the host console'),
+      /* Viewfinder */
+      React.createElement('div',{style:{width:220,height:220,borderRadius:16,position:'relative',display:'flex',alignItems:'center',justifyContent:'center',marginBottom:28,background:C.s.elevated,border:`1.5px solid ${C.border}`}},
+        /* Corner brackets */
+        [[0,0],[218,0],[0,218],[218,218]].map((c,i)=>React.createElement('div',{key:i,style:{position:'absolute',top:c[0],left:c[1]}},
+          React.createElement('div',{style:{width:18,height:2.5,background:C.a.cyan}}),
+          React.createElement('div',{style:{width:2.5,height:18,background:C.a.cyan}}))),
+        /* Scan line */
+        React.createElement('div',{style:{width:'100%',height:2,background:C.a.cyan,boxShadow:'0 0 8px rgba(6,182,212,.6)',position:'absolute',top:'40%',left:0}}),
+        React.createElement('div',{style:{fontSize:10,color:C.mono,fontFamily:'JetBrains Mono',position:'absolute',bottom:18}},'Position QR in frame')),
+      /* Divider */
+      React.createElement('div',{style:{display:'flex',alignItems:'center',gap:12,width:'100%',maxWidth:280,marginBottom:20}},
+        React.createElement('div',{style:{flex:1,height:1,background:C.border}}),
+        React.createElement('div',{style:{fontSize:11,color:C.t.muted,fontWeight:500}},'\u2014 or enter code manually \u2014'),
+        React.createElement('div',{style:{flex:1,height:1,background:C.border}})),
+      /* Code input */
+      React.createElement('div',{style:{display:'flex',gap:6,marginBottom:16}},
+        '482909'.split('').map((ch,i)=>React.createElement('div',{key:i,style:{width:40,height:52,background:C.s.elevated,borderRadius:C.r.sm,border:`1.5px solid ${i===3?C.a.cyan:C.border}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:24,fontWeight:600,color:C.t.primary,fontFamily:'JetBrains Mono'}},ch))),
+      /* Claim button */
+      React.createElement('div',{onClick:()=>setStep('success'),style:{width:'100%',maxWidth:280,background:C.a.cyan,borderRadius:C.r.sm,height:48,display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,fontWeight:600,color:C.a.fg,marginBottom:16,cursor:'pointer'}},'Claim device'),
+      /* Status */
+      React.createElement('div',{style:{display:'flex',alignItems:'center',gap:6}},
+        React.createElement('div',{style:{width:7,height:7,borderRadius:999,background:C.sem.warning}}),
+        React.createElement('div',{style:{fontSize:11,color:C.t.muted}},'Waiting for host approval\u2026'))):
+
+    /* Success state */
+    React.createElement('div',{style:{flex:1,display:'flex',flexDirection:'column',alignItems:'center',padding:'0 24px 24px',marginTop:60}},
+      React.createElement('div',{style:{width:64,height:64,borderRadius:999,background:`${C.sem.success}18`,border:`1.5px solid ${C.sem.success}40`,display:'flex',alignItems:'center',justifyContent:'center',marginBottom:20}},
+        React.createElement('div',{style:{fontSize:28,color:C.sem.success,fontWeight:700}},'\u2713')),
+      React.createElement('div',{style:{fontSize:18,fontWeight:600,color:C.sem.success,marginBottom:4}},'Paired successfully'),
+      React.createElement('div',{style:{fontSize:13,color:C.t.primary,fontWeight:500,marginBottom:4}},'MacBook Pro \u00B7 Local'),
+      React.createElement('div',{style:{fontSize:11,color:C.t.muted,marginBottom:28}},'Trusted since just now'),
+      React.createElement('div',{style:{width:'100%',maxWidth:280,background:C.a.cyan,borderRadius:C.r.sm,height:48,display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,fontWeight:600,color:C.a.fg,cursor:'pointer'},onClick:()=>setStep('scanning')},'Continue to dashboard')));}
+
+/* ═══ Screen 3: Sessions List ═══ */
+function SessionsListScreen(){
+  const [showEmpty,setShowEmpty]=useState(false);
+  const sessions=[
+    {name:'code-review \u00B7 main',status:'Running',chipColor:C.a.cyan,host:'MacBook Pro',elapsed:'2m',preview:'Applying review feedback to src/auth.ts\u2026'},
+    {name:'refactor-auth',status:'Paused',chipColor:C.sem.warning,host:'MacBook Pro',elapsed:'4m 12s',preview:'Awaiting your response on OAuth flow design\u2026'},
+    {name:'deploy-config',status:'Completed',chipColor:C.mono,host:'MacBook Pro',elapsed:'12m',preview:'Deploy pipeline updated. 3 services restarted.'},
+    {name:'api-migration',status:'Error',chipColor:C.sem.danger,host:'MacBook Pro',elapsed:'1h',preview:'Build failed at step 3: type mismatch in handlers.ts'},
+    {name:'lint-fixes',status:'Running',chipColor:C.a.cyan,host:'Mac Studio',elapsed:'3m',preview:'Running ESLint across packages/\u2026'},
+  ];
+  const statusDot={
+    Running:C.a.cyan, Paused:C.sem.warning, Completed:C.mono, Error:C.sem.danger,
+  };
+  return React.createElement('div',{style:{background:C.s.base,minHeight:'100%',display:'flex',flexDirection:'column'}},
+    React.createElement('div',{style:{flex:1,overflow:'auto',position:'relative'}},
+      /* Sticky header */
+      React.createElement('div',{style:{padding:'12px 16px',background:C.s.elevated,borderBottom:`1px solid ${C.border}`,position:'sticky',top:0,zIndex:5}},
+        React.createElement('div',{style:{fontSize:18,fontWeight:700,color:C.t.primary}},'Sessions'),
+        React.createElement('div',{style:{fontSize:11,color:C.t.muted,fontWeight:500,marginTop:2}},'MacBook Pro \u00B7 Local')),
+      showEmpty?
+      /* Empty state */
+      React.createElement('div',{style:{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:'80px 24px',textAlign:'center'}},
+        React.createElement('div',{style:{width:48,height:48,borderRadius:999,background:C.s.elevated,border:`1px solid ${C.border}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,color:C.t.muted,marginBottom:16}},'\u25C9'),
+        React.createElement('div',{style:{fontSize:14,fontWeight:600,color:C.t.primary,marginBottom:6}},'No sessions'),
+        React.createElement('div',{style:{fontSize:12,color:C.t.muted,lineHeight:'18px'}},'Start one from your host console')):
+      /* List */
+      React.createElement('div',{style:{padding:12}},
+        sessions.map(s=>React.createElement(Card,{key:s.name,style:{marginBottom:8}},
+          React.createElement('div',{style:{display:'flex',alignItems:'flex-start',gap:10}},
+            React.createElement('div',{style:{width:32,height:32,borderRadius:C.r.sm,background:C.s.base,border:`1px solid ${C.border}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,color:statusDot[s.status]||C.t.muted,flexShrink:0,marginTop:1}},'\u25C9'),
+            React.createElement('div',{style:{flex:1,minWidth:0}},
+              React.createElement('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:3}},
+                React.createElement('div',{style:{fontSize:13,fontWeight:600,color:C.t.primary,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis',flex:1}},s.name),
+                React.createElement(StatusChip,{label:s.status,color:s.chipColor})),
+              React.createElement('div',{style:{fontSize:10,color:C.t.muted,marginBottom:4}},s.host,' \u00B7 ',s.elapsed),
+              React.createElement('div',{style:{fontSize:11,color:C.t.muted,lineHeight:'16px',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis',fontFamily:'JetBrains Mono'}},s.preview)))))),
+      /* FAB */
+      React.createElement('div',{onClick:()=>setShowEmpty(!showEmpty),style:{position:'absolute',bottom:80,right:16,width:48,height:48,borderRadius:999,background:C.a.cyan,display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,color:C.a.fg,boxShadow:'0 4px 16px rgba(6,182,212,.35)',zIndex:10,cursor:'pointer'}},'+')),
+    React.createElement(BottomNav,{active:'sessions'}));}
+
+/* ═══ Screen 4: Active Session (HIGHEST PRIORITY) ═══ */
+function ActiveSessionScreen(){
+  const [paused, setPaused] = useState(false);
+  const outputText=[
+    {t:'$ refactor-agent v3.0.1 initialized',c:C.mono},
+    {t:'$ Session sess_9c2d4e attached to refactor-auth',c:C.mono},
+    {t:'> Analyzing auth module (147 lines, 8 functions)',c:C.t.primary},
+    {t:'> \u2713 Found 3 deprecated patterns',c:C.sem.success},
+    {t:'> \u26A0 Circular dependency: auth.ts → api.ts → auth.ts',c:C.sem.warning},
+    {t:'> Refactoring: extracting tokenService from auth.ts',c:C.t.primary},
+    {t:'> Writing changes to 4 files\u2026',c:C.t.primary},
+  ];
+  return React.createElement('div',{style:{background:C.s.base,minHeight:'100%',display:'flex',flexDirection:'column'}},
+    /* Top bar */
+    React.createElement('div',{style:{flexShrink:0,background:C.s.elevated,borderBottom:`1px solid ${C.border}`,padding:'10px 14px'}},
+      React.createElement('div',{style:{display:'flex',alignItems:'center',gap:8,marginBottom:6}},
+        React.createElement('div',{style:{fontSize:18,color:C.t.muted}},'\u2039'),
+        React.createElement('div',{style:{fontSize:14,fontWeight:600,color:C.t.primary,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis',flex:1}},'refactor-auth'),
+        React.createElement('div',{onClick:()=>setPaused(!paused),style:{width:30,height:30,borderRadius:C.r.sm,display:'flex',alignItems:'center',justifyContent:'center',color:C.sem.danger,flexShrink:0,cursor:'pointer',fontSize:16}},'\u25A0')),
+      React.createElement('div',{style:{display:'flex',alignItems:'center',gap:8}},
+        React.createElement(StatusChip,{label:paused?'Paused':'Running',color:paused?C.sem.warning:C.a.cyan}),
+        React.createElement('div',{style:{fontSize:12,color:C.t.muted,fontFamily:'JetBrains Mono'}},paused?'Paused at 4m 12s':'Elapsed: 4m 12s'),
+        React.createElement('div',{style:{display:'flex',alignItems:'center',gap:4,padding:'3px 8px',borderRadius:999,background:C.sem.warning+'18',border:`1px solid ${C.sem.warning}30`,marginLeft:'auto'}},
+          React.createElement('div',{style:{width:6,height:6,borderRadius:999,background:C.sem.warning}}),
+          React.createElement('div',{style:{fontSize:9,fontWeight:600,color:C.sem.warning}},'1 approval')))),
+    /* Output stream */
+    React.createElement('div',{style:{flex:1,overflow:'auto',background:'#0a0f18',padding:12,margin:0,opacity:paused?0.5:1}},
+      outputText.map((o,i)=>React.createElement('div',{key:i,style:{fontSize:13,fontFamily:'JetBrains Mono',color:o.c,padding:'2px 0',lineHeight:'20px',wordBreak:'break-word'}},o.t)),
+      !paused?React.createElement('div',{style:{display:'flex',alignItems:'center',gap:4,marginTop:4}},
+        React.createElement('div',{style:{width:2,height:16,background:C.a.cyan,animation:'blink 1s step-end infinite'}}),
+        React.createElement('div',{style:{fontSize:13,fontFamily:'JetBrains Mono',color:C.a.cyan}},'_')):
+      React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'center',padding:'20px 0'}},
+        React.createElement('div',{onClick:()=>setPaused(false),style:{padding:'8px 20px',borderRadius:C.r.sm,background:C.a.cyan,fontSize:13,fontWeight:600,color:C.a.fg,cursor:'pointer'}},'Resume'))),
+    /* Approval banner */
+    React.createElement('div',{style:{flexShrink:0,margin:'0 14px 8px',padding:'10px 12px',borderRadius:C.r.md,background:`${C.sem.warning}15`,border:`1px solid ${C.sem.warning}30`,display:'flex',alignItems:'center',gap:8}},
+      React.createElement('div',{style:{width:6,height:6,borderRadius:999,background:C.sem.warning,flexShrink:0}}),
+      React.createElement('div',{style:{flex:1,minWidth:0}},
+        React.createElement('div',{style:{fontSize:11,fontWeight:500,color:C.sem.warning}},'Approval needed'),
+        React.createElement('div',{style:{fontSize:10,color:C.t.muted,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}},'Write to /etc/hosts')),
+      React.createElement('div',{style:{height:26,padding:'0 12px',borderRadius:C.r.sm,background:C.sem.success,display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:500,color:'#064e3b',cursor:'pointer'}},'Approve'),
+      React.createElement('div',{style:{height:26,padding:'0 12px',borderRadius:C.r.sm,border:`1px solid ${C.sem.danger}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:500,color:C.sem.danger,cursor:'pointer'}},'Deny')),
+    /* Secondary action row (icons) */
+    React.createElement('div',{style:{flexShrink:0,display:'flex',gap:6,padding:'0 14px 8px'}},
+      [
+        {icon:'\u275A\u275A',label:'Pause'},
+        {icon:'\u2398',label:'Copy'},
+        {icon:'\u2630',label:'Artifacts',badge:2},
+      ].map(a=>React.createElement('div',{key:a.label,style:{width:36,height:36,background:C.s.elevated,borderRadius:C.r.sm,border:`1px solid ${C.border}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,color:C.t.muted,position:'relative',cursor:'pointer'}},
+        a.badge?React.createElement('div',{style:{position:'absolute',top:-3,right:-3,minWidth:14,height:14,borderRadius:999,background:C.sem.danger,display:'flex',alignItems:'center',justifyContent:'center',fontSize:9,fontWeight:700,color:'#fff',padding:'0 3px'}},a.badge):null,
+        a.icon))),
+    /* Input bar */
+    React.createElement('div',{style:{flexShrink:0,padding:'6px 14px 20px',background:C.s.base,borderTop:`1px solid ${C.border}30`}},
+      React.createElement('div',{style:{display:'flex',gap:8}},
+        React.createElement('div',{style:{flex:1,height:44,background:C.s.elevated,borderRadius:C.r.md,border:`1px solid ${C.border}`,padding:'0 14px',display:'flex',alignItems:'center',fontSize:14,color:C.t.muted}},'Send a message\u2026'),
+        React.createElement('div',{style:{width:44,height:44,background:C.a.cyan,borderRadius:C.r.md,display:'flex',alignItems:'center',justifyContent:'center',fontSize:16,color:C.a.fg,fontWeight:600,flexShrink:0}},'\u2191'))));}
+
+/* ═══ Screen 5: Approvals ═══ */
+function ApprovalsScreen(){
+  const approvals=[
+    {agent:'code-review-agent',action:'Write to src/auth.ts',desc:'Proposes changing OAuth2 callback handler to support PKCE flow. Affects 3 files, 42 lines.',risk:'Medium',riskColor:C.sem.warning},
+    {agent:'deploy-bot',action:'Restart production service',desc:'Wants to restart api-gateway to apply new rate-limit config. 0 downtime expected.',risk:'High',riskColor:C.sem.danger},
+    {agent:'refactor-agent',action:'Delete deprecated module',desc:'Removes src/legacy/auth-v1.ts and its tests. Import audit shows 0 references.',risk:'Low',riskColor:C.sem.success},
+  ];
+  return React.createElement('div',{style:{background:C.s.base,minHeight:'100%',display:'flex',flexDirection:'column'}},
+    React.createElement('div',{style:{flex:1,overflow:'auto',padding:16}},
+      React.createElement('div',{style:{fontSize:20,fontWeight:700,color:C.t.primary,marginBottom:12,letterSpacing:'-0.02em'}},'Approvals'),
+      React.createElement('div',{style:{fontSize:11,color:C.t.muted,fontWeight:500,textTransform:'uppercase',letterSpacing:'0.05em',marginBottom:12}},'3 pending'),
+      approvals.map(a=>React.createElement(Card,{key:a.agent,style:{marginBottom:10}},
+        React.createElement('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:6}},
+          React.createElement('div',{style:{fontSize:12,fontWeight:600,color:C.t.primary}},'\u25C9 ',a.agent),
+          React.createElement(Pill,{label:a.risk,color:a.riskColor})),
+        React.createElement('div',{style:{fontSize:12,fontWeight:500,color:C.a.cyan,marginBottom:4}},'Action: ',a.action),
+        React.createElement('div',{style:{fontSize:10,color:C.t.muted,lineHeight:'15px',marginBottom:10}},a.desc),
+        React.createElement('div',{style:{display:'flex',gap:8}},
+          React.createElement('div',{style:{flex:1,height:34,borderRadius:C.r.sm,border:`1px solid ${C.sem.danger}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:500,color:C.sem.danger}},'Deny'),
+          React.createElement('div',{style:{flex:1,height:34,borderRadius:C.r.sm,background:C.sem.success,display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:500,color:'#064e3b'}},'Approve'))))),
+    React.createElement(BottomNav,{active:'approvals'}));}
+
+/* ═══ Screen 6: Device Inspector ═══ */
+function InspectScreen(){
+  const lines=[
+    {n:62,t:'  const token = await exchangeCode(code);',c:null},{n:63,t:'  if (!token) throw new AuthError();',c:null},
+    {n:64,t:'-  return resolve(token);',c:C.sem.danger+'30',key:'l64a'},{n:64,t:'+  return await resolve(token);',c:C.sem.success+'30',key:'l64b'},
+    {n:65,t:'  } catch (e) {',c:null},{n:66,t:'    logger.error(\'OAuth exchange failed\', e);',c:null},
+    {n:67,t:'+   return { error: e.message };',c:C.sem.success+'30'},{n:68,t:'  }',c:null},
+  ];
+  return React.createElement('div',{style:{background:C.s.base,minHeight:'100%',display:'flex',flexDirection:'column'}},
+    React.createElement('div',{style:{flexShrink:0,background:C.s.elevated,borderBottom:`1px solid ${C.border}`,padding:'10px 14px'}},
+      React.createElement('div',{style:{fontSize:14,fontWeight:600,color:C.t.primary}},'src/auth.ts'),
+      React.createElement('div',{style:{display:'flex',gap:8,marginTop:3}},
+        React.createElement('div',{style:{fontSize:10,color:C.t.muted,fontFamily:'JetBrains Mono'}},'artifact_9f2a'),
+        React.createElement('div',{style:{fontSize:10,color:C.t.muted}},'\u00B7'),React.createElement('div',{style:{fontSize:10,color:C.t.muted}},'2.4 KB')),
+      React.createElement('div',{style:{display:'flex',gap:4,marginTop:8}},
+        React.createElement(Pill,{label:'+3 lines',color:C.sem.success}),React.createElement(Pill,{label:'-1 line',color:C.sem.danger}))),
+    React.createElement('div',{style:{flex:1,overflow:'auto',background:'#0a0f18',padding:8}},
+      lines.map((l,i)=>React.createElement('div',{key:l.key||(l.n+'-'+i),style:{display:'flex',fontFamily:'JetBrains Mono',fontSize:10,lineHeight:'20px',padding:'0 4px',background:l.c||'transparent',borderRadius:2}},
+        React.createElement('div',{style:{width:28,textAlign:'right',color:C.mono,marginRight:10,flexShrink:0}},l.n),
+        React.createElement('div',{style:{color:C.t.primary,whiteSpace:'pre'}},l.t)))),
+    React.createElement(BottomNav,{active:'inspect'}));}
+
+/* ═══ Screen 7: Trusted Devices ═══ */
+function TrustedDevicesScreen(){
+  const devices=[
+    {name:'MacBook Pro 16\u201D',os:'macOS 15',paired:'Apr 28, 2026',trusted:true,id:'device_7f3a'},
+    {name:'Mac Studio',os:'macOS 15',paired:'Apr 27, 2026',trusted:true,id:'device_a12b'},
+    {name:'Ubuntu Box',os:'Linux 6.8',paired:'Apr 25, 2026',trusted:false,id:'device_c4d9'},
+  ];
+  return React.createElement('div',{style:{background:C.s.base,minHeight:'100%',display:'flex',flexDirection:'column'}},
+    React.createElement('div',{style:{flex:1,overflow:'auto',padding:16}},
+      React.createElement('div',{style:{fontSize:20,fontWeight:700,color:C.t.primary,marginBottom:12,letterSpacing:'-0.02em'}},'Trusted Devices'),
+      devices.map(d=>React.createElement(Card,{key:d.id,style:{marginBottom:8}},
+        React.createElement('div',{style:{display:'flex',alignItems:'center',gap:10}},
+          React.createElement('div',{style:{width:36,height:36,borderRadius:C.r.sm,background:C.s.base,border:`1px solid ${C.border}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,color:C.t.muted,flexShrink:0}},'\u2325'),
+          React.createElement('div',{style:{flex:1,minWidth:0}},
+            React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between'}},
+              React.createElement('div',{style:{fontSize:13,fontWeight:600,color:C.t.primary}},d.name),
+              React.createElement(StatusChip,{label:d.trusted?'Trusted':'Revoked',color:d.trusted?C.sem.success:C.sem.danger})),
+            React.createElement('div',{style:{fontSize:10,color:C.t.muted,marginTop:2}},d.os,' \u00B7 Paired ',d.paired),
+            React.createElement('div',{style:{fontSize:10,color:C.mono,fontFamily:'JetBrains Mono',marginTop:2}},d.id))),
+        !d.trusted?null:React.createElement('div',{style:{marginTop:10,height:30,borderRadius:C.r.sm,border:`1px solid ${C.sem.danger}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:500,color:C.sem.danger}},'Revoke Trust')))),
+    React.createElement(BottomNav,{active:'settings'}));}
+
+/* ═══ Screen 8: Settings ═══ */
+function SettingsScreen(){
+  const sections=[
+    {label:'Appearance',items:[{label:'Dark Mode',type:'toggle',on:true},{label:'Display Density',type:'select',val:'Compact'}]},
+    {label:'Notifications',items:[{label:'Approval Alerts',type:'toggle',on:true},{label:'Session Updates',type:'toggle',on:false},{label:'Connection Events',type:'toggle',on:true}]},
+    {label:'Connection',items:[{label:'Timeout',type:'select',val:'30 seconds'},{label:'Relay Preference',type:'select',val:'Auto-detect'}]},
+    {label:'Security',items:[{label:'Export Audit Logs',type:'action',danger:false},{label:'Revoke All Trust',type:'action',danger:true}]},
+  ];
+  return React.createElement('div',{style:{background:C.s.base,minHeight:'100%',display:'flex',flexDirection:'column'}},
+    React.createElement('div',{style:{flex:1,overflow:'auto',padding:16}},
+      React.createElement('div',{style:{fontSize:20,fontWeight:700,color:C.t.primary,marginBottom:16,letterSpacing:'-0.02em'}},'Settings'),
+      sections.map((sec,i)=>React.createElement('div',{key:sec.label,style:{marginBottom:16}},
+        React.createElement('div',{style:{fontSize:10,fontWeight:600,color:C.a.cyan,textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:8}},'# ',sec.label),
+        React.createElement('div',{style:{background:C.s.elevated,borderRadius:C.r.md,border:`1px solid ${C.border}`,overflow:'hidden'}},
+          sec.items.map((item,j)=>React.createElement('div',{key:item.label,style:{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'12px 14px',borderBottom:j<sec.items.length-1?`1px solid ${C.border}20`:'none'}},
+            React.createElement('div',{style:{fontSize:13,color:item.danger?C.sem.danger:C.t.primary}},item.label),
+            item.type==='toggle'?React.createElement('div',{style:{width:40,height:22,borderRadius:999,background:item.on?C.a.cyan:C.s.base,border:`1px solid ${item.on?C.a.cyan:C.border}`,position:'relative'}},
+              React.createElement('div',{style:{width:16,height:16,borderRadius:999,background:'#fff',position:'absolute',top:2,left:(item.on?22:2)}})):
+            item.type==='select'?React.createElement('div',{style:{fontSize:12,color:C.t.muted,fontFamily:'JetBrains Mono'}},item.val,' \u203A'):
+            item.type==='action'?React.createElement('div',{style:{fontSize:12,color:item.danger?C.sem.danger:C.a.cyan,fontWeight:500}},'\u2192'):
+            null)))))),
+    React.createElement(BottomNav,{active:'settings'}));}
+
+/* ═══ App ═══ */
+function App(){
+  const screens=[
+    {id:1,label:'Home',cmp:HomeScreen},
+    {id:2,label:'Pairing \u2605',cmp:PairingScreen},
+    {id:3,label:'Sessions',cmp:SessionsListScreen},
+    {id:4,label:'Active Session \u2605',cmp:ActiveSessionScreen},
+    {id:5,label:'Approvals',cmp:ApprovalsScreen},
+    {id:6,label:'Inspector',cmp:InspectScreen},
+    {id:7,label:'Trusted Devices',cmp:TrustedDevicesScreen},
+    {id:8,label:'Settings',cmp:SettingsScreen},
+  ];
+  return React.createElement('div',{style:{display:'flex',gap:24,flexWrap:'wrap',padding:36,alignItems:'flex-start',justifyContent:'center',background:'#080c14',minHeight:'100vh'}},
+    React.createElement('div',{style:{width:'100%',textAlign:'center',marginBottom:4}},
+      React.createElement('div',{style:{fontSize:26,fontWeight:700,color:C.t.primary,letterSpacing:'-0.02em'}},'Sessio'),
+      React.createElement('div',{style:{fontSize:11,color:C.t.muted,marginTop:4}},'8 screens \u00B7 iPhone 14 Pro \u00B7 dark mode \u00B7 app prototype')),
+    screens.map(s=>React.createElement('div',{key:s.id},
+      React.createElement('div',{style:{fontSize:10,fontWeight:600,color:C.mono,marginBottom:8,textAlign:'center',letterSpacing:'0.06em',textTransform:'uppercase'}},s.label),
+      React.createElement(IosFrame,{w:393,h:852,time:'9:41',bat:85},
+        React.createElement(s.cmp)))));}
+
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+</script></body></html>

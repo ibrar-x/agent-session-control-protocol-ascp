@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "shadcn_localizations",
+  "name": "Shadcn Localizations",
+  "version": "1.0.0",
+  "tags": [
+    "localization",
+    "i18n",
+    "delegate"
+  ],
+  "installedAt": "2026-05-25T10:42:43.777582Z",
+  "shared": [],
+  "dependsOn": [
+    "shadcn_localizations_en"
+  ],
+  "files": [
+    "registry/components/utility/shadcn_localizations/_impl/utils/shadcn_localizations_delegate.dart",
+    "registry/components/utility/shadcn_localizations/shadcn_localizations.dart"
+  ],
+  "registryNamespace": "shadcn",
+  "manifestSource": "componentsJson",
+  "registryRoot": "/Users/ibrar/.config/superpowers/worktrees/shadcn_flutter_kit/branch-v1-registry-overlay-nav-manifests/flutter_shadcn_kit/lib/registry"
+}
