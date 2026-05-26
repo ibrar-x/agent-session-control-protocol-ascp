@@ -46,6 +46,19 @@ Riverpod owns the default app dependency graph through `mobileRuntimeConfigProvi
 
 `MobileDependencies.memory()` keeps deterministic in-memory controllers for tests and local shell previews. `MobileDependencies.live()` wires Dio-backed ASCP JSON-RPC repositories, daemon admin/pairing repositories, a lazy WebSocket subscription repository, `FlutterSecureStore`, `DeviceLocalAuthGate`, and the `mobile_scanner` QR scanner path.
 
+The default provider reads live device configuration from `--dart-define` values. Incomplete live configuration falls back to memory mode so local previews stay deterministic:
+
+```bash
+flutter run \
+  --dart-define=CONTINUUM_MOBILE_MODE=live \
+  --dart-define=CONTINUUM_ASCP_RPC_ENDPOINT=http://127.0.0.1:18787/rpc \
+  --dart-define=CONTINUUM_ASCP_WS_ENDPOINT=ws://127.0.0.1:18787/rpc \
+  --dart-define=CONTINUUM_DAEMON_ADMIN_BASE_URL=http://127.0.0.1:18787 \
+  --dart-define=CONTINUUM_HOST_ID=host_local \
+  --dart-define=CONTINUUM_ACTIVE_SESSION_ID=sess_active \
+  --dart-define=CONTINUUM_DEVICE_ID=device_mobile
+```
+
 ## Test Workflow
 
 Development is test-driven:
