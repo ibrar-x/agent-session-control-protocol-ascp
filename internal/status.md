@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-05-26 - Mobile live runtime configuration
+
+- Branch: `branch-mobile-live-runtime-config`
+- Commit: this commit
+- Summary: continued the mobile app with Codex as orchestrator and attempted a low-cost OpenCode Go advisory route through the cost-aware workflow; the route timed out without file changes, so the runtime-config refinement was implemented locally with TDD. Added `MobileRuntimeConfig.fromEnvironment` so the default Riverpod provider can boot live dependencies from explicit `--dart-define` values, with incomplete live configuration falling back to deterministic memory mode.
+- Documentation updated: `internal/plans.md`, `internal/status.md`, `apps/mobile/README.md`
+- Next likely step: run the documented `flutter run --dart-define=...` command against a live ASCP host/daemon endpoint on a simulator or physical device.
+
 ### 2026-05-25 - Mobile live wiring and scanner path
 
 - Branch: `branch-mobile-flutter-app`

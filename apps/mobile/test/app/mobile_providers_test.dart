@@ -8,6 +8,44 @@ import 'package:mobile/features/sessions/data/session_repository.dart';
 import 'package:mobile/features/sessions/domain/timeline_event.dart';
 
 void main() {
+  test('runtime config parses live dart define values', () {
+    final config = MobileRuntimeConfig.fromEnvironment(
+      read: (key) => switch (key) {
+        'CONTINUUM_MOBILE_MODE' => 'live',
+        'CONTINUUM_ASCP_RPC_ENDPOINT' => 'http://127.0.0.1:18787/rpc',
+        'CONTINUUM_ASCP_WS_ENDPOINT' => 'ws://127.0.0.1:18787/rpc',
+        'CONTINUUM_DAEMON_ADMIN_BASE_URL' => 'http://127.0.0.1:18787',
+        'CONTINUUM_HOST_ID' => 'host_env',
+        'CONTINUUM_ACTIVE_SESSION_ID' => 'sess_env',
+        'CONTINUUM_DEVICE_ID' => 'device_env',
+        _ => '',
+      },
+    );
+
+    expect(config.isLive, isTrue);
+    expect(config.rpcEndpoint, Uri.parse('http://127.0.0.1:18787/rpc'));
+    expect(config.websocketEndpoint, Uri.parse('ws://127.0.0.1:18787/rpc'));
+    expect(config.daemonAdminBaseUrl, Uri.parse('http://127.0.0.1:18787'));
+    expect(config.hostId, 'host_env');
+    expect(config.activeSessionId, 'sess_env');
+    expect(config.currentDeviceId, 'device_env');
+  });
+
+  test('runtime config ignores incomplete live dart define values', () {
+    final config = MobileRuntimeConfig.fromEnvironment(
+      read: (key) => switch (key) {
+        'CONTINUUM_MOBILE_MODE' => 'live',
+        'CONTINUUM_ASCP_RPC_ENDPOINT' => 'http://127.0.0.1:18787/rpc',
+        'CONTINUUM_HOST_ID' => 'host_env',
+        _ => '',
+      },
+    );
+
+    expect(config.isLive, isFalse);
+    expect(config.hostId, 'host_1');
+    expect(config.activeSessionId, 'session_1');
+  });
+
   test('mobile dependencies provider defaults to memory dependencies', () {
     final container = ProviderContainer();
     addTearDown(container.dispose);
