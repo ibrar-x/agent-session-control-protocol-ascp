@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "id": "tabs",
+  "name": "Tabs",
+  "version": "1.0.0",
+  "tags": [
+    "tabs",
+    "navigation",
+    "layout"
+  ],
+  "installedAt": "2026-05-25T11:23:17.870844Z",
+  "shared": [
+    "border_utils",
+    "constants",
+    "fade_scroll",
+    "geometry_extensions",
+    "outlined_container",
+    "style_value",
+    "theme",
+    "util"
+  ],
+  "dependsOn": [
+    "sortable"
+  ],
+  "files": [
+    "registry/components/navigation/tabs/_impl/core/clip_rect_with_adjustment.dart",
+    "registry/components/navigation/tabs/_impl/core/keyed_tab_child_widget.dart",
+    "registry/components/navigation/tabs/_impl/core/keyed_tab_item.dart",
+    "registry/components/navigation/tabs/_impl/core/tab_child_widget.dart",
+    "registry/components/navigation/tabs/_impl/core/tab_container.dart",
+    "registry/components/navigation/tabs/_impl/core/tab_container_data.dart",
+    "registry/components/navigation/tabs/_impl/core/tab_ghost_data.dart",
+    "registry/components/navigation/tabs/_impl/core/tab_item.dart",
+    "registry/components/navigation/tabs/_impl/core/tab_item_painter.dart",
+    "registry/components/navigation/tabs/_impl/core/tab_list.dart",
+    "registry/components/navigation/tabs/_impl/core/tab_pane_data.dart",
+    "registry/components/navigation/tabs/_impl/core/tab_pane_typedefs.dart",
+    "registry/components/navigation/tabs/_impl/core/tab_pane_widget.dart",
+    "registry/components/navigation/tabs/_impl/core/tabs_widget.dart",
+    "registry/components/navigation/tabs/_impl/state/_tabs_preview_state.dart",
+    "registry/components/navigation/tabs/_impl/state/tab_pane_state.dart",
+    "registry/components/navigation/tabs/_impl/styles/tabs_text_styles.dart",
+    "registry/components/navigation/tabs/_impl/themes/base/tabs_theme.dart",
+    "registry/components/navigation/tabs/_impl/themes/config/tabs_theme_config.dart",
+    "registry/components/navigation/tabs/_impl/themes/config/tabs_theme_defaults.dart",
+    "registry/components/navigation/tabs/_impl/themes/config/tabs_theme_schema.dart",
+    "registry/components/navigation/tabs/_impl/themes/config/tabs_theme_tokens.dart",
+    "registry/components/navigation/tabs/_impl/themes/variants/tab_container_theme.dart",
+    "registry/components/navigation/tabs/_impl/themes/variants/tab_list_theme.dart",
+    "registry/components/navigation/tabs/_impl/themes/variants/tab_pane_theme.dart",
+    "registry/components/navigation/tabs/_impl/utils/tab_builder_typedefs.dart",
+    "registry/components/navigation/tabs/tabs.dart"
+  ],
+  "registryNamespace": "shadcn",
+  "manifestSource": "componentsJson",
+  "registryRoot": "/Users/ibrar/.config/superpowers/worktrees/shadcn_flutter_kit/branch-v1-registry-overlay-nav-manifests/flutter_shadcn_kit/lib/registry"
+}

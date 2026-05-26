@@ -12,84 +12,91 @@ This file tracks the active scoped work for the current branch.
 
 ## Active State
 
-- Feature name: Host pairing UI slice
-- Branch: `branch-host-pairing-ui`
-- Goal: add a host-side pairing and trusted-device administration workspace inside `apps/host-console` on top of the completed daemon pairing backend, without changing frozen ASCP semantics or mixing daemon-wide onboarding state into the session chat workspace
+- Feature name: Mobile companion Flutter architecture and build plan
+- Branch: `branch-mobile-flutter-app`
+- Goal: build the Flutter-first mobile companion app foundation with feature-first folders, shadcn UI primitives, exact ASCP core models, JSON-RPC transports, pairing/trust foundations, app shell, feature domain slices, and replay cursor persistence
 - Source inputs:
   - `AGENTS.md`
   - `internal/plans.md`
   - `internal/status.md`
   - `README.md`
   - `protocol/ASCP_Protocol_Detailed_Spec_v0_1.md`
-  - `protocol/spec/methods.md`
-  - `protocol/spec/events.md`
-  - `protocol/spec/auth.md`
-  - `protocol/spec/compatibility.md`
-  - `docs/superpowers/specs/2026-04-28-host-daemon-auth-trust-design.md`
-  - `docs/superpowers/plans/2026-04-28-host-daemon-pairing-backend.md`
-  - `services/host-daemon/README.md`
-  - `apps/host-console/README.md`
-  - `apps/host-console/src/App.tsx`
-  - `apps/host-console/src/components/`
+  - `protocol/ASCP_Protocol_PRD_and_Build_Guide.md`
+  - `docs/superpowers/specs/2026-04-28-mobile-companion-design.md`
+  - `docs/superpowers/plans/2026-04-28-mobile-companion.md`
+  - `apps/mobile/index.html`
+  - `apps/mobile/sessio.html`
+  - `/Users/ibrar/Desktop/infinora.noworkspace/Continuum App/Continuum Design System/BUILD_ORDER.md`
 
 ## Scope
 
-Included in this branch:
+Included in this planning slice:
 
-- add a separate pairing/admin workspace inside `apps/host-console`
-- add a host-side pairing session lifecycle view with inline create action
-- add a focused pending-approval action queue for claimed devices
-- add a trusted-device list plus revoke controls
-- add daemon-admin polling and refresh behavior scoped to non-terminal pairing sessions
-- update host-console docs and branch tracking for the host pairing UI slice
+- define the Flutter app architecture under `apps/mobile`
+- define feature-first folder ownership and boundaries
+- choose default state management and allowed alternatives
+- choose current Flutter/Dart packages for HTTP, WebSocket, routing, models, security, persistence, QR scanning, and tests
+- translate the Continuum Design System build order into Flutter implementation phases
+- require Flutter shadcn CLI initialization, dry-run-first component installation, validation, audit, and dependency checks
+- require test-driven development, widget tests, golden tests, and integration tests before implementation is considered done
 
 Explicitly out of scope:
 
 - protocol redesign
-- mobile pairing UI implementation
-- daemon backend changes beyond small UI-enabling adjustments
+- implementation code in this planning slice
+- daemon backend changes
+- host-console changes
 - TLS network transport
 - relay transport auth
 - runtime-specific trust policy
-- creating a new standalone host admin app
+- product UI behavior that changes ASCP semantics
 
 ## Planned Files
 
 Files expected to be added or modified in this slice:
 
-- `docs/superpowers/specs/2026-04-28-host-pairing-ui-design.md`
-- `docs/superpowers/plans/2026-04-28-host-pairing-ui.md`
+- `docs/superpowers/specs/2026-04-28-mobile-companion-design.md`
+- `docs/superpowers/plans/2026-04-28-mobile-companion.md`
 - `internal/plans.md`
-- `internal/status.md`
-- `README.md`
-- `apps/host-console/README.md`
-- `apps/host-console/src/App.tsx`
-- `apps/host-console/src/model.ts`
-- `apps/host-console/src/model.test.ts`
-- `apps/host-console/src/styles.css`
-- `apps/host-console/src/components/`
-- `apps/host-console/src/pairing/`
+- `internal/status.md` after the planning checkpoint is committed
 
 ## Tasks
 
 | Status | Task | Acceptance Criteria |
 | --- | --- | --- |
-| completed | add pairing workspace shell | host console exposes a clear workspace switch between session operations and pairing/admin without regressing the existing session workspace |
-| completed | add pairing session lifecycle UI | hosts can create pairing sessions inline, see lifecycle state transitions, and view code, expiry, and claim details from one session list |
-| completed | add approval queue and device management UI | pending claims are actionable in a focused queue and trusted devices can be reviewed and revoked |
-| completed | update docs and verify the slice | host-console docs and branch tracker describe the pairing workspace contract, and focused frontend verification passes |
+| completed | research current Flutter packages | package matrix includes current pub.dev versions for state, HTTP, WebSocket, routing, models, security, persistence, QR, and tests |
+| completed | define Flutter architecture | plan defines feature-first folder structure, ASCP core client boundary, transport model, design-system layer, and route map |
+| completed | define Flutter shadcn CLI workflow | plan requires `flutter_shadcn init`, dry-run-first installs, validation, audit, and dependency checks |
+| completed | define TDD execution flow | plan requires failing tests first, widget/golden coverage, integration tests, docs, and tracker updates |
+| completed | scaffold Flutter app | Flutter project exists under `apps/mobile`, runtime/dev dependencies resolve, bootstrap and token tests pass, and `flutter analyze` is clean |
+| completed | initialize Flutter shadcn foundation | `flutter_shadcn init`, local registry fallback, dry-run, and app/card/button/badge installs completed; audit and deps pass |
+| completed | resolve shadcn registry validation gap | local registry manifest now includes the missing markdown live preview dependency and `flutter_shadcn validate --json` passes |
+| completed | build ASCP model foundation | exact ASCP method enums, JSON-RPC envelopes, errors, session statuses, event names, and extension-safe event parsing are implemented with tests |
+| completed | build JSON-RPC transport foundation | HTTP and WebSocket JSON-RPC clients, protocol error mapping, event emission, and reconnect policy have focused tests |
+| completed | build app shell and feature domain foundations | trusted/untrusted shell, route guard, home priority ordering, pairing state/parser, session ordering, approvals actionability, inspect ordering, settings revoke rule, and replay cursor persistence pass tests |
+| completed | add pairing controller and widget flow | manual/QR scanner abstraction, claim/poll state, secure write gate, trusted/error widget states, and focused widget/domain tests pass |
+| completed | add session controllers | in-memory session repository, session list ordering/filtering, detail timeline ordering, and send-input delegation tests pass |
+| completed | add approval queue controller | queue ordering, non-actionable visibility, response delegation, and status update tests pass |
+| completed | add ASCP and daemon-backed repository adapters | sessions, approvals, and inspect have ASCP JSON-RPC adapters; pairing and settings have loopback daemon REST adapters; focused adapter tests pass |
+| completed | add live session subscription adapter | WebSocket `sessions.subscribe` maps replay/live events into timeline events, filters by session id, and exposes `sessions.unsubscribe` cleanup |
+| completed | add Drift-backed replay cursor persistence | replay cursors are stored in a generated Drift `replay_cursors` table with host/session primary key coverage and focused tests |
+| completed | add offline metadata cache | Drift stores cached session summaries, artifact metadata, and diff metadata per host/session for reconnect recovery |
+| completed | wire controller-backed feature screens | session list/detail, approval queue, inspect list, and settings device/diagnostics screens render controller state and delegate user actions |
+| completed | add live integration and production hardening | default memory/live dependency containers wire ASCP, daemon, WebSocket, pairing, settings, and scanner boundaries; integration-style shell tests and golden smoke coverage pass |
+| completed | add Riverpod provider graph | `mobileRuntimeConfigProvider` and `mobileDependenciesProvider` provide default DI with test overrides while preserving explicit constructor injection for focused widgets |
+| completed | add production security adapters | live dependencies use Flutter secure storage for trust material and local_auth for local confirmation while memory dependencies remain deterministic for tests |
 
 ## Acceptance Criteria
 
 This slice is done only when all of the following are true:
 
-- the host console has a distinct pairing/admin workspace separate from the session chat workspace
-- hosts can create a short-lived pairing session inline and immediately see it in the lifecycle list
-- `pending_host_approval` sessions remain visible in the lifecycle list and also appear in a focused approval queue
-- pairing-session polling only runs while non-terminal sessions exist and slows or stops when all visible sessions are terminal
-- trusted devices can be listed and revoked through the host console without leaving the app
-- no ASCP core method or event names are changed, and the daemon pairing backend remains the source of truth
+- `docs/superpowers/plans/2026-04-28-mobile-companion.md` is Flutter-first rather than React-first
+- the plan explicitly selects Riverpod as the default state management layer and constrains BLoC use
+- the plan includes current package choices for HTTP and WebSocket real-time communication
+- the plan references Flutter shadcn CLI as the source of truth for registry UI components
+- the plan maps `BUILD_ORDER.md` phases into Flutter design-system implementation order
+- the plan requires TDD, widget tests, golden tests, integration tests, `flutter analyze`, and shadcn validation/audit/deps checks
 
 ## Next Likely Step
 
-After this slice lands, build the mobile claim UI on top of the completed pairing backend and host pairing workspace, or extend the daemon toward TLS-backed transport without changing the host-wide trust model.
+Mobile Flutter foundation is ready for device-level validation against a running ASCP host/daemon. Next likely step is an on-device smoke run once a host endpoint is available, followed by narrower polish tickets for exhaustive per-screen golden matrices or generated Riverpod provider refinements.

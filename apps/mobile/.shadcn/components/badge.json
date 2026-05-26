@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "badge",
+  "name": "Badge",
+  "version": "1.0.0",
+  "tags": [
+    "display",
+    "status",
+    "label"
+  ],
+  "installedAt": "2026-05-25T10:42:14.109817Z",
+  "shared": [
+    "theme"
+  ],
+  "dependsOn": [
+    "button"
+  ],
+  "files": [
+    "registry/components/display/badge/_impl/core/badge_widgets.dart",
+    "registry/components/display/badge/_impl/core/destructive_badge.dart",
+    "registry/components/display/badge/_impl/core/outline_badge.dart",
+    "registry/components/display/badge/_impl/core/secondary_badge.dart",
+    "registry/components/display/badge/_impl/themes/base/badge_theme.dart",
+    "registry/components/display/badge/_impl/themes/config/badge_theme_config.dart",
+    "registry/components/display/badge/_impl/themes/config/badge_theme_defaults.dart",
+    "registry/components/display/badge/_impl/themes/config/badge_theme_schema.dart",
+    "registry/components/display/badge/_impl/themes/config/badge_theme_tokens.dart",
+    "registry/components/display/badge/badge.dart"
+  ],
+  "registryNamespace": "shadcn",
+  "manifestSource": "componentsJson",
+  "registryRoot": "/Users/ibrar/.config/superpowers/worktrees/shadcn_flutter_kit/branch-v1-registry-overlay-nav-manifests/flutter_shadcn_kit/lib/registry"
+}

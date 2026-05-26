@@ -1,0 +1,62 @@
+# Continuum Mobile
+
+Flutter companion app for ASCP host pairing, trusted-device onboarding, live session observation, approvals, artifacts, diffs, and settings.
+
+## Architecture
+
+The app uses a feature-first structure:
+
+- `lib/core/ascp`: exact ASCP method names, JSON-RPC envelopes, errors, event envelopes, statuses, and extension-safe parsing.
+- `lib/core/network`: HTTP and WebSocket JSON-RPC clients plus reconnect policy.
+- `lib/core/security`: local trust material, secure-store interface, Flutter secure-storage adapter, and local auth gate boundary.
+- `lib/core/database`: Drift-backed replay cursor persistence boundary.
+- `lib/app/mobile_dependencies.dart`: app-level memory/live dependency container that wires controllers to ASCP, daemon, scanner, and local-auth boundaries.
+- `lib/features/*`: feature-owned domain, data, application, and presentation code.
+- `lib/ui/shadcn`: components installed by `flutter_shadcn`.
+
+ASCP remains protocol-first. The mobile client must not redefine method names, event names, session statuses, replay semantics, approval semantics, or host trust behavior.
+
+## Flutter shadcn
+
+Use `flutter_shadcn` as the source of truth for registry operations:
+
+```bash
+flutter_shadcn dry-run <components> --json
+flutter_shadcn add <components>
+flutter_shadcn validate --json
+flutter_shadcn audit --json
+flutter_shadcn deps --json
+```
+
+The current foundation includes app, card, button, badge, dialog, drawer, navigation, tabs, form controls, text inputs, skeleton, toast, tooltip, timeline, and code snippet primitives.
+
+## State And Transport
+
+Riverpod is the default state-management and dependency-injection layer. BLoC is allowed only for isolated feature-local event machines.
+
+Transport is split:
+
+- HTTP JSON-RPC: ASCP discovery, session reads, approval reads/responses, artifacts, diffs, and other non-streaming protocol calls.
+- WebSocket JSON-RPC: subscriptions, event streams, input, reconnect, and replay.
+- Loopback daemon REST: pairing claim/poll and trusted-device administration. These endpoints are daemon onboarding/admin surfaces, not ASCP core methods.
+
+Replay cursors are stored in Drift per host and session. Session summaries, artifact details, and diff details are also cached by host/session so reconnect recovery can show useful metadata before fresh ASCP reads complete. `sessions.subscribe` can request replay from a known sequence and maps live/replayed ASCP events into feature-owned timeline events. The mobile client never invents missing ASCP sequence numbers.
+
+Riverpod owns the default app dependency graph through `mobileRuntimeConfigProvider` and `mobileDependenciesProvider`. Tests can override those providers through `ProviderScope`, while focused widget tests can still pass explicit `MobileDependencies` constructors.
+
+`MobileDependencies.memory()` keeps deterministic in-memory controllers for tests and local shell previews. `MobileDependencies.live()` wires Dio-backed ASCP JSON-RPC repositories, daemon admin/pairing repositories, a lazy WebSocket subscription repository, `FlutterSecureStore`, `DeviceLocalAuthGate`, and the `mobile_scanner` QR scanner path.
+
+## Test Workflow
+
+Development is test-driven:
+
+```bash
+flutter test
+flutter test test_goldens
+flutter analyze
+flutter_shadcn validate --json
+flutter_shadcn audit --json
+flutter_shadcn deps --json
+```
+
+Focused tests live beside the feature or core boundary they protect.

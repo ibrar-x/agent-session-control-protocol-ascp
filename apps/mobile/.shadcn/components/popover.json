@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "popover",
+  "name": "Popover",
+  "version": "1.0.0",
+  "tags": [
+    "overlay",
+    "popover",
+    "floating"
+  ],
+  "installedAt": "2026-05-25T11:23:18.625281Z",
+  "shared": [
+    "color_extensions",
+    "constants",
+    "geometry_extensions",
+    "overlay",
+    "theme"
+  ],
+  "dependsOn": [],
+  "files": [
+    "registry/components/overlay/popover/popover.dart"
+  ],
+  "registryNamespace": "shadcn",
+  "manifestSource": "componentsJson",
+  "registryRoot": "/Users/ibrar/.config/superpowers/worktrees/shadcn_flutter_kit/branch-v1-registry-overlay-nav-manifests/flutter_shadcn_kit/lib/registry"
+}

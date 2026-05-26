@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "timeline",
+  "name": "Timeline",
+  "version": "1.0.0",
+  "tags": [
+    "timeline",
+    "layout",
+    "chronology"
+  ],
+  "installedAt": "2026-05-25T11:23:18.575219Z",
+  "shared": [
+    "theme",
+    "util"
+  ],
+  "dependsOn": [
+    "text"
+  ],
+  "files": [
+    "registry/components/layout/timeline/_impl/core/timeline_2.dart",
+    "registry/components/layout/timeline/_impl/core/timeline_data.dart",
+    "registry/components/layout/timeline/timeline.dart"
+  ],
+  "registryNamespace": "shadcn",
+  "manifestSource": "componentsJson",
+  "registryRoot": "/Users/ibrar/.config/superpowers/worktrees/shadcn_flutter_kit/branch-v1-registry-overlay-nav-manifests/flutter_shadcn_kit/lib/registry"
+}

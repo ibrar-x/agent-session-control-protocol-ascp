@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "text",
+  "name": "Text",
+  "version": "1.0.0",
+  "tags": [
+    "text",
+    "typography"
+  ],
+  "installedAt": "2026-05-25T10:42:43.668072Z",
+  "shared": [
+    "theme"
+  ],
+  "dependsOn": [
+    "button",
+    "selectable"
+  ],
+  "files": [
+    "registry/components/display/text/_impl/core/_rich_text_then_widget.dart",
+    "registry/components/display/text/_impl/core/_selectable_text_then_widget.dart",
+    "registry/components/display/text/_impl/core/_text_then_widget.dart",
+    "registry/components/display/text/_impl/core/unordered_list_data.dart",
+    "registry/components/display/text/_impl/core/wrapped_text.dart",
+    "registry/components/display/text/text.dart"
+  ],
+  "registryNamespace": "shadcn",
+  "manifestSource": "componentsJson",
+  "registryRoot": "/Users/ibrar/.config/superpowers/worktrees/shadcn_flutter_kit/branch-v1-registry-overlay-nav-manifests/flutter_shadcn_kit/lib/registry"
+}

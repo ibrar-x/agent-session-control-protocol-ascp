@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "selectable",
+  "name": "Selectable Text",
+  "version": "1.0.0",
+  "tags": [
+    "text",
+    "selection"
+  ],
+  "installedAt": "2026-05-25T10:42:43.649202Z",
+  "shared": [
+    "theme"
+  ],
+  "dependsOn": [],
+  "files": [
+    "registry/components/display/selectable/_impl/core/selectable_text.dart",
+    "registry/components/display/selectable/selectable.dart"
+  ],
+  "registryNamespace": "shadcn",
+  "manifestSource": "componentsJson",
+  "registryRoot": "/Users/ibrar/.config/superpowers/worktrees/shadcn_flutter_kit/branch-v1-registry-overlay-nav-manifests/flutter_shadcn_kit/lib/registry"
+}

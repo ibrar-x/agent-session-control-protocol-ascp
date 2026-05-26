@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "switch",
+  "name": "Switch",
+  "version": "1.0.0",
+  "tags": [
+    "form",
+    "input",
+    "toggle"
+  ],
+  "installedAt": "2026-05-25T11:23:18.685888Z",
+  "shared": [
+    "border_utils",
+    "focus_outline",
+    "form_control",
+    "form_value_supplier",
+    "style_value",
+    "theme"
+  ],
+  "dependsOn": [],
+  "files": [
+    "registry/components/form/switch/_impl/core/controlled_switch.dart",
+    "registry/components/form/switch/_impl/core/switch_widget.dart",
+    "registry/components/form/switch/_impl/state/_switch_preview_state.dart",
+    "registry/components/form/switch/_impl/state/_switch_state.dart",
+    "registry/components/form/switch/_impl/themes/base/switch_theme.dart",
+    "registry/components/form/switch/_impl/themes/config/switch_theme_config.dart",
+    "registry/components/form/switch/_impl/themes/config/switch_theme_defaults.dart",
+    "registry/components/form/switch/_impl/themes/config/switch_theme_schema.dart",
+    "registry/components/form/switch/_impl/themes/config/switch_theme_tokens.dart",
+    "registry/components/form/switch/_impl/utils/switch_controller.dart",
+    "registry/components/form/switch/switch.dart"
+  ],
+  "registryNamespace": "shadcn",
+  "manifestSource": "componentsJson",
+  "registryRoot": "/Users/ibrar/.config/superpowers/worktrees/shadcn_flutter_kit/branch-v1-registry-overlay-nav-manifests/flutter_shadcn_kit/lib/registry"
+}
