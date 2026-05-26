@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-05-26 - Mobile trusted shell golden matrix
+
+- Branch: `branch-mobile-golden-matrix`
+- Commit: this commit
+- Summary: continued the mobile app with Codex as orchestrator and attempted a low-cost OpenCode Go advisory route through the cost-aware workflow; the route timed out without file changes, so the UI coverage refinement was implemented locally with TDD. Added deterministic golden coverage for trusted approvals, inspect, and settings shell states, extending the existing first-run and sessions baselines.
+- Documentation updated: `internal/plans.md`, `internal/status.md`
+- Next likely step: run the documented `flutter run --dart-define=...` command against a live ASCP host/daemon endpoint on a simulator or physical device.
+
 ### 2026-05-26 - Mobile live runtime configuration
 
 - Branch: `branch-mobile-live-runtime-config`
