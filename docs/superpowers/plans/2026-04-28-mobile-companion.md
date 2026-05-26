@@ -732,7 +732,7 @@ flutter test test/features/pairing/pairing_controller_test.dart
 
 Expected: FAIL.
 
-- [ ] **Step 3: Implement pairing repository and controller**
+- [x] **Step 3: Implement pairing repository and controller**
 
 Support:
 
@@ -743,11 +743,11 @@ Support:
 - secure write only after host approval
 - explicit errors for expired, rejected, revoked, unreachable, and malformed QR states
 
-- [ ] **Step 4: Build pairing UI with shadcn components**
+- [x] **Step 4: Build pairing UI with shadcn components**
 
 Use `@shadcn/input_otp`, `@shadcn/button`, `@shadcn/card`, `@shadcn/dialog`, `@shadcn/toast`, `@shadcn/skeleton`, and `mobile_scanner`.
 
-- [ ] **Step 5: Verify**
+- [x] **Step 5: Verify**
 
 Run:
 
@@ -857,7 +857,7 @@ flutter test test/features/sessions/session_detail_controller_test.dart
 
 Expected: FAIL.
 
-- [ ] **Step 3: Implement session list/detail controllers**
+- [x] **Step 3: Implement session list/detail controllers**
 
 Support:
 
@@ -872,11 +872,11 @@ Support:
 - live transcript updates
 - degraded state when replay is unsupported
 
-- [ ] **Step 4: Build session UI**
+- [x] **Step 4: Build session UI**
 
 Use shadcn `card`, `badge`, `timeline`, `text_area`, `button`, `refresh_trigger`, `code_snippet`, and `drawer` components.
 
-- [ ] **Step 5: Verify**
+- [x] **Step 5: Verify**
 
 Run:
 
@@ -931,7 +931,7 @@ flutter test test/features/approvals/approval_queue_controller_test.dart
 
 Expected: FAIL.
 
-- [ ] **Step 3: Implement approvals repository and queue**
+- [x] **Step 3: Implement approvals repository and queue**
 
 Support:
 
@@ -941,7 +941,7 @@ Support:
 - confirmation sheet before high-risk approval
 - audit-visible actor attribution where returned by the host
 
-- [ ] **Step 4: Verify**
+- [x] **Step 4: Verify**
 
 Run:
 
@@ -993,7 +993,7 @@ flutter test test/features/inspect/inspect_controller_test.dart
 
 Expected: FAIL.
 
-- [ ] **Step 3: Implement inspect flows**
+- [x] **Step 3: Implement inspect flows**
 
 Support:
 
@@ -1004,7 +1004,7 @@ Support:
 - jump back to owning session
 - clear unsupported/degraded states
 
-- [ ] **Step 4: Verify**
+- [x] **Step 4: Verify**
 
 Run:
 
@@ -1052,7 +1052,7 @@ flutter test test/features/settings/settings_controller_test.dart
 
 Expected: FAIL.
 
-- [ ] **Step 3: Implement settings and trusted-device management**
+- [x] **Step 3: Implement settings and trusted-device management**
 
 Support:
 
@@ -1063,7 +1063,7 @@ Support:
 - secure storage reset
 - host trust revocation
 
-- [ ] **Step 4: Verify**
+- [x] **Step 4: Verify**
 
 Run:
 
@@ -1111,7 +1111,7 @@ flutter test test/core/database/continuum_database_test.dart
 
 Expected: FAIL.
 
-- [ ] **Step 3: Implement Drift tables**
+- [x] **Step 3: Implement Drift tables**
 
 Tables:
 
@@ -1124,7 +1124,7 @@ Tables:
 - `diffs`
 - `replay_cursors`
 
-- [ ] **Step 4: Verify**
+- [x] **Step 4: Verify**
 
 Run:
 
@@ -1186,7 +1186,7 @@ Golden states must cover:
 - local test commands
 - ASCP scope boundaries
 
-- [ ] **Step 4: Full verification**
+- [x] **Step 4: Full verification**
 
 Run:
 
@@ -1208,7 +1208,7 @@ Implementation checkpoint on 2026-05-25:
 - Added integration-style shell coverage under `apps/mobile/test/integration/mobile_shell_flow_test.dart` for first-run pairing and trusted sessions-to-approvals navigation.
 - Added golden smoke coverage under `apps/mobile/test_goldens/mobile_shell_golden_test.dart` for first-run pairing and trusted sessions shells.
 - Updated `apps/mobile/README.md`, `internal/plans.md`, and `internal/status.md`.
-- Full verification is tracked in the active session output because it must be rerun after every implementation change.
+- Full verification passed in the active session and must be rerun after every implementation change.
 
 ## Definition of Done
 

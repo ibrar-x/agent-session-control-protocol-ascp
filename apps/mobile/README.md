@@ -42,6 +42,8 @@ Transport is split:
 
 Replay cursors are stored in Drift per host and session. Session summaries, artifact details, and diff details are also cached by host/session so reconnect recovery can show useful metadata before fresh ASCP reads complete. `sessions.subscribe` can request replay from a known sequence and maps live/replayed ASCP events into feature-owned timeline events. The mobile client never invents missing ASCP sequence numbers.
 
+Riverpod owns the default app dependency graph through `mobileRuntimeConfigProvider` and `mobileDependenciesProvider`. Tests can override those providers through `ProviderScope`, while focused widget tests can still pass explicit `MobileDependencies` constructors.
+
 `MobileDependencies.memory()` keeps deterministic in-memory controllers for tests and local shell previews. `MobileDependencies.live()` wires Dio-backed ASCP JSON-RPC repositories, daemon admin/pairing repositories, a lazy WebSocket subscription repository, and the `mobile_scanner` QR scanner path.
 
 ## Test Workflow

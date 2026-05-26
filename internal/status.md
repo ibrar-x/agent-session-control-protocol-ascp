@@ -17,10 +17,18 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 ### 2026-05-25 - Mobile live wiring and scanner path
 
 - Branch: `branch-mobile-flutter-app`
-- Commit: `not committed`
+- Commit: `bbf1181`
 - Summary: completed the mobile app production-wiring slice with Codex as orchestrator and a bounded Blackbox read-only advisory route through the cost-aware workflow; Blackbox timed out after partial context, so no external patch was applied. Added `MobileDependencies` memory/live factories, wired the trusted shell to injected controllers, replaced the static first-run card with the controller-backed pairing screen, added a `mobile_scanner` QR scanner route, and connected live pairing to the daemon claim/poll repository. Added integration-style shell coverage and golden smoke baselines for first-run pairing and trusted sessions.
 - Documentation updated: `internal/plans.md`, `internal/status.md`, `apps/mobile/README.md`
 - Next likely step: run on a physical/simulator device against a live ASCP host daemon endpoint and split any visual or provider-generation polish into separate tickets.
+
+### 2026-05-26 - Mobile Riverpod provider graph
+
+- Branch: `branch-mobile-flutter-app`
+- Commit: this commit
+- Summary: continued the mobile app with Codex as orchestrator and attempted a bounded Blackbox read-only route through the cost-aware workflow; Blackbox timed out and tried an unavailable shell tool, so no external patch was applied. Added a Riverpod-backed `mobileRuntimeConfigProvider` and `mobileDependenciesProvider`, made `ContinuumMobileApp` consume provider overrides by default, and preserved explicit constructor injection plus memory fallback for focused widget tests.
+- Documentation updated: `internal/plans.md`, `internal/status.md`, `apps/mobile/README.md`
+- Next likely step: run simulator/device validation against a live ASCP host daemon endpoint, then split any remaining visual matrix or generated-provider refinements into small follow-up tickets.
 
 ### 2026-05-25 - Mobile cache and controller-backed screens
 

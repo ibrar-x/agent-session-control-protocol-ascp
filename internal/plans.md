@@ -83,6 +83,7 @@ Files expected to be added or modified in this slice:
 | completed | add offline metadata cache | Drift stores cached session summaries, artifact metadata, and diff metadata per host/session for reconnect recovery |
 | completed | wire controller-backed feature screens | session list/detail, approval queue, inspect list, and settings device/diagnostics screens render controller state and delegate user actions |
 | completed | add live integration and production hardening | default memory/live dependency containers wire ASCP, daemon, WebSocket, pairing, settings, and scanner boundaries; integration-style shell tests and golden smoke coverage pass |
+| completed | add Riverpod provider graph | `mobileRuntimeConfigProvider` and `mobileDependenciesProvider` provide default DI with test overrides while preserving explicit constructor injection for focused widgets |
 
 ## Acceptance Criteria
 
@@ -97,4 +98,4 @@ This slice is done only when all of the following are true:
 
 ## Next Likely Step
 
-Mobile Flutter foundation is ready for device-level validation against a running ASCP host/daemon. Next likely step is an on-device smoke run once a host endpoint is available, followed by narrower polish tickets for richer Riverpod provider generation or exhaustive per-screen golden matrices.
+Mobile Flutter foundation is ready for device-level validation against a running ASCP host/daemon. Next likely step is an on-device smoke run once a host endpoint is available, followed by narrower polish tickets for exhaustive per-screen golden matrices or generated Riverpod provider refinements.

@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/design_system/continuum_theme.dart';
 import '../core/design_system/continuum_tokens.dart';
@@ -11,8 +12,9 @@ import '../ui/shadcn/components/display/badge/badge.dart' as shadcn;
 import '../ui/shadcn/components/layout/card/card.dart' as shadcn;
 import '../ui/shadcn/shared/theme/theme.dart' as shadcn;
 import 'mobile_dependencies.dart';
+import 'mobile_providers.dart';
 
-class ContinuumMobileApp extends StatelessWidget {
+class ContinuumMobileApp extends ConsumerWidget {
   const ContinuumMobileApp({
     super.key,
     this.isTrusted = false,
@@ -23,7 +25,10 @@ class ContinuumMobileApp extends StatelessWidget {
   final MobileDependencies? dependencies;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final explicitDependencies = dependencies;
+    final resolvedDependencies = explicitDependencies ?? _readDependencies(ref);
+
     return WidgetsApp(
       title: 'Continuum',
       color: ContinuumColorTokens.accent,
@@ -39,10 +44,18 @@ class ContinuumMobileApp extends StatelessWidget {
       home: shadcn.Theme(
         data: buildContinuumTheme(),
         child: isTrusted
-            ? ContinuumTrustedShell(dependencies: dependencies)
-            : ContinuumFirstRunShell(dependencies: dependencies),
+            ? ContinuumTrustedShell(dependencies: resolvedDependencies)
+            : ContinuumFirstRunShell(dependencies: resolvedDependencies),
       ),
     );
+  }
+
+  MobileDependencies _readDependencies(WidgetRef ref) {
+    try {
+      return ref.watch(mobileDependenciesProvider);
+    } on StateError {
+      return MobileDependencies.memory();
+    }
   }
 }
 
