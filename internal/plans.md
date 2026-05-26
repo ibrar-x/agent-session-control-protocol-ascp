@@ -86,6 +86,7 @@ Files expected to be added or modified in this slice:
 | completed | add Riverpod provider graph | `mobileRuntimeConfigProvider` and `mobileDependenciesProvider` provide default DI with test overrides while preserving explicit constructor injection for focused widgets |
 | completed | add production security adapters | live dependencies use Flutter secure storage for trust material and local_auth for local confirmation while memory dependencies remain deterministic for tests |
 | completed | add dart-define live runtime config | default Riverpod runtime config can boot live mode from explicit build/run defines while incomplete live config falls back to deterministic memory mode |
+| completed | expand trusted shell golden matrix | trusted approvals, inspect, and settings tab states have deterministic golden baselines in addition to first-run and sessions coverage |
 
 ## Acceptance Criteria
 
@@ -100,4 +101,4 @@ This slice is done only when all of the following are true:
 
 ## Next Likely Step
 
-Mobile Flutter foundation is ready for device-level validation against a running ASCP host/daemon. Use the documented `flutter run --dart-define=...` values in `apps/mobile/README.md` to point a simulator or physical device at a host endpoint. Remaining work should be split into narrow follow-up tickets such as exhaustive per-screen golden matrices or generated Riverpod provider refinements.
+Mobile Flutter foundation is ready for device-level validation against a running ASCP host/daemon. Use the documented `flutter run --dart-define=...` values in `apps/mobile/README.md` to point a simulator or physical device at a host endpoint. Remaining work should be split into narrow follow-up tickets such as generated Riverpod provider refinements or platform-specific release configuration.
