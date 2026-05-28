@@ -7,6 +7,8 @@ import 'package:mobile/core/ascp/ascp_event.dart';
 import 'package:mobile/core/ascp/ascp_method.dart';
 import 'package:mobile/core/network/http_json_rpc_client.dart';
 import 'package:mobile/core/network/websocket_json_rpc_client.dart';
+import 'package:mobile/core/security/secure_store.dart';
+import 'package:mobile/core/security/trust_material.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -78,6 +80,46 @@ void main() {
         ),
       ),
     );
+
+    await client.close();
+  });
+
+  test('authenticated WebSocket client sends stored device credentials', () async {
+    final store = MemorySecureStore();
+    await store.writeTrustMaterial(
+      const TrustMaterial(
+        hostId: '127.0.0.1:8765',
+        deviceId: 'device_mobile',
+        secret: 'device_secret',
+      ),
+    );
+    final channel = _FakeWebSocketChannel();
+    Map<String, dynamic>? capturedHeaders;
+    final client = AuthenticatedWebSocketJsonRpcClient(
+      endpoint: Uri.parse('ws://127.0.0.1:8765'),
+      secureStore: store,
+      channelFactory: (endpoint, headers) {
+        capturedHeaders = headers;
+        return channel;
+      },
+    );
+
+    final pending = client.call(
+      id: 'sessions.list',
+      method: AscpMethod.sessionsList,
+    );
+    await Future<void>.delayed(Duration.zero);
+    channel.serverSend({
+      'jsonrpc': '2.0',
+      'id': 'sessions.list',
+      'result': {'sessions': <Object?>[]},
+    });
+
+    await pending;
+    expect(capturedHeaders, {
+      'x-ascp-device-id': 'device_mobile',
+      'x-ascp-device-secret': 'device_secret',
+    });
 
     await client.close();
   });

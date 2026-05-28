@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
-
 import '../core/network/http_json_rpc_client.dart';
+import '../core/network/json_rpc_client.dart';
 import '../core/network/websocket_json_rpc_client.dart';
 import '../core/security/local_auth_gate.dart';
 import '../core/security/secure_store.dart';
@@ -83,25 +82,33 @@ class MobileDependencies {
     required String activeSessionId,
     String? currentDeviceId,
     Dio? dio,
+    JsonRpcClient? ascpClient,
     LocalAuthGate? localAuth,
     SecureStore secureStore = const FlutterSecureStore(),
   }) {
     final sharedDio = dio ?? Dio();
     final resolvedLocalAuth = localAuth ?? DeviceLocalAuthGate();
-    final ascpClient = HttpJsonRpcClient(dio: sharedDio, endpoint: rpcEndpoint);
+    final resolvedAscpClient =
+        ascpClient ??
+        (websocketEndpoint.scheme == 'ws' || websocketEndpoint.scheme == 'wss'
+            ? AuthenticatedWebSocketJsonRpcClient(
+                endpoint: websocketEndpoint,
+                secureStore: secureStore,
+              )
+            : HttpJsonRpcClient(dio: sharedDio, endpoint: rpcEndpoint));
 
     return MobileDependencies(
       hostId: hostId,
       activeSessionId: activeSessionId,
       sessionListController: SessionListController(
-        repository: AscpSessionRepository(client: ascpClient),
+        repository: AscpSessionRepository(client: resolvedAscpClient),
       ),
       approvalQueueController: ApprovalQueueController(
-        repository: AscpApprovalRepository(client: ascpClient),
+        repository: AscpApprovalRepository(client: resolvedAscpClient),
       ),
       inspectController: InspectController(
         repository: AscpInspectRepository(
-          client: ascpClient,
+          client: resolvedAscpClient,
           sessionId: activeSessionId,
         ),
       ),
@@ -120,11 +127,9 @@ class MobileDependencies {
       ),
       pairingScanner: const MobileScannerPairingScanner(),
       createSessionSubscriptionRepository: () =>
-          AscpSessionSubscriptionRepository(
-            client: WebSocketJsonRpcClient(
-              channel: WebSocketChannel.connect(websocketEndpoint),
-            ),
-          ),
+          resolvedAscpClient is EventJsonRpcClient
+          ? AscpSessionSubscriptionRepository(client: resolvedAscpClient)
+          : _UnsupportedSessionSubscriptionRepository(),
     );
   }
 

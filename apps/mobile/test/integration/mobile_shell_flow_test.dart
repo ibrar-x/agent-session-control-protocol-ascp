@@ -1,12 +1,30 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/widgets.dart';
 import 'package:mobile/app/continuum_app.dart';
 import 'package:mobile/app/mobile_dependencies.dart';
+import 'package:mobile/core/security/local_auth_gate.dart';
+import 'package:mobile/core/security/secure_store.dart';
+import 'package:mobile/core/security/trust_material.dart';
 import 'package:mobile/features/approvals/application/approval_queue_controller.dart';
 import 'package:mobile/features/approvals/data/approval_repository.dart';
 import 'package:mobile/features/approvals/domain/approval_view_model.dart';
+import 'package:mobile/features/pairing/application/pairing_controller.dart';
+import 'package:mobile/features/pairing/data/pairing_repository.dart';
+import 'package:mobile/features/pairing/domain/pairing_state.dart';
 import 'package:mobile/features/sessions/application/session_list_controller.dart';
 import 'package:mobile/features/sessions/data/session_repository.dart';
 import 'package:mobile/features/sessions/domain/timeline_event.dart';
+
+class _AllowingAuth implements LocalAuthGate {
+  @override
+  Future<bool> confirm(String reason) async => true;
+}
+
+class _ApprovedPoll implements PairingPollSimulator {
+  @override
+  PairingPollState simulatePoll(PairingClaim claim) =>
+      PairingPollState.approved;
+}
 
 void main() {
   testWidgets('first-run shell exposes pairing scan and manual paths', (
@@ -67,5 +85,56 @@ void main() {
     await tester.pump();
     await tester.pump();
     expect(find.text('Allow command'), findsOneWidget);
+  });
+
+  testWidgets('successful first-run pairing can enter trusted shell', (
+    tester,
+  ) async {
+    final dependencies = MobileDependencies.memory(
+      pairingController: PairingController(
+        secureStore: MemorySecureStore(),
+        localAuth: _AllowingAuth(),
+        pollSimulator: _ApprovedPoll(),
+      ),
+    );
+
+    await tester.pumpWidget(ContinuumMobileApp(dependencies: dependencies));
+
+    await tester.tap(find.text('Enter code manually'));
+    await tester.pump();
+    await tester.enterText(find.byType(EditableText), '127.0.0.1:8765:APPROVE');
+    await tester.tap(find.text('Submit'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Continue'));
+    await tester.pump();
+
+    expect(find.text('Trusted host'), findsOneWidget);
+    expect(find.text('Sessions'), findsWidgets);
+  });
+
+  testWidgets('stored trust material opens trusted shell on startup', (
+    tester,
+  ) async {
+    final secureStore = MemorySecureStore();
+    await secureStore.writeTrustMaterial(
+      const TrustMaterial(
+        hostId: '127.0.0.1:8765',
+        deviceId: 'device_mobile',
+        secret: 'secret',
+      ),
+    );
+    final dependencies = MobileDependencies.memory(
+      pairingController: PairingController(
+        secureStore: secureStore,
+        localAuth: _AllowingAuth(),
+        pollSimulator: _ApprovedPoll(),
+      ),
+    );
+
+    await tester.pumpWidget(ContinuumMobileApp(dependencies: dependencies));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Trusted host'), findsOneWidget);
+    expect(find.text('Connected'), findsOneWidget);
   });
 }

@@ -1,5 +1,5 @@
 import '../../../core/ascp/ascp_method.dart';
-import '../../../core/network/http_json_rpc_client.dart';
+import '../../../core/network/json_rpc_client.dart';
 import '../domain/approval_view_model.dart';
 
 enum ApprovalDecision {
@@ -38,7 +38,7 @@ class MemoryApprovalRepository implements ApprovalRepository {
 class AscpApprovalRepository implements ApprovalRepository {
   const AscpApprovalRepository({required this.client});
 
-  final HttpJsonRpcClient client;
+  final JsonRpcClient client;
 
   @override
   Future<List<ApprovalViewModel>> listApprovals() async {

@@ -3,8 +3,9 @@ import 'package:dio/dio.dart';
 import '../ascp/ascp_envelope.dart';
 import '../ascp/ascp_error.dart';
 import '../ascp/ascp_method.dart';
+import 'json_rpc_client.dart';
 
-class HttpJsonRpcClient {
+class HttpJsonRpcClient implements JsonRpcClient {
   HttpJsonRpcClient({
     required Dio dio,
     required this.endpoint,
@@ -13,6 +14,7 @@ class HttpJsonRpcClient {
   final Dio _dio;
   final Uri endpoint;
 
+  @override
   Future<Object?> call({
     required Object id,
     required AscpMethod method,

@@ -396,6 +396,15 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 - Commit: `bd4472a`
 - Summary: added a deterministic fixture-backed ASCP mock server over line-oriented stdio JSON-RPC, seeded host/runtime/session/approval/artifact/diff data, replay-aware sample event streams, a repeatable mock validator, a docs index, and a protocol usage plus DTO-generation guide
 - Documentation updated: `plans.md`, `docs/status.md`, `README.md`, `docs/README.md`, `docs/protocol-usage-and-dto-generation.md`, `services/mock-server/README.md`
+### 2026-05-29 - Mobile pairing navigation and live auth
+
+- Branch: `branch-mobile-pairing-navigation`
+- Commit: `not committed`
+- Summary: fixed the trusted pairing Continue action so it enters the trusted mobile shell, restored stored trust material on startup, introduced transport-neutral JSON-RPC repositories, and wired live ASCP calls/subscriptions through an authenticated WebSocket client that sends paired device credentials.
+- Documentation updated: `internal/plans.md`, `internal/status.md`
+- Verification: `flutter test` passed with 141 tests; `flutter analyze` passed; iOS simulator pairing was exercised through the debugger agent and live Sessions loaded from the daemon after paired device scopes matched the daemon authorizer.
+- Next likely step: handle Inspect when `CONTINUUM_ACTIVE_SESSION_ID` is missing or stale by deriving it from a selected live session or showing a non-error empty state.
+
 - Next likely step: build a protocol-consumer reference or deeper interoperability checks on top of the mock without reopening the frozen ASCP v0.1 contracts
 
 ### 2026-04-22 - Conformance

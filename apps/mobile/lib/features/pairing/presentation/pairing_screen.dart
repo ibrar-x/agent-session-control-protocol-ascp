@@ -12,11 +12,13 @@ class PairingScreen extends StatefulWidget {
   const PairingScreen({
     required this.controller,
     required this.scanner,
+    this.onContinue,
     super.key,
   });
 
   final PairingController controller;
   final PairingScanner scanner;
+  final VoidCallback? onContinue;
 
   @override
   State<PairingScreen> createState() => _PairingScreenState();
@@ -63,7 +65,7 @@ class _PairingScreenState extends State<PairingScreen> {
           ] else if (state.isTrusted) ...[
             const Text('Trusted device', style: _titleStyle),
             const SizedBox(height: 12),
-            _ActionText(label: 'Continue', onTap: () {}),
+            _ActionText(label: 'Continue', onTap: widget.onContinue ?? () {}),
           ] else if (state.isFailed) ...[
             Text(_failureLabel(state.failure), style: _titleStyle),
             const SizedBox(height: 12),

@@ -1,5 +1,5 @@
 import '../../../core/ascp/ascp_method.dart';
-import '../../../core/network/http_json_rpc_client.dart';
+import '../../../core/network/json_rpc_client.dart';
 import '../domain/inspect_item.dart';
 
 abstract interface class InspectRepository {
@@ -55,7 +55,7 @@ class AscpInspectRepository implements InspectRepository {
     required this.sessionId,
   });
 
-  final HttpJsonRpcClient client;
+  final JsonRpcClient client;
   final String sessionId;
 
   @override

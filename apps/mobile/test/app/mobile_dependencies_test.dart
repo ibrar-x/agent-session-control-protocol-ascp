@@ -1,8 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile/app/mobile_dependencies.dart';
-import 'package:mobile/features/approvals/data/approval_repository.dart';
+import 'package:mobile/core/ascp/ascp_method.dart';
+import 'package:mobile/core/network/json_rpc_client.dart';
 import 'package:mobile/core/security/local_auth_gate.dart';
 import 'package:mobile/core/security/secure_store.dart';
+import 'package:mobile/features/approvals/data/approval_repository.dart';
 import 'package:mobile/features/inspect/data/inspect_repository.dart';
 import 'package:mobile/features/sessions/data/session_repository.dart';
 import 'package:mobile/features/settings/data/settings_repository.dart';
@@ -30,13 +32,15 @@ void main() {
   });
 
   test('live dependencies wire ASCP and daemon-backed repositories', () {
+    final ascpClient = _FakeJsonRpcClient();
     final dependencies = MobileDependencies.live(
       rpcEndpoint: Uri.parse('http://127.0.0.1:18787/rpc'),
-      websocketEndpoint: Uri.parse('ws://127.0.0.1:18787/rpc'),
+      websocketEndpoint: Uri.parse('ws://127.0.0.1:18787'),
       daemonAdminBaseUrl: Uri.parse('http://127.0.0.1:18787'),
       hostId: 'host_local',
       activeSessionId: 'sess_active',
       currentDeviceId: 'device_mobile',
+      ascpClient: ascpClient,
     );
 
     expect(
@@ -62,5 +66,27 @@ void main() {
     expect(dependencies.pairingController.store, isA<FlutterSecureStore>());
     expect(dependencies.hostId, 'host_local');
     expect(dependencies.activeSessionId, 'sess_active');
+
+    final sessionRepository =
+        dependencies.sessionListController.repository as AscpSessionRepository;
+    final approvalRepository =
+        dependencies.approvalQueueController.repository
+            as AscpApprovalRepository;
+    final inspectRepository =
+        dependencies.inspectController.repository as AscpInspectRepository;
+    expect(sessionRepository.client, same(ascpClient));
+    expect(approvalRepository.client, same(ascpClient));
+    expect(inspectRepository.client, same(ascpClient));
   });
+}
+
+class _FakeJsonRpcClient implements JsonRpcClient {
+  @override
+  Future<Object?> call({
+    required Object id,
+    required AscpMethod method,
+    Map<String, Object?> params = const {},
+  }) async {
+    return <String, Object?>{};
+  }
 }

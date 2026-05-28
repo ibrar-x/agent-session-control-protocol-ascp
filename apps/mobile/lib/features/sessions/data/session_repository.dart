@@ -1,6 +1,5 @@
 import '../../../core/ascp/ascp_method.dart';
-import '../../../core/network/http_json_rpc_client.dart';
-import '../../../core/network/websocket_json_rpc_client.dart';
+import '../../../core/network/json_rpc_client.dart';
 import '../domain/timeline_event.dart';
 
 abstract interface class SessionRepository {
@@ -63,7 +62,7 @@ class MemorySessionRepository implements SessionRepository {
 class AscpSessionRepository implements SessionRepository {
   const AscpSessionRepository({required this.client});
 
-  final HttpJsonRpcClient client;
+  final JsonRpcClient client;
 
   @override
   Future<List<SessionSummary>> listSessions() async {
@@ -138,7 +137,7 @@ class AscpSessionSubscriptionRepository
     implements SessionSubscriptionRepository {
   const AscpSessionSubscriptionRepository({required this.client});
 
-  final WebSocketJsonRpcClient client;
+  final EventJsonRpcClient client;
 
   @override
   Future<SessionEventSubscription> subscribeTimeline({

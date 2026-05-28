@@ -159,6 +159,39 @@ void main() {
     expect(find.text('Continue'), findsOneWidget);
   });
 
+  testWidgets('pairing screen notifies parent when trusted continue tapped', (
+    tester,
+  ) async {
+    var continued = false;
+    final controller = PairingController(
+      secureStore: _FakeSecureStore(),
+      localAuth: _AllowingAuth(),
+      pollSimulator: _DeterministicPoll(PairingPollState.approved),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PairingScreen(
+          controller: controller,
+          scanner: _NullScanner(),
+          onContinue: () => continued = true,
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Enter code manually'));
+    await tester.pump();
+
+    await tester.enterText(find.byType(EditableText), '127.0.0.1:8765:APPROVE');
+    await tester.tap(find.text('Submit'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Continue'));
+    await tester.pump();
+
+    expect(continued, isTrue);
+  });
+
   testWidgets('pairing screen shows rejected error with retry affordance', (
     tester,
   ) async {

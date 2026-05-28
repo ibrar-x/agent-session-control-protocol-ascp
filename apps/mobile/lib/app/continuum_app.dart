@@ -14,7 +14,7 @@ import '../ui/shadcn/shared/theme/theme.dart' as shadcn;
 import 'mobile_dependencies.dart';
 import 'mobile_providers.dart';
 
-class ContinuumMobileApp extends ConsumerWidget {
+class ContinuumMobileApp extends ConsumerStatefulWidget {
   const ContinuumMobileApp({
     super.key,
     this.isTrusted = false,
@@ -25,8 +25,24 @@ class ContinuumMobileApp extends ConsumerWidget {
   final MobileDependencies? dependencies;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final explicitDependencies = dependencies;
+  ConsumerState<ContinuumMobileApp> createState() => _ContinuumMobileAppState();
+}
+
+class _ContinuumMobileAppState extends ConsumerState<ContinuumMobileApp> {
+  late bool _isTrusted;
+
+  @override
+  void initState() {
+    super.initState();
+    _isTrusted = widget.isTrusted;
+    if (!_isTrusted) {
+      _restoreStoredTrust();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final explicitDependencies = widget.dependencies;
     final resolvedDependencies = explicitDependencies ?? _readDependencies(ref);
 
     return WidgetsApp(
@@ -43,16 +59,32 @@ class ContinuumMobileApp extends ConsumerWidget {
       },
       home: shadcn.Theme(
         data: buildContinuumTheme(),
-        child: isTrusted
+        child: _isTrusted
             ? ContinuumTrustedShell(dependencies: resolvedDependencies)
-            : ContinuumFirstRunShell(dependencies: resolvedDependencies),
+            : ContinuumFirstRunShell(
+                dependencies: resolvedDependencies,
+                onTrusted: () => setState(() => _isTrusted = true),
+              ),
       ),
     );
   }
 
-  MobileDependencies _readDependencies(WidgetRef ref) {
+  Future<void> _restoreStoredTrust() async {
+    final dependencies =
+        widget.dependencies ?? _readDependencies(ref, listen: false);
+    final material = await dependencies.pairingController.secureStore
+        .readTrustMaterial();
+    if (!mounted || material == null) {
+      return;
+    }
+    setState(() => _isTrusted = true);
+  }
+
+  MobileDependencies _readDependencies(WidgetRef ref, {bool listen = true}) {
     try {
-      return ref.watch(mobileDependenciesProvider);
+      return listen
+          ? ref.watch(mobileDependenciesProvider)
+          : ref.read(mobileDependenciesProvider);
     } on StateError {
       return MobileDependencies.memory();
     }
@@ -305,9 +337,10 @@ class _ShellTab {
 }
 
 class ContinuumFirstRunShell extends StatefulWidget {
-  const ContinuumFirstRunShell({super.key, this.dependencies});
+  const ContinuumFirstRunShell({super.key, this.dependencies, this.onTrusted});
 
   final MobileDependencies? dependencies;
+  final VoidCallback? onTrusted;
 
   @override
   State<ContinuumFirstRunShell> createState() => _ContinuumFirstRunShellState();
@@ -343,6 +376,7 @@ class _ContinuumFirstRunShellState extends State<ContinuumFirstRunShell> {
                 child: PairingScreen(
                   controller: _dependencies.pairingController,
                   scanner: _dependencies.pairingScanner,
+                  onContinue: widget.onTrusted,
                 ),
               ),
               const Spacer(),

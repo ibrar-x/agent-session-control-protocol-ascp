@@ -90,6 +90,7 @@ Files expected to be added or modified in this slice:
 | completed | expand trusted shell golden matrix | trusted approvals, inspect, and settings tab states have deterministic golden baselines in addition to first-run and sessions coverage |
 | completed | harden platform capability config | Android and iOS platform shells declare the network, camera, biometric, Face ID, and app identity settings required by live pairing and trusted-device flows |
 | completed | replace scaffold packaging metadata | pubspec, web metadata, and Android Gradle release comments identify Continuum explicitly and are guarded by smoke coverage |
+| completed | fix simulator pairing continuation and live ASCP auth | first-run pairing Continue transitions into the trusted shell, stored trust material restores trusted startup state, live ASCP repositories use authenticated WebSocket JSON-RPC with paired device credentials, and simulator verification loads live sessions from the daemon |
 
 ## Acceptance Criteria
 
@@ -104,4 +105,4 @@ This slice is done only when all of the following are true:
 
 ## Next Likely Step
 
-Mobile Flutter foundation is ready for device-level validation against a running ASCP host/daemon. Use the documented `flutter run --dart-define=...` values in `apps/mobile/README.md` to point a simulator or physical device at a host endpoint. Remaining work should be split into narrow follow-up tickets such as generated Riverpod provider refinements or release signing/store configuration.
+Mobile Flutter foundation is ready for deeper device-level validation against a running ASCP host/daemon. Pairing, trusted startup, authenticated live sessions, approvals, and settings have simulator coverage. The Inspect tab still depends on launching with a valid `CONTINUUM_ACTIVE_SESSION_ID`; a follow-up can either derive that from the selected session or present a non-error empty state when no active session is configured.
