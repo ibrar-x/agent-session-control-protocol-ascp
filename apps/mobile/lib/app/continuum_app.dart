@@ -421,17 +421,10 @@ class _ContinuumFirstRunShellState extends State<ContinuumFirstRunShell> {
             children: [
               const _Header(),
               const SizedBox(height: 24),
-              shadcn.Card(
-                filled: true,
-                fillColor: ContinuumColorTokens.bgElevated,
-                borderColor: ContinuumColorTokens.border,
-                borderRadius: BorderRadius.circular(12),
-                padding: const EdgeInsets.all(18),
-                child: PairingScreen(
-                  controller: _dependencies.pairingController,
-                  scanner: _dependencies.pairingScanner,
-                  onContinue: widget.onTrusted,
-                ),
+              PairingScreen(
+                controller: _dependencies.pairingController,
+                scanner: _dependencies.pairingScanner,
+                onContinue: widget.onTrusted,
               ),
               const Spacer(),
               const Text(

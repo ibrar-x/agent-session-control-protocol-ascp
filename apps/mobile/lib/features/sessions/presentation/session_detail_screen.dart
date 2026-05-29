@@ -527,48 +527,86 @@ class _InputBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: ContinuumColorTokens.bgElevated,
-              border: Border.all(color: ContinuumColorTokens.border),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: EditableText(
-              controller: controller,
-              focusNode: focusNode,
-              style: const TextStyle(
-                color: ContinuumColorTokens.textPrimary,
-                fontSize: 14,
+    return ListenableBuilder(
+      listenable: focusNode,
+      builder: (context, _) {
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Expanded(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: ContinuumColorTokens.bgSurface,
+                  border: Border.all(
+                    color: focusNode.hasFocus
+                        ? ContinuumColorTokens.accent
+                        : ContinuumColorTokens.border,
+                  ),
+                  borderRadius: BorderRadius.circular(ContinuumRadiusTokens.lg),
+                  boxShadow: focusNode.hasFocus
+                      ? [
+                          BoxShadow(
+                            color: ContinuumColorTokens.accent.withValues(
+                              alpha: 0.18,
+                            ),
+                            blurRadius: 0,
+                            spreadRadius: 2,
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
+                  child: EditableText(
+                    controller: controller,
+                    focusNode: focusNode,
+                    style: const TextStyle(
+                      color: ContinuumColorTokens.textPrimary,
+                      fontSize: 15,
+                      height: 1.35,
+                    ),
+                    cursorColor: ContinuumColorTokens.accent,
+                    backgroundCursorColor: ContinuumColorTokens.border,
+                    minLines: 1,
+                    maxLines: 4,
+                    keyboardType: TextInputType.multiline,
+                    textInputAction: TextInputAction.send,
+                    onSubmitted: (_) => onSend(),
+                  ),
+                ),
               ),
-              cursorColor: ContinuumColorTokens.accent,
-              backgroundCursorColor: ContinuumColorTokens.border,
-              maxLines: 1,
-              keyboardType: TextInputType.text,
-              textInputAction: TextInputAction.send,
-              onSubmitted: (_) => onSend(),
             ),
-          ),
-        ),
-        const SizedBox(width: 10),
-        GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: onSend,
-          child: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            child: Text(
-              'Send',
-              style: TextStyle(
-                color: ContinuumColorTokens.accent,
-                fontSize: 14,
-                fontWeight: FontWeight.w800,
+            const SizedBox(width: 10),
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: onSend,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: ContinuumColorTokens.accent,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const SizedBox(
+                  height: 40,
+                  width: 60,
+                  child: Center(
+                    child: Text(
+                      'Send',
+                      style: TextStyle(
+                        color: ContinuumColorTokens.accentForeground,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
-          ),
-        ),
-      ],
+          ],
+        );
+      },
     );
   }
 }

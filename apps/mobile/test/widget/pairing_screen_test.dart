@@ -57,7 +57,7 @@ void main() {
       ),
     );
 
-    expect(find.text('Pair a host'), findsOneWidget);
+    expect(find.text('Pair New Device'), findsOneWidget);
     expect(find.text('Scan QR code'), findsOneWidget);
     expect(find.text('Enter code manually'), findsOneWidget);
   });
@@ -81,7 +81,8 @@ void main() {
     await tester.tap(find.text('Scan QR code'));
     await tester.pump();
 
-    expect(find.text('Scanning...'), findsOneWidget);
+    expect(find.text('Pair New Device'), findsOneWidget);
+    expect(find.text('Scan QR code'), findsOneWidget);
     expect(find.text('Cancel'), findsOneWidget);
   });
 
@@ -105,7 +106,7 @@ void main() {
     await tester.pump();
 
     expect(find.byType(EditableText), findsOneWidget);
-    expect(find.text('Submit'), findsOneWidget);
+    expect(find.text('Verify'), findsOneWidget);
   });
 
   testWidgets('pairing screen accepts submitted payload', (tester) async {
@@ -126,7 +127,7 @@ void main() {
     await tester.pump();
 
     await tester.enterText(find.byType(EditableText), '127.0.0.1:8765:TEST01');
-    await tester.tap(find.text('Submit'));
+    await tester.tap(find.text('Verify'));
     await tester.pumpAndSettle();
 
     expect(controller.state.isTrusted, isTrue);
@@ -152,10 +153,10 @@ void main() {
     await tester.pump();
 
     await tester.enterText(find.byType(EditableText), '127.0.0.1:8765:APPROVE');
-    await tester.tap(find.text('Submit'));
+    await tester.tap(find.text('Verify'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Trusted device'), findsOneWidget);
+    expect(find.text('Device Paired'), findsOneWidget);
     expect(find.text('Continue'), findsOneWidget);
   });
 
@@ -210,7 +211,7 @@ void main() {
     await tester.pump();
 
     await tester.enterText(find.byType(EditableText), '127.0.0.1:8765:APPROVE');
-    await tester.tap(find.text('Submit'));
+    await tester.tap(find.text('Verify'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Continue'));
     await tester.pump();
@@ -238,7 +239,7 @@ void main() {
     await tester.pump();
 
     await tester.enterText(find.byType(EditableText), '127.0.0.1:8765:REJECT');
-    await tester.tap(find.text('Submit'));
+    await tester.tap(find.text('Verify'));
     await tester.pumpAndSettle();
 
     expect(find.text('Rejected by host'), findsOneWidget);
@@ -263,7 +264,7 @@ void main() {
     await tester.pump();
 
     await tester.enterText(find.byType(EditableText), '127.0.0.1:8765:EXPIRE');
-    await tester.tap(find.text('Submit'));
+    await tester.tap(find.text('Verify'));
     await tester.pumpAndSettle();
 
     expect(find.text('Pairing code expired'), findsOneWidget);
@@ -287,7 +288,7 @@ void main() {
     await tester.pump();
 
     await tester.enterText(find.byType(EditableText), '127.0.0.1:8765:REVOKE');
-    await tester.tap(find.text('Submit'));
+    await tester.tap(find.text('Verify'));
     await tester.pumpAndSettle();
 
     expect(find.text('Pairing revoked'), findsOneWidget);
@@ -311,7 +312,7 @@ void main() {
     await tester.pump();
 
     await tester.enterText(find.byType(EditableText), '127.0.0.1:8765:UNREACH');
-    await tester.tap(find.text('Submit'));
+    await tester.tap(find.text('Verify'));
     await tester.pumpAndSettle();
 
     expect(find.text('Host unreachable'), findsOneWidget);
@@ -337,7 +338,7 @@ void main() {
     await tester.pump();
 
     await tester.enterText(find.byType(EditableText), 'totally-invalid');
-    await tester.tap(find.text('Submit'));
+    await tester.tap(find.text('Verify'));
     await tester.pumpAndSettle();
 
     expect(find.text('Invalid pairing code'), findsOneWidget);
@@ -391,7 +392,7 @@ void main() {
     await tester.tap(find.text('Cancel'));
     await tester.pump();
 
-    expect(find.text('Pair a host'), findsOneWidget);
+    expect(find.text('Pair New Device'), findsOneWidget);
     expect(find.text('Scan QR code'), findsOneWidget);
   });
 }

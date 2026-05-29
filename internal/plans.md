@@ -93,6 +93,7 @@ Files expected to be added or modified in this slice:
 | completed | fix simulator pairing continuation and live ASCP auth | first-run pairing Continue transitions into the trusted shell, stored trust material restores trusted startup state, live ASCP repositories use authenticated WebSocket JSON-RPC with paired device credentials, and simulator verification loads live sessions from the daemon |
 | completed | add live session detail navigation and WebSocket feed rendering | sessions list opens a detail feed, subscribes through `sessions.subscribe`, renders user/agent/tool/approval/terminal-style rows from ASCP event payloads, sends protocol-valid `sessions.send_input`, and simulator verification shows bidirectional live events |
 | completed | harden live inspect empty states | artifact/diff list calls degrade to an empty inspect state for unsupported or missing live metadata instead of showing a load failure |
+| completed | align pairing and composer UI with HTML design system | first-run pairing card matches `component-pairing.html` state structure, removes nested card framing, improves manual code input styling, and updates the live session send composer with focus-aware field/button styling |
 
 ## Acceptance Criteria
 
@@ -107,4 +108,4 @@ This slice is done only when all of the following are true:
 
 ## Next Likely Step
 
-Mobile Flutter foundation is ready for deeper HTML-by-HTML visual parity work against the Continuum Design System. Pairing, trusted startup, authenticated live sessions, live WebSocket event replay, send-input, approvals empty state, inspect empty state, and settings trusted devices have simulator coverage against a running daemon.
+Mobile Flutter foundation is ready for the next HTML-by-HTML visual parity slice against the Continuum Design System. Pairing card states, first-run shell framing, and the live session composer now have simulator-verified parity improvements; the next likely UI work is the active-session screen top bar, diff preview, tool status cards, waiting indicator, and approval card styling.

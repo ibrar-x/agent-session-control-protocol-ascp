@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-05-29 - Mobile pairing and composer UI parity
+
+- Branch: `codex/mobile-live-session-detail`
+- Commit: this commit
+- Summary: continued the mobile HTML parity work with Codex as reviewer/orchestrator and used OpenCode Go `opencode-go/qwen3.7-max` for a read-only UI gap audit through the cost-aware route. Rebuilt the first-run pairing card around the `component-pairing.html` state model, removed the extra shell card wrapper, added HTML-matched state labels/buttons/manual-code field styling, and improved the live session composer text field and send button.
+- Documentation updated: `internal/plans.md`, `internal/status.md`
+- Next likely step: continue active-session parity against the HTML preview by tightening the session top bar, diff preview, tool status cards, waiting indicator, and approval compound card styling.
+
 ### 2026-05-26 - Mobile iOS simulator destination support
 
 - Branch: `branch-mobile-ios-simulator-destination`

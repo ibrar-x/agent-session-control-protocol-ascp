@@ -55,13 +55,13 @@ void main() {
     await tester.pumpWidget(const ContinuumMobileApp());
 
     expect(find.text('Continuum'), findsOneWidget);
-    expect(find.text('Pair a host'), findsOneWidget);
+    expect(find.text('Pair New Device'), findsOneWidget);
     expect(find.text('Scan QR code'), findsOneWidget);
 
     await tester.tap(find.text('Enter code manually'));
     await tester.pump();
 
-    expect(find.text('Submit'), findsOneWidget);
+    expect(find.text('Verify'), findsOneWidget);
   });
 
   testWidgets('trusted shell can move from sessions to approvals', (
@@ -169,7 +169,7 @@ void main() {
     await tester.tap(find.text('Enter code manually'));
     await tester.pump();
     await tester.enterText(find.byType(EditableText), '127.0.0.1:8765:APPROVE');
-    await tester.tap(find.text('Submit'));
+    await tester.tap(find.text('Verify'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Continue'));
     await tester.pump();
