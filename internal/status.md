@@ -502,3 +502,12 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 - Documentation updated: `internal/plans.md`, `internal/status.md`
 - Verification: `flutter test`, `flutter analyze`, iOS simulator live run with ASCP daemon on `127.0.0.1:9875` and pairing admin/proxy on `9876`/`9877`
 - Next likely step: continue visual parity by comparing each remaining Flutter screen against the HTML references in `Continuum Design System/BUILD_ORDER.md`, then convert the current hand-built controls toward Flutter shadcn CLI components where the registry has matching primitives.
+
+### 2026-05-29 - Mobile HTML screen parity pass
+
+- Branch: `codex/mobile-live-session-detail`
+- Commit: `not committed`
+- Summary: used Codex as orchestrator/reviewer and external CLI routes for implementation, rebuilding the trusted Home dashboard, Sessions list, live session detail feed, Approvals queue, Inspect empty/artifact states, and Settings screen toward the Continuum HTML references. Removed duplicate shell headers from non-detail tabs and fixed the simulator-observed approvals count mismatch by making the header subtitle data-driven.
+- Documentation updated: `internal/plans.md`, `internal/status.md`
+- Verification: `flutter analyze` passed; `flutter test` passed with 152 tests; iOS simulator build/run passed on iPhone 16e; manual simulator QA paired with `127.0.0.1:8765:APPROVE` and confirmed the Home, Sessions, Approvals, Inspect, and Settings tab surfaces render without duplicate shell headers, with the Approvals empty state now showing `No pending actions`.
+- Next likely step: replace static dashboard paired devices and display preferences with live daemon-backed data/actions, then continue HTML parity on populated-data states.

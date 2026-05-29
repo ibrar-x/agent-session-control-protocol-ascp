@@ -23,13 +23,19 @@ class SessionListScreen extends StatelessWidget {
       future: controller.load(),
       builder: (context, snapshot) {
         final sessions = snapshot.data;
-        return _SessionScreenFrame(
-          title: 'Sessions',
-          child: _SessionListBody(
-            isLoading: snapshot.connectionState == ConnectionState.waiting,
-            error: snapshot.error,
-            sessions: sessions ?? const [],
-            onSessionSelected: onSessionSelected,
+        return DecoratedBox(
+          decoration: const BoxDecoration(color: SessionColors.pageBackground),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+            child: _SessionScreenFrame(
+              title: 'Sessions',
+              child: _SessionListBody(
+                isLoading: snapshot.connectionState == ConnectionState.waiting,
+                error: snapshot.error,
+                sessions: sessions ?? const [],
+                onSessionSelected: onSessionSelected,
+              ),
+            ),
           ),
         );
       },
@@ -48,15 +54,18 @@ class _SessionScreenFrame extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          style: const TextStyle(
-            color: ContinuumColorTokens.textPrimary,
-            fontSize: 22,
-            fontWeight: FontWeight.w700,
+        Padding(
+          padding: const EdgeInsets.only(left: 10, bottom: 14),
+          child: Text(
+            title,
+            style: const TextStyle(
+              color: SessionColors.textDark,
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.3,
+            ),
           ),
         ),
-        const SizedBox(height: 12),
         Expanded(child: child),
       ],
     );
@@ -90,8 +99,8 @@ class _SessionListBody extends StatelessWidget {
 
     return ListView.separated(
       itemCount: sessions.length,
-      separatorBuilder: (_, _) => const SizedBox(height: 10),
-      itemBuilder: (context, index) => _SessionRow(
+      separatorBuilder: (_, _) => const SizedBox(height: 8),
+      itemBuilder: (context, index) => _SessionItem(
         session: sessions[index],
         onTap: onSessionSelected == null
             ? null
@@ -101,27 +110,31 @@ class _SessionListBody extends StatelessWidget {
   }
 }
 
-class _SessionRow extends StatelessWidget {
-  const _SessionRow({required this.session, this.onTap});
+class _SessionItem extends StatelessWidget {
+  const _SessionItem({required this.session, this.onTap});
 
   final SessionSummary session;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
+    final statusColor = _statusColor(session.status);
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: ContinuumColorTokens.bgElevated,
-          border: Border.all(color: ContinuumColorTokens.border),
-          borderRadius: BorderRadius.circular(8),
+          color: SessionColors.cardSurface,
+          border: Border.all(color: SessionColors.borderCard),
+          borderRadius: BorderRadius.circular(ContinuumRadiusTokens.md),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           child: Row(
             children: [
+              _StatusIcon(status: session.status, color: statusColor),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -131,31 +144,99 @@ class _SessionRow extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        color: ContinuumColorTokens.textPrimary,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
+                        color: SessionColors.textDark,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: -0.1,
                       ),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 3),
                     Text(
                       session.id,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        color: ContinuumColorTokens.mutedText,
-                        fontSize: 12,
+                        color: SessionColors.textMuted,
+                        fontSize: 11,
+                        fontFamily: 'monospace',
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: 12),
-              Text(
-                session.status,
-                style: const TextStyle(
-                  color: ContinuumColorTokens.accent,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
+              const SizedBox(width: 10),
+              _StatusBadge(status: session.status, color: statusColor),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _StatusIcon extends StatelessWidget {
+  const _StatusIcon({required this.status, required this.color});
+
+  final String status;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: SizedBox(
+        width: 36,
+        height: 36,
+        child: Center(
+          child: Text(
+            _iconGlyph(status),
+            style: TextStyle(
+              color: color,
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _StatusBadge extends StatelessWidget {
+  const _StatusBadge({required this.status, required this.color});
+
+  final String status;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Flexible(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.10),
+          border: Border.all(color: color.withValues(alpha: 0.25)),
+          borderRadius: BorderRadius.circular(ContinuumRadiusTokens.pill),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _StatusDot(color: color),
+              const SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  status,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
@@ -166,6 +247,48 @@ class _SessionRow extends StatelessWidget {
   }
 }
 
+class _StatusDot extends StatelessWidget {
+  const _StatusDot({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+      child: const SizedBox(width: 6, height: 6),
+    );
+  }
+}
+
+Color _statusColor(String status) {
+  return switch (status) {
+    'running' => ContinuumColorTokens.success,
+    'waiting_approval' => ContinuumColorTokens.warning,
+    'waiting_input' => ContinuumColorTokens.warning,
+    'idle' => ContinuumColorTokens.accent,
+    'completed' => ContinuumColorTokens.mutedText,
+    'failed' => ContinuumColorTokens.danger,
+    'stopped' => ContinuumColorTokens.danger,
+    'disconnected' => ContinuumColorTokens.danger,
+    _ => ContinuumColorTokens.mutedText,
+  };
+}
+
+String _iconGlyph(String status) {
+  return switch (status) {
+    'running' => '▶',
+    'waiting_approval' => '!',
+    'waiting_input' => '?',
+    'idle' => '◉',
+    'completed' => '✓',
+    'failed' => '✕',
+    'stopped' => '■',
+    'disconnected' => '—',
+    _ => '•',
+  };
+}
+
 class _MutedCopy extends StatelessWidget {
   const _MutedCopy(this.text);
 
@@ -173,12 +296,15 @@ class _MutedCopy extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: const TextStyle(
-        color: ContinuumColorTokens.mutedText,
-        fontSize: 14,
-        height: 1.45,
+    return Padding(
+      padding: const EdgeInsets.only(left: 10, top: 8),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: SessionColors.textMuted,
+          fontSize: 14,
+          height: 1.45,
+        ),
       ),
     );
   }

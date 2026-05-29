@@ -94,6 +94,7 @@ Files expected to be added or modified in this slice:
 | completed | add live session detail navigation and WebSocket feed rendering | sessions list opens a detail feed, subscribes through `sessions.subscribe`, renders user/agent/tool/approval/terminal-style rows from ASCP event payloads, sends protocol-valid `sessions.send_input`, and simulator verification shows bidirectional live events |
 | completed | harden live inspect empty states | artifact/diff list calls degrade to an empty inspect state for unsupported or missing live metadata instead of showing a load failure |
 | completed | align pairing and composer UI with HTML design system | first-run pairing card matches `component-pairing.html` state structure, removes nested card framing, improves manual code input styling, and updates the live session send composer with focus-aware field/button styling |
+| completed | rebuild mobile screens from HTML design system | external OpenCode/Kiro/Blackbox routes were exercised with Codex as reviewer; Home, Sessions, session detail, Approvals, Inspect, and Settings were restyled toward the HTML references, duplicate shell headers were removed, approval empty-state counts were corrected, widget coverage was added, and simulator QA verified the trusted tab flow |
 
 ## Acceptance Criteria
 
@@ -108,4 +109,4 @@ This slice is done only when all of the following are true:
 
 ## Next Likely Step
 
-Mobile Flutter foundation is ready for the next HTML-by-HTML visual parity slice against the Continuum Design System. Pairing card states, first-run shell framing, and the live session composer now have simulator-verified parity improvements; the next likely UI work is the active-session screen top bar, diff preview, tool status cards, waiting indicator, and approval card styling.
+Mobile Flutter foundation is ready for the next backend-connected interaction slice. The current HTML parity pass rebuilt the major mobile screens and fixed simulator-observed UI inconsistencies; the next likely work is wiring the dashboard paired-device inventory and approval/settings toggles to live daemon data instead of static placeholders.

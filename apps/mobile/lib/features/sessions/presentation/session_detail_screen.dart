@@ -51,42 +51,27 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
     return FutureBuilder<void>(
       future: _load,
       builder: (context, snapshot) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Live feed',
-              style: const TextStyle(
-                color: ContinuumColorTokens.textPrimary,
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
+        return DecoratedBox(
+          decoration: const BoxDecoration(color: SessionColors.pageBackground),
+          child: Column(
+            children: [
+              _SessionHeader(sessionId: widget.sessionId),
+              const _DateDivider(label: 'Today'),
+              Expanded(
+                child: _TimelineFeed(
+                  isLoading:
+                      snapshot.connectionState == ConnectionState.waiting,
+                  error: snapshot.error,
+                  timeline: widget.controller.timeline,
+                ),
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              widget.sessionId,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: ContinuumColorTokens.mutedText,
-                fontSize: 12,
+              _InputBar(
+                controller: _inputController,
+                focusNode: _inputFocusNode,
+                onSend: _sendInput,
               ),
-            ),
-            const SizedBox(height: 14),
-            Expanded(
-              child: _TimelineList(
-                isLoading: snapshot.connectionState == ConnectionState.waiting,
-                error: snapshot.error,
-                timeline: widget.controller.timeline,
-              ),
-            ),
-            const SizedBox(height: 12),
-            _InputBar(
-              controller: _inputController,
-              focusNode: _inputFocusNode,
-              onSend: _sendInput,
-            ),
-          ],
+            ],
+          ),
         );
       },
     );
@@ -105,8 +90,104 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
   }
 }
 
-class _TimelineList extends StatelessWidget {
-  const _TimelineList({
+class _SessionHeader extends StatelessWidget {
+  const _SessionHeader({required this.sessionId});
+
+  final String sessionId;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Text(
+                'Live feed',
+                style: TextStyle(
+                  color: SessionColors.textDark,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.2,
+                ),
+              ),
+              const SizedBox(width: 8),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: SessionColors.amberBg,
+                  border: Border.all(color: SessionColors.amberBorder),
+                  borderRadius: BorderRadius.circular(
+                    ContinuumRadiusTokens.pill,
+                  ),
+                ),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  child: Text(
+                    'Live',
+                    style: TextStyle(
+                      color: SessionColors.amberText,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 3),
+          Text(
+            sessionId,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: SessionColors.textMuted,
+              fontSize: 11,
+              fontFamily: 'monospace',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DateDivider extends StatelessWidget {
+  const _DateDivider({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          Text(
+            label.toUpperCase(),
+            style: const TextStyle(
+              color: SessionColors.textMuted,
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              letterSpacing: 0.4,
+            ),
+          ),
+          const SizedBox(width: 10),
+          const Expanded(
+            child: DecoratedBox(
+              decoration: BoxDecoration(color: SessionColors.borderLight),
+              child: SizedBox(height: 1),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TimelineFeed extends StatelessWidget {
+  const _TimelineFeed({
     required this.isLoading,
     required this.error,
     required this.timeline,
@@ -129,38 +210,66 @@ class _TimelineList extends StatelessWidget {
     }
 
     return ListView.separated(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       itemCount: timeline.length,
-      separatorBuilder: (_, _) => const SizedBox(height: 10),
-      itemBuilder: (context, index) => _TimelineRow(event: timeline[index]),
+      separatorBuilder: (_, _) => const SizedBox(height: 12),
+      itemBuilder: (context, index) => _EventRenderer(event: timeline[index]),
     );
   }
 }
 
-class _TimelineRow extends StatelessWidget {
-  const _TimelineRow({required this.event});
+class _EventRenderer extends StatelessWidget {
+  const _EventRenderer({required this.event});
 
   final TimelineEvent event;
 
   @override
   Widget build(BuildContext context) {
-    final style = _TimelineEventStyle.fromLabel(event.label);
-    final isUser = style.kind == _TimelineEventKind.userMessage;
+    final kind = _classifyEvent(event.label);
 
+    return switch (kind) {
+      _EventKind.userMessage => _UserBubble(event: event),
+      _EventKind.agentMessage => _AgentMessage(event: event),
+      _EventKind.tool => _ToolCard(event: event),
+      _EventKind.approval => _ApprovalCard(event: event),
+      _EventKind.terminal => _TerminalBlock(event: event),
+      _EventKind.generic => _GenericEvent(event: event),
+    };
+  }
+}
+
+class _UserBubble extends StatelessWidget {
+  const _UserBubble({required this.event});
+
+  final TimelineEvent event;
+
+  @override
+  Widget build(BuildContext context) {
     return Align(
-      alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+      alignment: Alignment.centerRight,
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 340),
+        constraints: const BoxConstraints(maxWidth: 300),
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: style.background,
-            border: Border.all(color: style.border),
-            borderRadius: BorderRadius.circular(8),
+            color: SessionColors.userBubbleBg,
+            border: Border.all(color: SessionColors.userBubbleBorder),
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(18),
+              topRight: Radius.circular(18),
+              bottomLeft: Radius.circular(18),
+              bottomRight: Radius.circular(4),
+            ),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: style.kind == _TimelineEventKind.terminal
-                ? _TerminalEventContent(event: event, style: style)
-                : _TimelineEventContent(event: event, style: style),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+            child: Text(
+              _eventDetail(event.label),
+              style: const TextStyle(
+                color: Color(0xFF3A2510),
+                fontSize: 15,
+                height: 1.45,
+              ),
+            ),
           ),
         ),
       ),
@@ -168,136 +277,253 @@ class _TimelineRow extends StatelessWidget {
   }
 }
 
-class _TimelineEventContent extends StatelessWidget {
-  const _TimelineEventContent({required this.event, required this.style});
+class _AgentMessage extends StatelessWidget {
+  const _AgentMessage({required this.event});
 
   final TimelineEvent event;
-  final _TimelineEventStyle style;
+
+  @override
+  Widget build(BuildContext context) {
+    final detail = _eventDetail(event.label);
+
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 340),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              _eventTitle(event.label),
+              style: const TextStyle(
+                color: SessionColors.textMuted,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.1,
+              ),
+            ),
+            if (detail.isNotEmpty) ...[
+              const SizedBox(height: 3),
+              Text(
+                detail,
+                style: const TextStyle(
+                  color: Color(0xFF2A1F12),
+                  fontSize: 15,
+                  height: 1.6,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ToolCard extends StatelessWidget {
+  const _ToolCard({required this.event});
+
+  final TimelineEvent event;
 
   @override
   Widget build(BuildContext context) {
     final title = _eventTitle(event.label);
     final detail = _eventDetail(event.label);
+    final blocked = _isToolBlocked(event.label);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _EventGlyph(style: style),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: style.titleColor,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 340),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: SessionColors.cardSurface,
+            border: Border.all(
+              color: blocked
+                  ? ContinuumColorTokens.danger.withValues(alpha: 0.35)
+                  : SessionColors.borderCard,
             ),
-            if (event.sequence != null) ...[
-              const SizedBox(width: 8),
-              _SequencePill(sequence: event.sequence!, color: style.accent),
-            ],
-          ],
-        ),
-        if (detail.isNotEmpty) ...[
-          const SizedBox(height: 8),
-          Text(
-            detail,
-            maxLines: 4,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: style.detailColor,
-              fontSize: 13,
-              height: 1.35,
-              fontWeight: FontWeight.w500,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    _ToolGlyph(blocked: blocked),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: SessionColors.textMuted,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    _ToolStatusPill(blocked: blocked),
+                  ],
+                ),
+                if (detail.isNotEmpty) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    detail,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: SessionColors.textMuted,
+                      fontSize: 12,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
-        ],
-        if (style.kind == _TimelineEventKind.approval) ...[
-          const SizedBox(height: 12),
-          const _ApprovalActions(),
-        ],
-      ],
+        ),
+      ),
     );
   }
 }
 
-class _TerminalEventContent extends StatelessWidget {
-  const _TerminalEventContent({required this.event, required this.style});
+class _ToolGlyph extends StatelessWidget {
+  const _ToolGlyph({required this.blocked});
+
+  final bool blocked;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: blocked ? SessionColors.toolRedBg : SessionColors.toolIndigoBg,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: SizedBox(
+        width: 22,
+        height: 22,
+        child: Center(
+          child: Text(
+            blocked ? '✕' : 'T',
+            style: TextStyle(
+              color: blocked
+                  ? ContinuumColorTokens.danger
+                  : SessionColors.toolIndigoIcon,
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ToolStatusPill extends StatelessWidget {
+  const _ToolStatusPill({required this.blocked});
+
+  final bool blocked;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = blocked
+        ? ContinuumColorTokens.danger
+        : ContinuumColorTokens.success;
+    final label = blocked ? 'Blocked' : 'Done';
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: color,
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ApprovalCard extends StatelessWidget {
+  const _ApprovalCard({required this.event});
 
   final TimelineEvent event;
-  final _TimelineEventStyle style;
 
   @override
   Widget build(BuildContext context) {
     final detail = _eventDetail(event.label);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            _EventGlyph(style: style),
-            const SizedBox(width: 8),
-            const Text(
-              'Terminal',
-              style: TextStyle(
-                color: ContinuumColorTokens.textPrimary,
-                fontSize: 13,
-                fontWeight: FontWeight.w800,
-              ),
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 360),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: SessionColors.approvalBg,
+            border: Border.all(color: SessionColors.amberBorder),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    _ShieldGlyph(),
+                    const SizedBox(width: 10),
+                    const Expanded(
+                      child: Text(
+                        'Approval requested',
+                        style: TextStyle(
+                          color: SessionColors.amberText,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                if (detail.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: SessionColors.codeBg,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      child: Text(
+                        detail,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: SessionColors.codeText,
+                          fontSize: 11,
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 12),
+                const _ApprovalActions(),
+              ],
             ),
-            const Spacer(),
-            if (event.sequence != null)
-              _SequencePill(
-                sequence: event.sequence!,
-                color: ContinuumColorTokens.mono,
-              ),
-          ],
-        ),
-        const SizedBox(height: 10),
-        Text(
-          detail.isEmpty ? event.label : detail,
-          maxLines: 5,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            color: ContinuumColorTokens.mono,
-            fontSize: 12,
-            height: 1.35,
-            fontFamily: 'monospace',
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _EventGlyph extends StatelessWidget {
-  const _EventGlyph({required this.style});
-
-  final _TimelineEventStyle style;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: style.accent.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
-        child: Text(
-          style.glyph,
-          style: TextStyle(
-            color: style.accent,
-            fontSize: 12,
-            fontWeight: FontWeight.w900,
           ),
         ),
       ),
@@ -305,27 +531,25 @@ class _EventGlyph extends StatelessWidget {
   }
 }
 
-class _SequencePill extends StatelessWidget {
-  const _SequencePill({required this.sequence, required this.color});
-
-  final int sequence;
-  final Color color;
-
+class _ShieldGlyph extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(999),
+        color: SessionColors.shieldBg,
+        borderRadius: BorderRadius.circular(10),
       ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        child: Text(
-          '#$sequence',
-          style: TextStyle(
-            color: color,
-            fontSize: 11,
-            fontWeight: FontWeight.w800,
+      child: const SizedBox(
+        width: 34,
+        height: 34,
+        child: Center(
+          child: Text(
+            '⛨',
+            style: TextStyle(
+              color: SessionColors.shieldStroke,
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
       ),
@@ -339,36 +563,55 @@ class _ApprovalActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      children: const [
-        _ActionChip(label: 'Deny', color: ContinuumColorTokens.danger),
-        SizedBox(width: 8),
-        _ActionChip(label: 'Approve', color: ContinuumColorTokens.success),
+      children: [
+        Expanded(
+          child: _ActionButton(
+            label: 'Deny',
+            background: SessionColors.denyBg,
+            textColor: ContinuumColorTokens.danger,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          flex: 2,
+          child: _ActionButton(
+            label: 'Approve',
+            background: SessionColors.approveBg,
+            textColor: ContinuumColorTokens.success,
+          ),
+        ),
       ],
     );
   }
 }
 
-class _ActionChip extends StatelessWidget {
-  const _ActionChip({required this.label, required this.color});
+class _ActionButton extends StatelessWidget {
+  const _ActionButton({
+    required this.label,
+    required this.background,
+    required this.textColor,
+  });
 
   final String label;
-  final Color color;
+  final Color background;
+  final Color textColor;
 
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(999),
+        color: background,
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        padding: const EdgeInsets.symmetric(vertical: 10),
         child: Text(
           label,
+          textAlign: TextAlign.center,
           style: TextStyle(
-            color: color,
-            fontSize: 12,
-            fontWeight: FontWeight.w800,
+            color: textColor,
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ),
@@ -376,142 +619,221 @@ class _ActionChip extends StatelessWidget {
   }
 }
 
-enum _TimelineEventKind {
-  userMessage,
-  agentMessage,
-  tool,
-  approval,
-  terminal,
-  generic,
-}
+class _TerminalBlock extends StatelessWidget {
+  const _TerminalBlock({required this.event});
 
-class _TimelineEventStyle {
-  const _TimelineEventStyle({
-    required this.kind,
-    required this.background,
-    required this.border,
-    required this.accent,
-    required this.titleColor,
-    required this.detailColor,
-    required this.glyph,
-  });
+  final TimelineEvent event;
 
-  final _TimelineEventKind kind;
-  final Color background;
-  final Color border;
-  final Color accent;
-  final Color titleColor;
-  final Color detailColor;
-  final String glyph;
+  @override
+  Widget build(BuildContext context) {
+    final detail = _eventDetail(event.label);
 
-  static _TimelineEventStyle fromLabel(String label) {
-    final normalized = label.toLowerCase();
-    if (normalized.startsWith('message.user') ||
-        normalized.startsWith('user.')) {
-      return const _TimelineEventStyle(
-        kind: _TimelineEventKind.userMessage,
-        background: Color(0xFF47372D),
-        border: Color(0xFF6A4B36),
-        accent: ContinuumColorTokens.accent,
-        titleColor: ContinuumColorTokens.textPrimary,
-        detailColor: ContinuumColorTokens.textPrimary,
-        glyph: 'U',
-      );
-    }
-    if (normalized.startsWith('message.agent') ||
-        normalized.startsWith('message.assistant') ||
-        normalized.contains('thinking')) {
-      return const _TimelineEventStyle(
-        kind: _TimelineEventKind.agentMessage,
-        background: ContinuumColorTokens.bgSurface,
-        border: ContinuumColorTokens.border,
-        accent: ContinuumColorTokens.mono,
-        titleColor: ContinuumColorTokens.textPrimary,
-        detailColor: ContinuumColorTokens.mutedText,
-        glyph: 'A',
-      );
-    }
-    if (normalized.contains('approval')) {
-      return const _TimelineEventStyle(
-        kind: _TimelineEventKind.approval,
-        background: Color(0xFF40352B),
-        border: Color(0xFF8C5A2E),
-        accent: ContinuumColorTokens.warning,
-        titleColor: ContinuumColorTokens.warning,
-        detailColor: ContinuumColorTokens.textPrimary,
-        glyph: '!',
-      );
-    }
-    if (normalized.startsWith('terminal') ||
-        normalized.contains('terminal.') ||
-        normalized.contains('stdout') ||
-        normalized.contains('stderr')) {
-      return const _TimelineEventStyle(
-        kind: _TimelineEventKind.terminal,
-        background: Color(0xFF1E1B16),
-        border: ContinuumColorTokens.border,
-        accent: ContinuumColorTokens.mono,
-        titleColor: ContinuumColorTokens.textPrimary,
-        detailColor: ContinuumColorTokens.mono,
-        glyph: '>',
-      );
-    }
-    if (normalized.startsWith('tool.') || normalized.contains('tool')) {
-      final blocked =
-          normalized.contains('blocked') || normalized.contains('failed');
-      return _TimelineEventStyle(
-        kind: _TimelineEventKind.tool,
-        background: ContinuumColorTokens.bgElevated,
-        border: blocked
-            ? ContinuumColorTokens.danger.withValues(alpha: 0.45)
-            : ContinuumColorTokens.border,
-        accent: blocked
-            ? ContinuumColorTokens.danger
-            : ContinuumColorTokens.success,
-        titleColor: ContinuumColorTokens.textPrimary,
-        detailColor: ContinuumColorTokens.mutedText,
-        glyph: blocked ? 'X' : 'T',
-      );
-    }
-    return const _TimelineEventStyle(
-      kind: _TimelineEventKind.generic,
-      background: ContinuumColorTokens.bgElevated,
-      border: ContinuumColorTokens.border,
-      accent: ContinuumColorTokens.accent,
-      titleColor: ContinuumColorTokens.textPrimary,
-      detailColor: ContinuumColorTokens.mutedText,
-      glyph: '*',
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 340),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E1B16),
+            border: Border.all(color: SessionColors.borderCard),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: ContinuumColorTokens.mono.withValues(
+                          alpha: 0.15,
+                        ),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 4,
+                        ),
+                        child: Text(
+                          '>',
+                          style: TextStyle(
+                            color: ContinuumColorTokens.mono,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'Terminal',
+                      style: TextStyle(
+                        color: SessionColors.textDark,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const Spacer(),
+                    if (event.sequence != null)
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: ContinuumColorTokens.mono.withValues(
+                            alpha: 0.12,
+                          ),
+                          borderRadius: BorderRadius.circular(
+                            ContinuumRadiusTokens.pill,
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
+                          child: Text(
+                            '#${event.sequence}',
+                            style: const TextStyle(
+                              color: ContinuumColorTokens.mono,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  detail.isEmpty ? event.label : detail,
+                  maxLines: 6,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: ContinuumColorTokens.mono,
+                    fontSize: 12,
+                    height: 1.4,
+                    fontFamily: 'monospace',
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
 
-String _eventTitle(String label) {
-  final detail = _eventDetail(label);
-  if (label.startsWith('message.user')) {
-    return 'You';
-  }
-  if (label.startsWith('message.agent') ||
-      label.startsWith('message.assistant')) {
-    return 'Agent';
-  }
-  if (label.toLowerCase().contains('approval')) {
-    return 'Approval requested';
-  }
-  if (label.toLowerCase().contains('tool')) {
-    return label.split(' ').first;
-  }
-  if (label.toLowerCase().startsWith('terminal')) {
-    return 'Terminal';
-  }
-  return detail.isEmpty ? label : label.split(' ').first;
-}
+class _GenericEvent extends StatelessWidget {
+  const _GenericEvent({required this.event});
 
-String _eventDetail(String label) {
-  final separator = label.indexOf(' ');
-  if (separator == -1 || separator == label.length - 1) {
-    return '';
+  final TimelineEvent event;
+
+  @override
+  Widget build(BuildContext context) {
+    final title = _eventTitle(event.label);
+    final detail = _eventDetail(event.label);
+
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 340),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: SessionColors.cardSurface,
+            border: Border.all(color: SessionColors.borderCard),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: ContinuumColorTokens.accent.withValues(
+                          alpha: 0.14,
+                        ),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 4,
+                        ),
+                        child: Text(
+                          '*',
+                          style: TextStyle(
+                            color: ContinuumColorTokens.accent,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: SessionColors.textDark,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    if (event.sequence != null)
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: ContinuumColorTokens.accent.withValues(
+                            alpha: 0.12,
+                          ),
+                          borderRadius: BorderRadius.circular(
+                            ContinuumRadiusTokens.pill,
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
+                          child: Text(
+                            '#${event.sequence}',
+                            style: TextStyle(
+                              color: ContinuumColorTokens.accent,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                if (detail.isNotEmpty) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    detail,
+                    maxLines: 4,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: SessionColors.textSecondary,
+                      fontSize: 13,
+                      height: 1.35,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
-  return label.substring(separator + 1);
 }
 
 class _InputBar extends StatelessWidget {
@@ -527,88 +849,162 @@ class _InputBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: focusNode,
-      builder: (context, _) {
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Expanded(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: ContinuumColorTokens.bgSurface,
-                  border: Border.all(
-                    color: focusNode.hasFocus
-                        ? ContinuumColorTokens.accent
-                        : ContinuumColorTokens.border,
-                  ),
-                  borderRadius: BorderRadius.circular(ContinuumRadiusTokens.lg),
-                  boxShadow: focusNode.hasFocus
-                      ? [
-                          BoxShadow(
-                            color: ContinuumColorTokens.accent.withValues(
-                              alpha: 0.18,
-                            ),
-                            blurRadius: 0,
-                            spreadRadius: 2,
-                          ),
-                        ]
-                      : null,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(14, 8, 14, 24),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: SessionColors.cardSurface,
+          border: Border.all(
+            color: focusNode.hasFocus
+                ? ContinuumColorTokens.accent
+                : SessionColors.borderLight,
+          ),
+          borderRadius: BorderRadius.circular(ContinuumRadiusTokens.xl),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 10, 8, 6),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              EditableText(
+                controller: controller,
+                focusNode: focusNode,
+                style: const TextStyle(
+                  color: SessionColors.textDark,
+                  fontSize: 15,
+                  height: 1.35,
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 10,
-                  ),
-                  child: EditableText(
-                    controller: controller,
-                    focusNode: focusNode,
-                    style: const TextStyle(
-                      color: ContinuumColorTokens.textPrimary,
-                      fontSize: 15,
-                      height: 1.35,
-                    ),
-                    cursorColor: ContinuumColorTokens.accent,
-                    backgroundCursorColor: ContinuumColorTokens.border,
-                    minLines: 1,
-                    maxLines: 4,
-                    keyboardType: TextInputType.multiline,
-                    textInputAction: TextInputAction.send,
-                    onSubmitted: (_) => onSend(),
-                  ),
-                ),
+                cursorColor: ContinuumColorTokens.accent,
+                backgroundCursorColor: SessionColors.borderLight,
+                minLines: 1,
+                maxLines: 4,
+                keyboardType: TextInputType.multiline,
+                textInputAction: TextInputAction.send,
+                onSubmitted: (_) => onSend(),
               ),
-            ),
-            const SizedBox(width: 10),
-            GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: onSend,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: ContinuumColorTokens.accent,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const SizedBox(
-                  height: 40,
-                  width: 60,
-                  child: Center(
-                    child: Text(
-                      'Send',
-                      style: TextStyle(
-                        color: ContinuumColorTokens.accentForeground,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w800,
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  _AgentAvatar(),
+                  const SizedBox(width: 6),
+                  const Text(
+                    'Quick',
+                    style: TextStyle(
+                      color: SessionColors.textMuted,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const Spacer(),
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: onSend,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: ContinuumColorTokens.accent,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        child: Text(
+                          'Send',
+                          style: TextStyle(
+                            color: ContinuumColorTokens.accentForeground,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
+                ],
               ),
-            ),
-          ],
-        );
-      },
+            ],
+          ),
+        ),
+      ),
     );
   }
+}
+
+class _AgentAvatar extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: SessionColors.warmSurface,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: const SizedBox(
+        width: 24,
+        height: 24,
+        child: Center(
+          child: Text(
+            'A',
+            style: TextStyle(
+              color: SessionColors.textMuted,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+enum _EventKind { userMessage, agentMessage, tool, approval, terminal, generic }
+
+_EventKind _classifyEvent(String label) {
+  final normalized = label.toLowerCase();
+  if (normalized.startsWith('message.user') || normalized.startsWith('user.')) {
+    return _EventKind.userMessage;
+  }
+  if (normalized.startsWith('message.agent') ||
+      normalized.startsWith('message.assistant') ||
+      normalized.contains('thinking')) {
+    return _EventKind.agentMessage;
+  }
+  if (normalized.contains('approval')) {
+    return _EventKind.approval;
+  }
+  if (normalized.startsWith('terminal') ||
+      normalized.contains('terminal.') ||
+      normalized.contains('stdout') ||
+      normalized.contains('stderr')) {
+    return _EventKind.terminal;
+  }
+  if (normalized.startsWith('tool.') || normalized.contains('tool')) {
+    return _EventKind.tool;
+  }
+  return _EventKind.generic;
+}
+
+String _eventTitle(String label) {
+  if (label.startsWith('message.user')) return 'You';
+  if (label.startsWith('message.agent') ||
+      label.startsWith('message.assistant')) {
+    return 'Agent';
+  }
+  if (label.toLowerCase().contains('approval')) return 'Approval requested';
+  if (label.toLowerCase().startsWith('terminal')) return 'Terminal';
+  if (label.toLowerCase().contains('tool')) return label.split(' ').first;
+  final detail = _eventDetail(label);
+  return detail.isEmpty ? label : label.split(' ').first;
+}
+
+String _eventDetail(String label) {
+  final separator = label.indexOf(' ');
+  if (separator == -1 || separator == label.length - 1) return '';
+  return label.substring(separator + 1);
+}
+
+bool _isToolBlocked(String label) {
+  final normalized = label.toLowerCase();
+  return normalized.contains('blocked') || normalized.contains('failed');
 }
 
 class _MutedCopy extends StatelessWidget {
@@ -618,12 +1014,15 @@ class _MutedCopy extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: const TextStyle(
-        color: ContinuumColorTokens.mutedText,
-        fontSize: 14,
-        height: 1.45,
+    return Padding(
+      padding: const EdgeInsets.only(left: 16, top: 8),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: SessionColors.textMuted,
+          fontSize: 14,
+          height: 1.45,
+        ),
       ),
     );
   }
