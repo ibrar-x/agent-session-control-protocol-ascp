@@ -36,7 +36,11 @@ void main() {
   test('inspect controller delegates diff get', () async {
     final repository = MemoryInspectRepository(
       diffs: const {
-        'diff_1': DiffDetail(id: 'diff_1', summary: '2 files changed', fileCount: 2),
+        'diff_1': DiffDetail(
+          id: 'diff_1',
+          summary: '2 files changed',
+          fileCount: 2,
+        ),
       },
     );
     final controller = InspectController(repository: repository);
@@ -67,7 +71,10 @@ void main() {
         '{"jsonrpc":"2.0","id":"artifacts.get","result":{"artifact":{"id":"artifact_1","name":"report.md","mime_type":"text/markdown"}}}',
       );
     final repository = AscpInspectRepository(
-      client: HttpJsonRpcClient(dio: dio, endpoint: Uri.parse('http://host/rpc')),
+      client: HttpJsonRpcClient(
+        dio: dio,
+        endpoint: Uri.parse('http://host/rpc'),
+      ),
       sessionId: 'sess_1',
     );
 
@@ -77,13 +84,37 @@ void main() {
     expect(artifact.mimeType, 'text/markdown');
   });
 
+  test(
+    'ASCP inspect repository treats unsupported artifact lists as empty',
+    () async {
+      final dio = Dio()
+        ..httpClientAdapter = const _FakeAdapter(
+          '{"jsonrpc":"2.0","id":"artifacts.list","error":{"code":"UNSUPPORTED","message":"Artifacts unavailable","retryable":false}}',
+        );
+      final repository = AscpInspectRepository(
+        client: HttpJsonRpcClient(
+          dio: dio,
+          endpoint: Uri.parse('http://host/rpc'),
+        ),
+        sessionId: 'sess_1',
+      );
+
+      final items = await repository.listItems();
+
+      expect(items, isEmpty);
+    },
+  );
+
   test('ASCP inspect repository maps diff detail', () async {
     final dio = Dio()
       ..httpClientAdapter = const _FakeAdapter(
         '{"jsonrpc":"2.0","id":"diffs.get","result":{"diff":{"id":"diff_1","summary":"2 files changed","file_count":2}}}',
       );
     final repository = AscpInspectRepository(
-      client: HttpJsonRpcClient(dio: dio, endpoint: Uri.parse('http://host/rpc')),
+      client: HttpJsonRpcClient(
+        dio: dio,
+        endpoint: Uri.parse('http://host/rpc'),
+      ),
       sessionId: 'sess_1',
     );
 

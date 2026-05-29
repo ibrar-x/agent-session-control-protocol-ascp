@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mobile/app/continuum_app.dart';
@@ -24,6 +26,26 @@ class _ApprovedPoll implements PairingPollSimulator {
   @override
   PairingPollState simulatePoll(PairingClaim claim) =>
       PairingPollState.approved;
+}
+
+class _FakeSubscriptionRepository implements SessionSubscriptionRepository {
+  final _controller = StreamController<TimelineEvent>.broadcast();
+
+  void add(TimelineEvent event) {
+    _controller.add(event);
+  }
+
+  @override
+  Future<SessionEventSubscription> subscribeTimeline({
+    required String sessionId,
+    int? fromSequence,
+  }) async {
+    return SessionEventSubscription(
+      id: 'sub_$sessionId',
+      events: _controller.stream,
+      cancel: () => _controller.close(),
+    );
+  }
 }
 
 void main() {
@@ -85,6 +107,50 @@ void main() {
     await tester.pump();
     await tester.pump();
     expect(find.text('Allow command'), findsOneWidget);
+  });
+
+  testWidgets('trusted shell opens a live session detail feed', (tester) async {
+    final subscriptionRepository = _FakeSubscriptionRepository();
+    final dependencies = MobileDependencies.memory(
+      sessionListController: SessionListController(
+        repository: MemorySessionRepository(
+          sessions: [
+            SessionSummary(
+              id: 'sess_live',
+              title: 'Live ASCP session',
+              status: 'running',
+              updatedAt: DateTime.utc(2026, 5, 25, 13),
+            ),
+          ],
+        ),
+      ),
+      createSessionSubscriptionRepository: () => subscriptionRepository,
+    );
+
+    await tester.pumpWidget(
+      ContinuumMobileApp(isTrusted: true, dependencies: dependencies),
+    );
+
+    await tester.tap(find.text('Sessions').last);
+    await tester.pump();
+    await tester.pump();
+    await tester.tap(find.text('Live ASCP session'));
+    await tester.pump();
+
+    expect(find.text('Live feed'), findsOneWidget);
+    expect(find.text('Back'), findsOneWidget);
+
+    subscriptionRepository.add(
+      const TimelineEvent(
+        sequence: 8,
+        id: 'evt_agent',
+        label: 'message.agent Thinking through the next patch',
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('Agent'), findsOneWidget);
+    expect(find.text('Thinking through the next patch'), findsOneWidget);
   });
 
   testWidgets('successful first-run pairing can enter trusted shell', (

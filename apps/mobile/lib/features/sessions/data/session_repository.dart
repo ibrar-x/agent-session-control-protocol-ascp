@@ -109,10 +109,11 @@ class AscpSessionRepository implements SessionRepository {
     }
     return events.whereType<Map>().map((event) {
       final json = Map<String, Object?>.from(event);
+      final payload = _objectMap(json['payload']);
       return TimelineEvent(
         sequence: json['seq'] as int?,
         id: json['id'] as String? ?? '',
-        label: json['type'] as String? ?? 'event',
+        label: _eventLabel(json['type'] as String? ?? 'event', payload),
       );
     }).toList();
   }
@@ -127,7 +128,9 @@ class AscpSessionRepository implements SessionRepository {
       method: AscpMethod.sessionsSendInput,
       params: {
         'session_id': sessionId,
-        'input': {'kind': 'text', 'text': text},
+        'input': text,
+        'input_kind': 'instruction',
+        'metadata': {'source': 'mobile_ui'},
       },
     );
   }
@@ -174,7 +177,7 @@ class AscpSessionSubscriptionRepository
             (event) => TimelineEvent(
               sequence: event.sequence,
               id: event.id,
-              label: event.rawType,
+              label: _eventLabel(event.rawType, event.payload),
             ),
           ),
       cancel: () async {
@@ -186,4 +189,51 @@ class AscpSessionSubscriptionRepository
       },
     );
   }
+}
+
+Map<String, Object?> _objectMap(Object? value) {
+  if (value is Map) {
+    return Map<String, Object?>.from(value);
+  }
+  return const {};
+}
+
+String _eventLabel(String type, Map<String, Object?> payload) {
+  final detail = _eventDetail(type, payload);
+  if (detail.isEmpty) {
+    return type;
+  }
+  return '$type $detail';
+}
+
+String _eventDetail(String type, Map<String, Object?> payload) {
+  final content = payload['content'];
+  if (content is String && content.isNotEmpty) {
+    return content;
+  }
+
+  final text = payload['text'];
+  if (text is String && text.isNotEmpty) {
+    return text;
+  }
+
+  final message = payload['message'];
+  if (message is String && message.isNotEmpty) {
+    return message;
+  }
+
+  if (type == 'session.status_changed') {
+    final from = payload['from'];
+    final to = payload['to'];
+    if (from is String && to is String) {
+      return '$from -> $to';
+    }
+  }
+
+  final name = payload['name'] ?? payload['tool_name'] ?? payload['command'];
+  if (name is String && name.isNotEmpty) {
+    return name;
+  }
+
+  return '';
 }

@@ -60,4 +60,34 @@ void main() {
 
     expect(find.text('No active sessions'), findsOneWidget);
   });
+
+  testWidgets('session list screen notifies when a session is selected', (
+    tester,
+  ) async {
+    SessionSummary? selected;
+    final session = SessionSummary(
+      id: 'sess_live',
+      title: 'Live build',
+      status: 'running',
+      updatedAt: DateTime.utc(2026, 5, 25, 9),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SessionListScreen(
+          controller: SessionListController(
+            repository: MemorySessionRepository(sessions: [session]),
+          ),
+          onSessionSelected: (session) => selected = session,
+        ),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.text('Live build'));
+    await tester.pump();
+
+    expect(selected?.id, 'sess_live');
+  });
 }

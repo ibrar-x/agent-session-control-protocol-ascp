@@ -130,6 +130,24 @@ void main() {
     expect(sessions.single.status, 'running');
   });
 
+  test('ASCP session repository maps timeline payload content', () async {
+    final dio = Dio()
+      ..httpClientAdapter = _FakeAdapter(
+        '{"jsonrpc":"2.0","id":"sessions.get","result":{"events":[{"id":"evt_1","type":"message.user","seq":1,"payload":{"content":"hello from host"}},{"id":"evt_2","type":"run.failed","seq":2,"payload":{"message":"Usage limit"}}]}}',
+      );
+    final repository = AscpSessionRepository(
+      client: HttpJsonRpcClient(
+        dio: dio,
+        endpoint: Uri.parse('http://host/rpc'),
+      ),
+    );
+
+    final timeline = await repository.readTimeline('sess_1');
+
+    expect(timeline.first.label, 'message.user hello from host');
+    expect(timeline.last.label, 'run.failed Usage limit');
+  });
+
   test('ASCP session repository delegates send input method', () async {
     final adapter = _RecordingAdapter(
       '{"jsonrpc":"2.0","id":"sessions.send_input","result":{"accepted":true}}',
@@ -145,7 +163,9 @@ void main() {
     await repository.sendInput(sessionId: 'sess_1', text: 'hello');
 
     expect(adapter.requestBody, contains('sessions.send_input'));
-    expect(adapter.requestBody, contains('hello'));
+    expect(adapter.requestBody, contains('"input":"hello"'));
+    expect(adapter.requestBody, contains('"input_kind":"instruction"'));
+    expect(adapter.requestBody, isNot(contains('"kind":"text"')));
   });
 
   test('ASCP session subscription repository maps replay events', () async {
@@ -189,7 +209,7 @@ void main() {
     final event = await eventFuture;
     expect(event.id, 'evt_1');
     expect(event.sequence, 9);
-    expect(event.label, 'message.user');
+    expect(event.label, 'message.user hello');
 
     final cancel = subscription.cancel();
     await Future<void>.delayed(Duration.zero);

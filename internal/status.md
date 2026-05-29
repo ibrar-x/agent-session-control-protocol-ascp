@@ -485,3 +485,12 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 - Summary: added explicit intake, planning, drift-control, and checkpoint workflow assets for the ASCP repository
 - Documentation updated: `AGENTS.md`, `plans.md`, `docs/repo-operating-system.md`, `README.md`
 - Next likely step: choose the next protocol feature and create a dedicated feature branch and scoped plan for it
+
+### 2026-05-29 - Mobile live session detail and simulator QA
+
+- Branch: `codex/mobile-live-session-detail`
+- Commit: `not committed`
+- Summary: added sessions-list-to-detail navigation, live `sessions.subscribe` wiring, payload-aware timeline rendering for user/agent/tool/approval/terminal-style events, protocol-valid `sessions.send_input` params, and inspect empty-state handling for unsupported or missing artifact metadata. Verified pairing, authenticated WebSocket sessions, live send-input/event feedback, approvals empty state, inspect empty state, and trusted-device settings on the iPhone 16e simulator against a loopback daemon.
+- Documentation updated: `internal/plans.md`, `internal/status.md`
+- Verification: `flutter test`, `flutter analyze`, iOS simulator live run with ASCP daemon on `127.0.0.1:9875` and pairing admin/proxy on `9876`/`9877`
+- Next likely step: continue visual parity by comparing each remaining Flutter screen against the HTML references in `Continuum Design System/BUILD_ORDER.md`, then convert the current hand-built controls toward Flutter shadcn CLI components where the registry has matching primitives.

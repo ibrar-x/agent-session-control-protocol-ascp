@@ -6,12 +6,16 @@ import '../data/session_repository.dart';
 import '../domain/timeline_event.dart';
 
 class SessionListScreen extends StatelessWidget {
-  SessionListScreen({SessionListController? controller, super.key})
-    : controller =
-          controller ??
-          SessionListController(repository: MemorySessionRepository());
+  SessionListScreen({
+    SessionListController? controller,
+    this.onSessionSelected,
+    super.key,
+  }) : controller =
+           controller ??
+           SessionListController(repository: MemorySessionRepository());
 
   final SessionListController controller;
+  final ValueChanged<SessionSummary>? onSessionSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +29,7 @@ class SessionListScreen extends StatelessWidget {
             isLoading: snapshot.connectionState == ConnectionState.waiting,
             error: snapshot.error,
             sessions: sessions ?? const [],
+            onSessionSelected: onSessionSelected,
           ),
         );
       },
@@ -63,11 +68,13 @@ class _SessionListBody extends StatelessWidget {
     required this.isLoading,
     required this.error,
     required this.sessions,
+    required this.onSessionSelected,
   });
 
   final bool isLoading;
   final Object? error;
   final List<SessionSummary> sessions;
+  final ValueChanged<SessionSummary>? onSessionSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -84,65 +91,75 @@ class _SessionListBody extends StatelessWidget {
     return ListView.separated(
       itemCount: sessions.length,
       separatorBuilder: (_, _) => const SizedBox(height: 10),
-      itemBuilder: (context, index) => _SessionRow(session: sessions[index]),
+      itemBuilder: (context, index) => _SessionRow(
+        session: sessions[index],
+        onTap: onSessionSelected == null
+            ? null
+            : () => onSessionSelected!(sessions[index]),
+      ),
     );
   }
 }
 
 class _SessionRow extends StatelessWidget {
-  const _SessionRow({required this.session});
+  const _SessionRow({required this.session, this.onTap});
 
   final SessionSummary session;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: ContinuumColorTokens.bgElevated,
-        border: Border.all(color: ContinuumColorTokens.border),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    session.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: ContinuumColorTokens.textPrimary,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: ContinuumColorTokens.bgElevated,
+          border: Border.all(color: ContinuumColorTokens.border),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      session.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: ContinuumColorTokens.textPrimary,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    session.id,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: ContinuumColorTokens.mutedText,
-                      fontSize: 12,
+                    const SizedBox(height: 6),
+                    Text(
+                      session.id,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: ContinuumColorTokens.mutedText,
+                        fontSize: 12,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              session.status,
-              style: const TextStyle(
-                color: ContinuumColorTokens.accent,
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
+              const SizedBox(width: 12),
+              Text(
+                session.status,
+                style: const TextStyle(
+                  color: ContinuumColorTokens.accent,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

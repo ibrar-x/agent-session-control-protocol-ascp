@@ -6,7 +6,10 @@ import '../core/design_system/continuum_tokens.dart';
 import '../features/approvals/presentation/approvals_screen.dart';
 import '../features/inspect/presentation/inspect_screen.dart';
 import '../features/pairing/presentation/pairing_screen.dart';
+import '../features/sessions/application/session_detail_controller.dart';
+import '../features/sessions/domain/timeline_event.dart';
 import '../features/sessions/presentation/session_list_screen.dart';
+import '../features/sessions/presentation/session_detail_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
 import '../ui/shadcn/components/display/badge/badge.dart' as shadcn;
 import '../ui/shadcn/components/layout/card/card.dart' as shadcn;
@@ -102,6 +105,7 @@ class ContinuumTrustedShell extends StatefulWidget {
 
 class _ContinuumTrustedShellState extends State<ContinuumTrustedShell> {
   int _index = 0;
+  SessionSummary? _selectedSession;
   late final MobileDependencies _dependencies;
 
   static const _tabs = <_ShellTab>[
@@ -148,13 +152,22 @@ class _ContinuumTrustedShellState extends State<ContinuumTrustedShell> {
                 child: _TrustedTabView(
                   tab: active,
                   dependencies: _dependencies,
+                  selectedSession: _selectedSession,
+                  onSessionSelected: (session) =>
+                      setState(() => _selectedSession = session),
+                  onSessionBack: () => setState(() => _selectedSession = null),
                 ),
               ),
             ),
             _BottomNav(
               index: _index,
               tabs: _tabs,
-              onSelected: (index) => setState(() => _index = index),
+              onSelected: (index) => setState(() {
+                _index = index;
+                if (_tabs[index].label != 'Sessions') {
+                  _selectedSession = null;
+                }
+              }),
             ),
           ],
         ),
@@ -164,17 +177,38 @@ class _ContinuumTrustedShellState extends State<ContinuumTrustedShell> {
 }
 
 class _TrustedTabView extends StatelessWidget {
-  const _TrustedTabView({required this.tab, required this.dependencies});
+  const _TrustedTabView({
+    required this.tab,
+    required this.dependencies,
+    required this.selectedSession,
+    required this.onSessionSelected,
+    required this.onSessionBack,
+  });
 
   final _ShellTab tab;
   final MobileDependencies dependencies;
+  final SessionSummary? selectedSession;
+  final ValueChanged<SessionSummary> onSessionSelected;
+  final VoidCallback onSessionBack;
 
   @override
   Widget build(BuildContext context) {
     final feature = switch (tab.label) {
-      'Sessions' => SessionListScreen(
-        controller: dependencies.sessionListController,
-      ),
+      'Sessions' =>
+        selectedSession == null
+            ? SessionListScreen(
+                controller: dependencies.sessionListController,
+                onSessionSelected: onSessionSelected,
+              )
+            : SessionDetailScreen(
+                sessionId: selectedSession!.id,
+                controller: SessionDetailController(
+                  sessionId: selectedSession!.id,
+                  repository: dependencies.sessionListController.repository,
+                  subscriptionRepository: dependencies
+                      .createSessionSubscriptionRepository(),
+                ),
+              ),
       'Approvals' => ApprovalsScreen(
         controller: dependencies.approvalQueueController,
       ),
@@ -190,7 +224,9 @@ class _TrustedTabView extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                tab.label,
+                selectedSession != null && tab.label == 'Sessions'
+                    ? selectedSession!.title
+                    : tab.label,
                 style: const TextStyle(
                   color: ContinuumColorTokens.textPrimary,
                   fontSize: 24,
@@ -198,6 +234,24 @@ class _TrustedTabView extends StatelessWidget {
                 ),
               ),
             ),
+            if (selectedSession != null && tab.label == 'Sessions') ...[
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: onSessionBack,
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  child: Text(
+                    'Back',
+                    style: TextStyle(
+                      color: ContinuumColorTokens.accent,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 6),
+            ],
             shadcn.SecondaryBadge(
               child: const Text('Connected', style: TextStyle(fontSize: 12)),
             ),

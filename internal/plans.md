@@ -13,7 +13,7 @@ This file tracks the active scoped work for the current branch.
 ## Active State
 
 - Feature name: Mobile companion Flutter architecture and build plan
-- Branch: `branch-mobile-flutter-app`
+- Branch: `codex/mobile-live-session-detail`
 - Goal: build the Flutter-first mobile companion app foundation with feature-first folders, shadcn UI primitives, exact ASCP core models, JSON-RPC transports, pairing/trust foundations, app shell, feature domain slices, and replay cursor persistence
 - Source inputs:
   - `AGENTS.md`
@@ -91,6 +91,8 @@ Files expected to be added or modified in this slice:
 | completed | harden platform capability config | Android and iOS platform shells declare the network, camera, biometric, Face ID, and app identity settings required by live pairing and trusted-device flows |
 | completed | replace scaffold packaging metadata | pubspec, web metadata, and Android Gradle release comments identify Continuum explicitly and are guarded by smoke coverage |
 | completed | fix simulator pairing continuation and live ASCP auth | first-run pairing Continue transitions into the trusted shell, stored trust material restores trusted startup state, live ASCP repositories use authenticated WebSocket JSON-RPC with paired device credentials, and simulator verification loads live sessions from the daemon |
+| completed | add live session detail navigation and WebSocket feed rendering | sessions list opens a detail feed, subscribes through `sessions.subscribe`, renders user/agent/tool/approval/terminal-style rows from ASCP event payloads, sends protocol-valid `sessions.send_input`, and simulator verification shows bidirectional live events |
+| completed | harden live inspect empty states | artifact/diff list calls degrade to an empty inspect state for unsupported or missing live metadata instead of showing a load failure |
 
 ## Acceptance Criteria
 
@@ -105,4 +107,4 @@ This slice is done only when all of the following are true:
 
 ## Next Likely Step
 
-Mobile Flutter foundation is ready for deeper device-level validation against a running ASCP host/daemon. Pairing, trusted startup, authenticated live sessions, approvals, and settings have simulator coverage. The Inspect tab still depends on launching with a valid `CONTINUUM_ACTIVE_SESSION_ID`; a follow-up can either derive that from the selected session or present a non-error empty state when no active session is configured.
+Mobile Flutter foundation is ready for deeper HTML-by-HTML visual parity work against the Continuum Design System. Pairing, trusted startup, authenticated live sessions, live WebSocket event replay, send-input, approvals empty state, inspect empty state, and settings trusted devices have simulator coverage against a running daemon.
