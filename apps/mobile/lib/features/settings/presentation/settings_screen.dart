@@ -140,7 +140,10 @@ class _SettingsBodyState extends State<_SettingsBody> {
       children: [
         _UserSummaryCard(),
         const SizedBox(height: 10),
-        _SectionHeader(label: 'Trusted devices'),
+        Semantics(
+          identifier: 'trusted_devices_section',
+          child: _SectionHeader(label: 'Trusted devices'),
+        ),
         _SettingCard(
           children: [
             for (final device in _devices)
@@ -206,7 +209,10 @@ class _SettingsBodyState extends State<_SettingsBody> {
           ],
         ),
         const SizedBox(height: 6),
-        _SectionHeader(label: 'Connection'),
+        Semantics(
+          identifier: 'connection_section',
+          child: _SectionHeader(label: 'Connection'),
+        ),
         _SettingCard(
           children: [
             _NavRow(

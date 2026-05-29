@@ -170,10 +170,13 @@ class _PairingScreenState extends State<PairingScreen> {
             style: _subtleStyle,
           ),
           const SizedBox(height: ContinuumSpacingTokens.x4),
-          _ActionButton(
-            label: 'Verify',
-            variant: _ButtonVariant.primary,
-            onTap: _submitManual,
+          Semantics(
+            identifier: 'verify_button',
+            child: _ActionButton(
+              label: 'Verify',
+              variant: _ButtonVariant.primary,
+              onTap: _submitManual,
+            ),
           ),
         ],
       );
@@ -215,9 +218,15 @@ class _PairingScreenState extends State<PairingScreen> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const _StateLabel(label: 'Scanning'),
+          Semantics(
+            identifier: 'scanning_state',
+            child: const _StateLabel(label: 'Scanning'),
+          ),
           const SizedBox(height: ContinuumSpacingTokens.x3),
-          const Text('Pair New Device', style: _titleStyle),
+          Semantics(
+            identifier: 'pair_new_device_title',
+            child: const Text('Pair New Device', style: _titleStyle),
+          ),
           const SizedBox(height: ContinuumSpacingTokens.x3),
           const _ScanArea(),
           const SizedBox(height: ContinuumSpacingTokens.x3),
@@ -233,9 +242,15 @@ class _PairingScreenState extends State<PairingScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const _StateLabel(label: 'Scanning'),
+        Semantics(
+          identifier: 'scanning_state',
+          child: const _StateLabel(label: 'Scanning'),
+        ),
         const SizedBox(height: ContinuumSpacingTokens.x3),
-        const Text('Pair New Device', style: _titleStyle),
+        Semantics(
+          identifier: 'pair_new_device_title',
+          child: const Text('Pair New Device', style: _titleStyle),
+        ),
         const SizedBox(height: ContinuumSpacingTokens.x3),
         GestureDetector(
           behavior: HitTestBehavior.opaque,
@@ -243,10 +258,13 @@ class _PairingScreenState extends State<PairingScreen> {
           child: const _ScanArea(),
         ),
         const SizedBox(height: ContinuumSpacingTokens.x3),
-        _ActionButton(
-          label: 'Enter code manually',
-          variant: _ButtonVariant.ghost,
-          onTap: () => setState(widget.controller.startManualInput),
+        Semantics(
+          identifier: 'enter_code_manually',
+          child: _ActionButton(
+            label: 'Enter code manually',
+            variant: _ButtonVariant.ghost,
+            onTap: () => setState(widget.controller.startManualInput),
+          ),
         ),
       ],
     );

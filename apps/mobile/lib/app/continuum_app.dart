@@ -371,7 +371,10 @@ class _HomeDashboardState extends State<_HomeDashboard> {
               ],
               if (data != null && data.devices.isNotEmpty) ...[
                 const SizedBox(height: ContinuumSpacingTokens.x5),
-                const _DashboardSectionHeader(label: 'Paired devices'),
+                Semantics(
+                  identifier: 'paired_devices_section',
+                  child: const _DashboardSectionHeader(label: 'Paired devices'),
+                ),
                 const SizedBox(height: ContinuumSpacingTokens.x2),
                 for (final device in data.devices)
                   Padding(
@@ -420,21 +423,24 @@ class _DashboardHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const Expanded(
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Continuum',
-                style: TextStyle(
-                  color: ContinuumColorTokens.textPrimary,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: -0.2,
+              Semantics(
+                identifier: 'continuum_header',
+                child: const Text(
+                  'Continuum',
+                  style: TextStyle(
+                    color: ContinuumColorTokens.textPrimary,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: -0.2,
+                  ),
                 ),
               ),
-              SizedBox(height: 2),
-              Text(
+              const SizedBox(height: 2),
+              const Text(
                 'ASCP Protocol Controller',
                 style: TextStyle(
                   color: ContinuumColorTokens.mutedText,
@@ -514,20 +520,26 @@ class _DashboardSummaryCards extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: _DashboardSummaryCard(
-            glyph: '▶',
-            glyphColor: ContinuumColorTokens.success,
-            value: activeSessions,
-            label: 'Active Sessions',
+          child: Semantics(
+            identifier: 'active_sessions_card',
+            child: _DashboardSummaryCard(
+              glyph: '▶',
+              glyphColor: ContinuumColorTokens.success,
+              value: activeSessions,
+              label: 'Active Sessions',
+            ),
           ),
         ),
         const SizedBox(width: ContinuumSpacingTokens.x3),
         Expanded(
-          child: _DashboardSummaryCard(
-            glyph: '⏱',
-            glyphColor: ContinuumColorTokens.warning,
-            value: pendingApprovals,
-            label: 'Pending Approvals',
+          child: Semantics(
+            identifier: 'pending_approvals_card',
+            child: _DashboardSummaryCard(
+              glyph: '⏱',
+              glyphColor: ContinuumColorTokens.warning,
+              value: pendingApprovals,
+              label: 'Pending Approvals',
+            ),
           ),
         ),
       ],
@@ -857,51 +869,54 @@ class _NavButton extends StatelessWidget {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 140),
-        margin: const EdgeInsets.symmetric(horizontal: 2),
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          color: selected ? SessionColors.warmSurface : null,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: selected ? SessionColors.textDark : SessionColors.textMuted,
-                fontSize: 11,
-                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-              ),
-            ),
-            if (badgeCount > 0)
-              Positioned(
-                top: -4,
-                right: 2,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                  decoration: BoxDecoration(
-                    color: ContinuumColorTokens.danger,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
-                  child: Text(
-                    badgeCount > 9 ? '9+' : '$badgeCount',
-                    style: const TextStyle(
-                      color: Color(0xFFFFFFFF),
-                      fontSize: 9,
-                      fontWeight: FontWeight.w700,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
+      child: Semantics(
+        identifier: 'nav_${label.toLowerCase()}',
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 140),
+          margin: const EdgeInsets.symmetric(horizontal: 2),
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: selected ? SessionColors.warmSurface : null,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: selected ? SessionColors.textDark : SessionColors.textMuted,
+                  fontSize: 11,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                 ),
               ),
-          ],
+              if (badgeCount > 0)
+                Positioned(
+                  top: -4,
+                  right: 2,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                    decoration: BoxDecoration(
+                      color: ContinuumColorTokens.danger,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
+                    child: Text(
+                      badgeCount > 9 ? '9+' : '$badgeCount',
+                      style: const TextStyle(
+                        color: Color(0xFFFFFFFF),
+                        fontSize: 9,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
