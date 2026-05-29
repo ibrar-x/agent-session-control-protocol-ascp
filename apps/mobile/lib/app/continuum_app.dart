@@ -107,8 +107,17 @@ class _ContinuumTrustedShellState extends State<ContinuumTrustedShell> {
   int _index = 0;
   SessionSummary? _selectedSession;
   late final MobileDependencies _dependencies;
+  late List<_ShellTab> _tabs;
 
-  static const _tabs = <_ShellTab>[
+  @override
+  void initState() {
+    super.initState();
+    _dependencies = widget.dependencies ?? MobileDependencies.memory();
+    _tabs = _buildTabs();
+    _loadBadgeCounts();
+  }
+
+  List<_ShellTab> _buildTabs() => [
     _ShellTab('Home', 'Trusted host', 'Connected to an ASCP host.'),
     _ShellTab(
       'Sessions',
@@ -132,10 +141,44 @@ class _ContinuumTrustedShellState extends State<ContinuumTrustedShell> {
     ),
   ];
 
-  @override
-  void initState() {
-    super.initState();
-    _dependencies = widget.dependencies ?? MobileDependencies.memory();
+  Future<void> _loadBadgeCounts() async {
+    try {
+      final sessions = await _dependencies.sessionListController.load();
+      final approvals = await _dependencies.approvalQueueController.loadQueue();
+      final runningCount = sessions.where((s) => s.status == 'running').length;
+      final pendingCount = approvals.where((a) => a.status == ApprovalStatus.pending).length;
+      if (mounted) {
+        setState(() {
+          _tabs = [
+            _ShellTab('Home', 'Trusted host', 'Connected to an ASCP host.'),
+            _ShellTab(
+              'Sessions',
+              'Live sessions',
+              'Observe, resume, and control agent sessions.',
+              badgeCount: runningCount,
+            ),
+            _ShellTab(
+              'Approvals',
+              'Approval queue',
+              'Review pending host approval requests.',
+              badgeCount: pendingCount,
+            ),
+            _ShellTab(
+              'Inspect',
+              'Artifacts and diffs',
+              'Open outputs, patches, logs, and diff metadata.',
+            ),
+            _ShellTab(
+              'Settings',
+              'Trusted device',
+              'Manage transport, biometrics, and local trust.',
+            ),
+          ];
+        });
+      }
+    } catch (_) {
+      // Leave badges at zero on load failure
+    }
   }
 
   @override
@@ -271,11 +314,13 @@ class _DashboardData {
     required this.sessions,
     required this.runningCount,
     required this.pendingCount,
+    required this.devices,
   });
 
   final List<SessionSummary> sessions;
   final int runningCount;
   final int pendingCount;
+  final List<_DashboardDeviceData> devices;
 }
 
 class _HomeDashboard extends StatefulWidget {
@@ -307,32 +352,35 @@ class _HomeDashboardState extends State<_HomeDashboard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const _DashboardHeader(),
-              const SizedBox(height: 16),
-              _DashboardConnectionCard(hostId: widget.dependencies.hostId),
-              const SizedBox(height: 14),
+              const SizedBox(height: ContinuumSpacingTokens.x4),
               _DashboardSummaryCards(
                 activeSessions: data?.runningCount ?? 0,
                 pendingApprovals: data?.pendingCount ?? 0,
               ),
               if (data != null && data.sessions.isNotEmpty) ...[
-                const SizedBox(height: 18),
+                const SizedBox(height: ContinuumSpacingTokens.x5),
                 const _DashboardSectionHeader(label: 'Recent sessions'),
-                const SizedBox(height: 8),
+                const SizedBox(height: ContinuumSpacingTokens.x2),
                 for (final session in data.sessions.take(3))
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 6),
+                    padding: const EdgeInsets.only(
+                      bottom: ContinuumSpacingTokens.x2,
+                    ),
                     child: _DashboardSessionRow(session: session),
                   ),
               ],
-              const SizedBox(height: 18),
-              const _DashboardSectionHeader(label: 'Paired devices'),
-              const SizedBox(height: 8),
-              for (final device in _dashboardDevices)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
-                  child: _DashboardDeviceRow(device: device),
-                ),
-              const SizedBox(height: 16),
+              if (data != null && data.devices.isNotEmpty) ...[
+                const SizedBox(height: ContinuumSpacingTokens.x5),
+                const _DashboardSectionHeader(label: 'Paired devices'),
+                const SizedBox(height: ContinuumSpacingTokens.x2),
+                for (final device in data.devices)
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      bottom: ContinuumSpacingTokens.x2,
+                    ),
+                    child: _DashboardDeviceRow(device: device),
+                  ),
+              ],
             ],
           ),
         );
@@ -344,32 +392,25 @@ class _HomeDashboardState extends State<_HomeDashboard> {
     final sessions = await widget.dependencies.sessionListController.load();
     final approvals = await widget.dependencies.approvalQueueController
         .loadQueue();
+    final trustedDevices = await widget.dependencies.settingsController
+        .listTrustedDevices();
     return _DashboardData(
       sessions: sessions,
       runningCount: sessions.where((s) => s.status == 'running').length,
       pendingCount: approvals
           .where((a) => a.status == ApprovalStatus.pending)
           .length,
+      devices: trustedDevices
+          .map(
+            (d) => _DashboardDeviceData(
+              name: d.displayName,
+              status: d.isCurrentDevice ? 'connected' : 'connected',
+              trust: 'Trusted',
+            ),
+          )
+          .toList(growable: false),
     );
   }
-
-  static const _dashboardDevices = [
-    _DashboardDeviceData(
-      name: 'MacBook Pro',
-      status: 'connected',
-      trust: 'Trusted',
-    ),
-    _DashboardDeviceData(
-      name: 'iPhone 15',
-      status: 'connecting',
-      trust: 'Trusted',
-    ),
-    _DashboardDeviceData(
-      name: 'Mac Mini',
-      status: 'disconnected',
-      trust: 'Trusted',
-    ),
-  ];
 }
 
 class _DashboardHeader extends StatelessWidget {
@@ -386,7 +427,7 @@ class _DashboardHeader extends StatelessWidget {
               Text(
                 'Continuum',
                 style: TextStyle(
-                  color: SessionColors.textDark,
+                  color: ContinuumColorTokens.textPrimary,
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                   letterSpacing: -0.2,
@@ -395,7 +436,10 @@ class _DashboardHeader extends StatelessWidget {
               SizedBox(height: 2),
               Text(
                 'ASCP Protocol Controller',
-                style: TextStyle(color: SessionColors.textMuted, fontSize: 12),
+                style: TextStyle(
+                  color: ContinuumColorTokens.mutedText,
+                  fontSize: 12,
+                ),
               ),
             ],
           ),
@@ -456,125 +500,6 @@ class _DashboardStatusChip extends StatelessWidget {
   }
 }
 
-class _DashboardConnectionCard extends StatelessWidget {
-  const _DashboardConnectionCard({required this.hostId});
-
-  final String hostId;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: SessionColors.cardSurface,
-        border: Border.all(color: SessionColors.borderCard),
-        borderRadius: BorderRadius.circular(ContinuumRadiusTokens.md),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: SessionColors.warmSurface,
-                    border: Border.all(color: SessionColors.borderCard),
-                    borderRadius: BorderRadius.circular(
-                      ContinuumRadiusTokens.sm + 2,
-                    ),
-                  ),
-                  child: const SizedBox(
-                    width: 36,
-                    height: 36,
-                    child: Center(
-                      child: Text(
-                        '⌘',
-                        style: TextStyle(
-                          color: SessionColors.textSecondary,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        hostId,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: SessionColors.textDark,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: -0.15,
-                        ),
-                      ),
-                      const SizedBox(height: 1),
-                      const Text(
-                        'Connected via local relay',
-                        style: TextStyle(
-                          color: SessionColors.textMuted,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                _DashboardStatusChip(
-                  color: ContinuumColorTokens.accent,
-                  label: 'Trusted',
-                  showDot: true,
-                ),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: DecoratedBox(
-                decoration: const BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                      color: SessionColors.borderLight,
-                      width: 0.5,
-                    ),
-                  ),
-                ),
-                child: const SizedBox(height: 1),
-              ),
-            ),
-            Row(
-              children: [
-                const Text(
-                  'Trusted host',
-                  style: TextStyle(
-                    color: SessionColors.textMuted,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                    letterSpacing: 0.3,
-                  ),
-                ),
-                const Spacer(),
-                Text(
-                  '✓',
-                  style: TextStyle(
-                    color: ContinuumColorTokens.success,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _DashboardSummaryCards extends StatelessWidget {
   const _DashboardSummaryCards({
     required this.activeSessions,
@@ -592,17 +517,15 @@ class _DashboardSummaryCards extends StatelessWidget {
           child: _DashboardSummaryCard(
             glyph: '▶',
             glyphColor: ContinuumColorTokens.success,
-            glyphBg: ContinuumColorTokens.success.withValues(alpha: 0.10),
             value: activeSessions,
             label: 'Active Sessions',
           ),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: ContinuumSpacingTokens.x3),
         Expanded(
           child: _DashboardSummaryCard(
             glyph: '⏱',
             glyphColor: ContinuumColorTokens.warning,
-            glyphBg: ContinuumColorTokens.warning.withValues(alpha: 0.10),
             value: pendingApprovals,
             label: 'Pending Approvals',
           ),
@@ -616,14 +539,12 @@ class _DashboardSummaryCard extends StatelessWidget {
   const _DashboardSummaryCard({
     required this.glyph,
     required this.glyphColor,
-    required this.glyphBg,
     required this.value,
     required this.label,
   });
 
   final String glyph;
   final Color glyphColor;
-  final Color glyphBg;
   final int value;
   final String label;
 
@@ -631,8 +552,8 @@ class _DashboardSummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: SessionColors.cardSurface,
-        border: Border.all(color: SessionColors.borderCard),
+        color: ContinuumColorTokens.bgElevated,
+        border: Border.all(color: ContinuumColorTokens.border),
         borderRadius: BorderRadius.circular(ContinuumRadiusTokens.md),
       ),
       child: Padding(
@@ -642,7 +563,7 @@ class _DashboardSummaryCard extends StatelessWidget {
           children: [
             DecoratedBox(
               decoration: BoxDecoration(
-                color: glyphBg,
+                color: glyphColor.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(ContinuumRadiusTokens.sm),
               ),
               child: SizedBox(
@@ -670,7 +591,7 @@ class _DashboardSummaryCard extends StatelessWidget {
             Text(
               label,
               style: const TextStyle(
-                color: SessionColors.textMuted,
+                color: ContinuumColorTokens.mutedText,
                 fontSize: 11,
               ),
             ),
@@ -693,7 +614,7 @@ class _DashboardSectionHeader extends StatelessWidget {
       child: Text(
         label.toUpperCase(),
         style: const TextStyle(
-          color: SessionColors.textMuted,
+          color: ContinuumColorTokens.mutedText,
           fontSize: 10,
           fontWeight: FontWeight.w600,
           letterSpacing: 0.6,
@@ -715,9 +636,9 @@ class _DashboardSessionRow extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: SessionColors.cardSurface,
-        border: Border.all(color: SessionColors.borderCard),
-        borderRadius: BorderRadius.circular(10),
+        color: ContinuumColorTokens.bgElevated,
+        border: Border.all(color: ContinuumColorTokens.border),
+        borderRadius: BorderRadius.circular(ContinuumRadiusTokens.md),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -725,7 +646,7 @@ class _DashboardSessionRow extends StatelessWidget {
           children: [
             DecoratedBox(
               decoration: BoxDecoration(
-                color: statusColor.withValues(alpha: 0.10),
+                color: statusColor.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: SizedBox(
@@ -736,8 +657,8 @@ class _DashboardSessionRow extends StatelessWidget {
                     glyph,
                     style: TextStyle(
                       color: statusColor,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w800,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
@@ -753,7 +674,7 @@ class _DashboardSessionRow extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      color: SessionColors.textDark,
+                      color: ContinuumColorTokens.textPrimary,
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
                     ),
@@ -764,9 +685,8 @@ class _DashboardSessionRow extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      color: SessionColors.textMuted,
-                      fontSize: 10,
-                      fontFamily: 'monospace',
+                      color: ContinuumColorTokens.mutedText,
+                      fontSize: 11,
                     ),
                   ),
                 ],
@@ -811,24 +731,36 @@ class _DashboardDeviceRow extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: SessionColors.cardSurface,
-        border: Border.all(color: SessionColors.borderCard),
-        borderRadius: BorderRadius.circular(10),
+        color: ContinuumColorTokens.bgElevated,
+        border: Border.all(color: ContinuumColorTokens.border),
+        borderRadius: BorderRadius.circular(ContinuumRadiusTokens.md),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         child: Row(
           children: [
-            const Text(
-              '⌘',
-              style: TextStyle(color: SessionColors.textMuted, fontSize: 16),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: ContinuumColorTokens.bgOverlay,
+                borderRadius: BorderRadius.circular(ContinuumRadiusTokens.sm),
+              ),
+              child: const SizedBox(
+                width: 32,
+                height: 32,
+                child: Center(
+                  child: Text(
+                    '🖥',
+                    style: TextStyle(fontSize: 14),
+                  ),
+                ),
+              ),
             ),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
                 device.name,
                 style: const TextStyle(
-                  color: SessionColors.textDark,
+                  color: ContinuumColorTokens.textPrimary,
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                 ),
@@ -896,6 +828,7 @@ class _BottomNav extends StatelessWidget {
                 child: _NavButton(
                   label: entry.$2.label,
                   selected: entry.$1 == index,
+                  badgeCount: entry.$2.badgeCount,
                   onTap: () => onSelected(entry.$1),
                 ),
               ),
@@ -911,11 +844,13 @@ class _NavButton extends StatelessWidget {
     required this.label,
     required this.selected,
     required this.onTap,
+    this.badgeCount = 0,
   });
 
   final String label;
   final bool selected;
   final VoidCallback onTap;
+  final int badgeCount;
 
   @override
   Widget build(BuildContext context) {
@@ -930,16 +865,43 @@ class _NavButton extends StatelessWidget {
           color: selected ? SessionColors.warmSurface : null,
           borderRadius: BorderRadius.circular(8),
         ),
-        child: Text(
-          label,
-          textAlign: TextAlign.center,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            color: selected ? SessionColors.textDark : SessionColors.textMuted,
-            fontSize: 11,
-            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-          ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: selected ? SessionColors.textDark : SessionColors.textMuted,
+                fontSize: 11,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+              ),
+            ),
+            if (badgeCount > 0)
+              Positioned(
+                top: -4,
+                right: 2,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                  decoration: BoxDecoration(
+                    color: ContinuumColorTokens.danger,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
+                  child: Text(
+                    badgeCount > 9 ? '9+' : '$badgeCount',
+                    style: const TextStyle(
+                      color: Color(0xFFFFFFFF),
+                      fontSize: 9,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );
@@ -947,11 +909,12 @@ class _NavButton extends StatelessWidget {
 }
 
 class _ShellTab {
-  const _ShellTab(this.label, this.title, this.detail);
+  const _ShellTab(this.label, this.title, this.detail, {this.badgeCount = 0});
 
   final String label;
   final String title;
   final String detail;
+  final int badgeCount;
 }
 
 class ContinuumFirstRunShell extends StatefulWidget {

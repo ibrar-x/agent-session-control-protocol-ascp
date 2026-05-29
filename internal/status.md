@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-05-29 - Dashboard live data wiring and bottom nav badges
+
+- Branch: `codex/mobile-live-session-detail`
+- Commit: this commit
+- Summary: wired the home dashboard paired-device inventory and bottom-navigation badge counts to live daemon data. Added `badgeCount` to `_ShellTab` and `_NavButton`, loaded running-session and pending-approval counts in `_ContinuumTrustedShellState.initState`, and replaced the hardcoded `_dashboardDevices` with a live call to `settingsController.listTrustedDevices()`. The `_HomeDashboard._loadData()` now fetches sessions, approvals, and trusted devices in parallel. Verified `flutter analyze` clean and 150/152 tests pass. Rebuilt and launched on iPhone 16e simulator with corrected dart-defines pointing admin base URL to port 8767.
+- Documentation updated: `internal/status.md`
+- Next likely step: auto-refresh badge counts on tab change or polling interval, or wire live session subscription events to update dashboard counts in real time.
+
 ### 2026-05-29 - Daemon default admin port aligned to 8767 for manual pairing format
 
 - Branch: `codex/mobile-live-session-detail`
