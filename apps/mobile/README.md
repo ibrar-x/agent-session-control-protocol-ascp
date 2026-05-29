@@ -109,3 +109,47 @@ flutter_shadcn deps --json
 ```
 
 Focused tests live beside the feature or core boundary they protect.
+
+## Integration Tests
+
+Integration tests run against the real ASCP daemon and verify end-to-end flows.
+
+### Prerequisites
+
+1. Start the ASCP daemon:
+   ```bash
+   cd services/host-daemon
+   npm start
+   ```
+
+2. Verify daemon is running:
+   ```bash
+   curl http://127.0.0.1:8767/admin/pairing/sessions
+   ```
+
+### Running Tests
+
+Run all integration tests:
+```bash
+cd apps/mobile
+flutter test integration_test/
+```
+
+Run specific test file:
+```bash
+flutter test integration_test/pairing_flow_test.dart
+```
+
+Run with verbose output:
+```bash
+flutter test integration_test/ --verbose
+```
+
+### Test Coverage
+
+- **Pairing Flow**: First-run screen, manual code entry, daemon claim, trusted shell transition
+- **Dashboard**: Active sessions count, pending approvals count, paired devices list
+- **Sessions**: List loading, detail navigation
+- **Approvals**: Queue loading, approve/deny buttons
+- **Inspect**: Tab navigation, empty state
+- **Settings**: Trusted devices, connection diagnostics
