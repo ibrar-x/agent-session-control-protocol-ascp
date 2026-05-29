@@ -14,6 +14,23 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-05-29 - Daemon default admin port aligned to 8767 for manual pairing format
+
+- Branch: `codex/mobile-live-session-detail`
+- Commit: this commit
+- Summary: changed the ASCP host daemon default admin port from 8766 to 8767 so the manual pairing entry format `127.0.0.1:8767:PAIR-CODE` works out of the box without env overrides. Updated `services/host-daemon/src/config.ts`, rebuilt `dist/`, updated `tests/config.test.ts` and `tests/main.test.ts` expectations, and verified the daemon starts on 8767 by default. Verified end-to-end: create session → claim (`POST /pairing/claim`) → poll (`pending_host_approval`) → approve → poll (`approved` with credentials). The Flutter `parseManualPairingPayload` already supports `host:port:code` natively, so no mobile code changes were required. Also updated `internal/real-device-path.md` to reference 8767.
+- Documentation updated: `internal/status.md`, `internal/real-device-path.md`
+- Next likely step: wire live daemon data for dashboard device inventory and bottom nav badge counts, or run manual simulator pairing end-to-end with the new default port.
+
+### 2026-05-29 - Mobile screen parity rebuild (cost-aware orchestrator)
+
+- Branch: `codex/mobile-live-session-detail`
+- Commit: this commit
+- Summary: used the cost-aware orchestrator with Kiro CLI (Auto router, ~15.7 credits) to rebuild all 7 mobile screens from the Continuum Design System HTML references in BUILD_ORDER.md. Codex acted as reviewer/verifier. Screens rebuilt: Home Dashboard (removed connection card, proper ContinuumColorTokens), Sessions List (status icons with color-coded backgrounds, mono session IDs), Session Detail (hamburger, amber approval badges, inline code parsing, diff preview with +/- coloring, tool cards, terminal blocks), Approvals (risk-level card coloring, info banner, Deny/Approve buttons, non-actionable support), Inspect (dark theme artifact viewer with diff stats), Settings (UserSummaryCard, section headers, Appearance/Notifications/Connection/Security/Diagnostics/DangerZone sections, Trusted Device rows), Pairing (dashed-border scan area, enlarged outcome icons). Result: flutter analyze clean, 150/152 tests pass, flutter_shadcn validate/audit both pass.
+- Documentation updated: `internal/plans.md`, `internal/status.md`
+- Cost summary: 7 Kiro dispatches (~15.7 credits out of 1,000/mo), 5 parallel runs, 1 retry (Session Detail timeout). All T2/Auto tier.
+- Next likely step: wire live daemon data for dashboard device inventory and bottom nav badge counts.
+
 ### 2026-05-29 - Mobile pairing and composer UI parity
 
 - Branch: `codex/mobile-live-session-detail`

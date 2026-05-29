@@ -88,7 +88,7 @@ Currently `qrPayload` is `{"code":"...","session_id":"..."}`. Drop `session_id` 
 
 ```ts
 export interface HostDaemonConfig {
-  adminPort: number;           // 8766, loopback only
+  adminPort: number;           // 8767, loopback only
   authTransport: "loopback" | "tls";
   databasePath: string;
   host: string;                // ASCP WebSocket host
@@ -122,11 +122,11 @@ Point to them with `ASCP_MOBILE_TLS_CERT` and `ASCP_MOBILE_TLS_KEY` env vars.
 
 The full pairing flow is possible end-to-end for the first time:
 
-1. Operator: `curl -X POST http://127.0.0.1:8766/admin/pairing/sessions` → gets code + QR payload
+1. Operator: `curl -X POST http://127.0.0.1:8767/admin/pairing/sessions` → gets code + QR payload
 2. Operator: shows QR payload to mobile (copy/paste or render)
 3. Mobile: reads `endpoint` and `code` from QR payload
 4. Mobile: `POST https://192.168.1.100:8767/pairing/claim` with the code
-5. Operator: `curl -X POST http://127.0.0.1:8766/admin/pairing/sessions/:id/approve`
+5. Operator: `curl -X POST http://127.0.0.1:8767/admin/pairing/sessions/:id/approve`
 6. Mobile: `GET https://192.168.1.100:8767/pairing/claims/:token` → gets `device_id + device_secret`
 7. Mobile: stores credentials and connects to ASCP WebSocket at `wss://192.168.1.100:8765`
 

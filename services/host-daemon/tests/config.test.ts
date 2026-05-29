@@ -5,7 +5,7 @@ import { resolveDaemonConfig } from "../src/config.js";
 describe("resolveDaemonConfig", () => {
   it("uses local defaults for the codex daemon", () => {
     expect(resolveDaemonConfig({})).toEqual({
-      adminPort: 8766,
+      adminPort: 8767,
       authTransport: "loopback",
       databasePath: ".ascp/host-daemon.sqlite",
       host: "127.0.0.1",

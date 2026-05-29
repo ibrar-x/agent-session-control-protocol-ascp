@@ -1,4 +1,4 @@
-const DEFAULT_ADMIN_PORT = 8766;
+const DEFAULT_ADMIN_PORT = 8767;
 const DEFAULT_AUTH_TRANSPORT = "loopback";
 const DEFAULT_DATABASE_PATH = ".ascp/host-daemon.sqlite";
 const DEFAULT_HOST = "127.0.0.1";

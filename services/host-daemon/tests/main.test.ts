@@ -19,14 +19,14 @@ describe("startHostDaemon", () => {
       close
     }));
     const createAdminServer = vi.fn(() => ({
-      url: "http://127.0.0.1:8766",
+      url: "http://127.0.0.1:8767",
       listen: adminListen,
       close: adminClose
     }));
 
     const daemon = await startHostDaemon({
       config: {
-        adminPort: 8766,
+        adminPort: 8767,
         authTransport: "loopback",
         databasePath: ":memory:",
         host: "127.0.0.1",
@@ -46,7 +46,7 @@ describe("startHostDaemon", () => {
       pairingService: expect.objectContaining({
         startPairing: expect.any(Function)
       }),
-      port: 8766
+      port: 8767
     });
     expect(createHostService).toHaveBeenCalledTimes(1);
     expect(createHostService.mock.calls[0]?.[0]).toEqual(
@@ -75,7 +75,7 @@ describe("startHostDaemon", () => {
     expect(adminListen).toHaveBeenCalledTimes(1);
     expect(listen).toHaveBeenCalledTimes(1);
     expect(daemon.url).toBe("ws://127.0.0.1:8765");
-    expect(daemon.adminUrl).toBe("http://127.0.0.1:8766");
+    expect(daemon.adminUrl).toBe("http://127.0.0.1:8767");
     expect(typeof daemon.pairingBackendService.startPairing).toBe("function");
     expect(typeof daemon.pairingService.pairDevice).toBe("function");
 
