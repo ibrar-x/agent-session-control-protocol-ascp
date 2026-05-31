@@ -219,7 +219,7 @@ export function createPairingService(deps: {
     startPairing(input) {
       const now = input.now ?? new Date().toISOString();
       const sessionId = `pairing:${randomUUID()}`;
-      const code = `PAIR-${randomBytes(4).toString("hex").toUpperCase()}`;
+      const code = generatePairingCode(deps.sessionStore);
       const expiresAt = new Date(Date.parse(now) + (input.ttlMs ?? DEFAULT_TTL_MS)).toISOString();
       const created = deps.sessionStore.insertSession({
         code,
@@ -240,6 +240,17 @@ export function createPairingService(deps: {
       };
     }
   };
+}
+
+function generatePairingCode(sessionStore: PairingSessionStore): string {
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    const code = String(randomBytes(4).readUInt32BE(0) % 1_000_000).padStart(6, "0");
+    if (sessionStore.getByCode(code) === null) {
+      return code;
+    }
+  }
+
+  throw new Error("Failed to generate a unique pairing code.");
 }
 
 async function trustApprovedSession(deps: {

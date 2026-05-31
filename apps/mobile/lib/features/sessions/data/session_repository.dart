@@ -110,10 +110,11 @@ class AscpSessionRepository implements SessionRepository {
     return events.whereType<Map>().map((event) {
       final json = Map<String, Object?>.from(event);
       final payload = _objectMap(json['payload']);
-      return TimelineEvent(
+      return TimelineEvent.fromAscp(
         sequence: json['seq'] as int?,
         id: json['id'] as String? ?? '',
-        label: _eventLabel(json['type'] as String? ?? 'event', payload),
+        type: json['type'] as String? ?? 'event',
+        payload: payload,
       );
     }).toList();
   }
@@ -174,10 +175,11 @@ class AscpSessionSubscriptionRepository
       events: client.events
           .where((event) => event.sessionId == sessionId)
           .map(
-            (event) => TimelineEvent(
+            (event) => TimelineEvent.fromAscp(
               sequence: event.sequence,
               id: event.id,
-              label: _eventLabel(event.rawType, event.payload),
+              type: event.rawType,
+              payload: event.payload,
             ),
           ),
       cancel: () async {
@@ -196,44 +198,4 @@ Map<String, Object?> _objectMap(Object? value) {
     return Map<String, Object?>.from(value);
   }
   return const {};
-}
-
-String _eventLabel(String type, Map<String, Object?> payload) {
-  final detail = _eventDetail(type, payload);
-  if (detail.isEmpty) {
-    return type;
-  }
-  return '$type $detail';
-}
-
-String _eventDetail(String type, Map<String, Object?> payload) {
-  final content = payload['content'];
-  if (content is String && content.isNotEmpty) {
-    return content;
-  }
-
-  final text = payload['text'];
-  if (text is String && text.isNotEmpty) {
-    return text;
-  }
-
-  final message = payload['message'];
-  if (message is String && message.isNotEmpty) {
-    return message;
-  }
-
-  if (type == 'session.status_changed') {
-    final from = payload['from'];
-    final to = payload['to'];
-    if (from is String && to is String) {
-      return '$from -> $to';
-    }
-  }
-
-  final name = payload['name'] ?? payload['tool_name'] ?? payload['command'];
-  if (name is String && name.isNotEmpty) {
-    return name;
-  }
-
-  return '';
 }

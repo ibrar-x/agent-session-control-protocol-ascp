@@ -89,7 +89,7 @@ describe("pairing admin server", () => {
     });
 
     expect(createResponse).toMatchObject({
-      code: expect.stringMatching(/^[A-Z0-9-]+$/),
+      code: expect.stringMatching(/^\d{6}$/),
       expires_at: expect.any(String),
       session_id: expect.any(String)
     });

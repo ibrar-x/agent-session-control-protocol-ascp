@@ -98,6 +98,7 @@ Files expected to be added or modified in this slice:
 | completed | run live iOS simulator QA and produce evidence report | real daemon pairing, trusted-shell navigation, sessions, live WebSocket input, approvals, inspect, settings, adaptive dark UI, screenshot evidence, and PDF report are verified; stale pairing retry input bug is fixed with widget coverage |
 | completed | align attached mobile screen designs | Agent Forge routes were used for review/implementation attempts with Codex as orchestrator and QA; the shell now exposes Home, Sessions, Approvals, Devices, and Settings; Home, Approvals, Settings, Trusted devices, and Pairing were rebuilt toward the attached screenshots; pairing uses the dark scanner/code-entry layout; tests and simulator screenshot verification pass |
 | completed | compact pairing and chat screen parity | OpenCode/Qwen was used through Agent Forge for implementation guidance while Codex reviewed and merged; pairing is now a single-screen layout using Flutter shadcn `InputOTP`, manual pairing accepts six-digit code-only entry against the configured host, active session detail is restyled as a warm chat surface, QA HTML/PDF evidence was generated, and tests/shadcn/simulator checks pass |
+| completed | run Agent Forge live QA and align pairing/chat live data | XcodeBuildMCP was exposed to OpenCode/Kiro/Claude/Blackbox config surfaces, iOS skills were copied into global agent skill folders, OpenCode audited live readiness, timeline rendering now preserves structured ASCP event payloads, the home dashboard no longer leaks demo session/host/health values into live mode, daemon pairing codes are six-digit numeric OTPs, and QA HTML/PDF evidence was generated |
 
 ## Acceptance Criteria
 
@@ -112,4 +113,4 @@ This slice is done only when all of the following are true:
 
 ## Next Likely Step
 
-Mobile Flutter foundation is ready for the next backend-connected interaction slice. The latest pass verified the compact one-screen pairing layout, Flutter shadcn OTP entry, code-only manual pairing, and warm chat-style active session detail. The next likely work is giving external CLI agents direct simulator/MCP access or adding automated XCUITest coverage for the same parity path.
+Mobile Flutter foundation is ready for the next backend-connected interaction slice. The latest pass verified Agent Forge subagent audit, global external-agent iOS skill/MCP setup, structured ASCP timeline rendering, live dashboard de-demoing, numeric daemon pairing codes, Flutter/shadcn/backend tests, and an iOS simulator build against a live daemon. The next likely work is defining a protocol-backed model-switching contract and continuing removal of hardcoded populated-state data from approvals, inspect, devices, and settings.

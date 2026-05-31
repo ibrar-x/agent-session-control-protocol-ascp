@@ -11,14 +11,29 @@ void main() {
   testWidgets('session detail screen renders chat header and session id', (
     tester,
   ) async {
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: SessionDetailScreen(sessionId: 'sess_1'),
+    final controller = SessionDetailController(
+      sessionId: 'sess_1',
+      repository: MemorySessionRepository(
+        sessions: [
+          SessionSummary(
+            id: 'sess_1',
+            title: 'refactor-auth',
+            status: 'waiting_approval',
+            updatedAt: DateTime(2026, 5, 31),
+          ),
+        ],
       ),
     );
 
-    expect(find.text('sess_1'), findsOneWidget);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SessionDetailScreen(sessionId: 'sess_1', controller: controller),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('refactor-auth'), findsOneWidget);
     expect(find.text('● Approval needed'), findsOneWidget);
   });
 

@@ -1,0 +1,262 @@
+# Agent-Forge OpenCode Live Audit Report
+
+**Project:** Flutter ASCP Mobile Companion (`apps/mobile`)  
+**Auditor:** OpenCode (Agent-Forge pipeline)  
+**Date:** 2026-05-31  
+**Scope:** Live-readiness and hardcoded/demo value leakage.  
+**Constraint:** Source files were not modified during this audit.
+
+---
+
+## Executive Summary
+
+The app has a **well-structured live mode** wired through `MobileDependencies.live()` and `MobileRuntimeConfig.fromEnvironment()`. Core protocol methods (pairing, sessions, approvals, inspect, settings) have **live ASCP/daemon repository implementations** that are correctly instantiated when `CONTINUUM_MOBILE_MODE=live` is passed via dart-define.
+
+However, **multiple screens contain hardcoded demo data that leaks into live mode**—either by rendering unconditionally or by falling back to synthetic data when live responses are empty or error. In addition, **model switching is not implemented**, and **integration tests are significantly misaligned with the current UI**, making them non-functional as written.
+
+| Area | Status | Notes |
+|------|--------|-------|
+| Pairing | **Live-ready** | Daemon claim/poll and secure-store write are correct. |
+| Sessions (list/get/subscribe/send_input) | **Live-ready** | WebSocket events stream into timeline via `AscpSessionSubscriptionRepository`. |
+| Chat event distinguishability | **Implemented** | User, agent, tool, approval, terminal, and generic events each have distinct renderers. |
+| Model switching | **Missing** | No UI, repository method, or protocol parameter for model selection. |
+| Hardcoded data in live mode | **Leaks found** | Dashboard, session detail, approvals, devices, inspect, and settings screens render hardcoded strings regardless of mode. |
+| iOS test readiness | **Partial** | README provides daemon start and `flutter run` dart-defines, but integration test UI selectors do not match current presentation code. |
+
+---
+
+## 1. Pairing Audit
+
+**Files:** `lib/features/pairing/**`, `lib/app/mobile_dependencies.dart`
+
+### Findings
+
+- **Live backend path exists and is correctly wired.**
+  - `MobileDependencies.live()` passes `claimRepository: DaemonPairingRepository(dio: sharedDio)` into `PairingController`.
+  - `DaemonPairingRepository.claim()` POSTs to `{hostUrl}/pairing/claim` with the pairing `code` and a `device_label`.
+  - `DaemonPairingRepository.poll()` GETs `/pairing/claims/{claimToken}` and maps daemon statuses (`approved`, `rejected`, `expired`, etc.) to `PairingPollOutcome`.
+  - On `approved`, the repository extracts `credentials.device_id` and `credentials.device_secret` and returns a `TrustMaterial` object.
+  - `PairingController._applyPollOutcome()` writes the returned `TrustMaterial` to the injected `SecureStore` (default `FlutterSecureStore` in live mode).
+
+- **Demo-only code is isolated but has a defensive fallback.**
+  - `DeterministicPairingPollSimulator` (memory/demo) is **not** passed in live mode.
+  - `deriveTrustMaterialFromApprovedClaim()` generates deterministic fake secrets. It is used as a fallback in `PairingController._applyPollOutcome()` when `outcome.trustMaterial` is null. In normal live operation, `DaemonPairingRepository` always populates `trustMaterial` for approved states, so this fallback is defensive. If the daemon ever returned `approved` without credentials, fake secrets would be stored.
+
+- **Local auth gate is used for writes.**
+  - `PairingController` wraps the store in a `SecureWriteGate` that requires `localAuth.confirm()` before persisting trust material. In live mode, this is `DeviceLocalAuthGate`.
+
+### Verdict
+**Live-ready.** The only risk is the `?? deriveTrustMaterialFromApprovedClaim(claim)` fallback, which should ideally throw rather than store synthetic credentials in a live repository path.
+
+---
+
+## 2. Sessions Audit
+
+**Files:** `lib/features/sessions/**`, `lib/app/mobile_dependencies.dart`, `lib/app/continuum_app.dart`
+
+### Findings
+
+- **List / Get / Send Input are live.**
+  - `AscpSessionRepository` maps directly to ASCP methods:
+    - `sessions.list` -> `listSessions()`
+    - `sessions.get` (with `include_events: true`) -> `readTimeline()`
+    - `sessions.send_input` -> `sendInput()`
+  - Input payload includes `input_kind: 'instruction'` and `metadata: {'source': 'mobile_ui'}`.
+
+- **WebSocket subscription is live.**
+  - `MobileDependencies.live()` creates `AscpSessionSubscriptionRepository` when the resolved client is an `EventJsonRpcClient` (i.e., WebSocket).
+  - `AscpSessionSubscriptionRepository.subscribeTimeline()` calls `sessions.subscribe`, obtains a `subscription_id`, and returns a `Stream<TimelineEvent>` filtered by `sessionId`.
+  - `SessionDetailController.load()` reads the initial timeline, then subscribes and appends live events via `_eventSubscription`.
+
+- **Subscription is correctly torn down.**
+  - `SessionDetailController.dispose()` cancels the stream subscription and calls `sessions.unsubscribe` with the stored `subscription_id`.
+
+- **Memory fallbacks are explicit.**
+  - `SessionListScreen` and `SessionDetailScreen` accept an optional controller; if omitted, they instantiate `MemorySessionRepository`. This is acceptable for isolated widget tests but should never be reachable in the live dependency graph.
+
+### Verdict
+**Live-ready.** The subscription lifecycle, replay cursor (`fromSequence`), and event mapping are all implemented.
+
+---
+
+## 3. Chat / Event Distinguishability Audit
+
+**Files:** `lib/features/sessions/presentation/session_detail_screen.dart`
+
+### Findings
+
+- **`_EventRenderer`** classifies timeline events into six kinds using `_classifyEvent(String label)`:
+  - `userMessage` — labels starting with `message.user` or `user.`
+  - `agentMessage` — labels starting with `message.agent`, `message.assistant`, or containing `thinking`
+  - `tool` — labels starting with `tool.` or containing `tool`
+  - `approval` — labels containing `approval`
+  - `terminal` — labels starting with `terminal`, or containing `terminal.`, `stdout`, `stderr`
+  - `generic` — everything else
+
+- **Each kind has a distinct visual treatment:**
+  - `userMessage` -> right-aligned bubble with warm background (`SessionColors.userBubbleBg`).
+  - `agentMessage` -> left-aligned text block with muted header and primary body text.
+  - `tool` -> card with tool glyph (`T` or `✕` for blocked), title, detail, and a `Done` / `Blocked` status pill.
+  - `approval` -> amber-bordered card with shield glyph, requested action, and Approve/Deny buttons.
+  - `terminal` -> dark monospace block with sequence badge.
+  - `generic` -> elevated card with accent star glyph and sequence badge.
+
+- **Tool blocked state** is inferred from label text containing `blocked` or `failed`.
+
+### Verdict
+**Implemented and distinguishable.** The classification is heuristic-based on event labels, which is pragmatic for an initial implementation. A future robust version may want to key off explicit `type` or `kind` fields from ASCP payloads rather than substring matching.
+
+---
+
+## 4. Model Switching Audit
+
+**Files:** `lib/features/sessions/**`, `lib/features/settings/**`
+
+### Findings
+
+- **No model selection UI exists.**
+  - `session_detail_screen.dart` `_InputBar` shows a static text row "Quick ⌄" and a "+" button, but neither is wired to any model picker.
+  - No dropdown, sheet, or settings toggle for choosing a model was found in any feature.
+
+- **No model parameter in protocol calls.**
+  - `AscpSessionRepository.sendInput()` sends `input_kind: 'instruction'` but no `model`, `model_id`, or `provider` field.
+  - `settings_repository.dart` does not read or write a preferred model.
+
+### Verdict
+**Missing.** Model switching is not implemented in UI, application layer, or protocol layer.
+
+---
+
+## 5. Hardcoded Data / Demo Leak Audit
+
+**Severity:** `LEAK` = renders unconditionally in live mode or replaces empty live data with synthetic data. `ACCEPTABLE` = isolated to explicit memory/demo constructors.
+
+### 5.1 Dashboard (`lib/app/continuum_app.dart`)
+
+| Element | Status | Detail |
+|---------|--------|--------|
+| `_fallbackSessions` | **LEAK** | If live `sessionListController.load()` returns an empty list or errors, the dashboard renders four hardcoded sessions (`code-review`, `refactor-auth`, etc.) with hardcoded subtitles and a hardcoded reference time (`DateTime(2026, 5, 31, 9, 41)`). |
+| `_HomeHeader` | **LEAK** | Always renders `"Good evening, Muhammad"` regardless of user identity. |
+| `_HostCard` | **LEAK** | Always renders `"MacBook Pro · Local"`, `"Connected via local relay"`, `"Last heartbeat 4s ago"`, and `"18 ms"`. |
+| `_HealthCard` values | **LEAK** | Hardcoded `"34%"`, `"6.8 GB"`, `"3"` for CPU, Memory, Active agents. |
+| `_SecondaryAction` badge | **LEAK** | Defaults to `2` when live pending-count data is missing (`data?.pendingCount ?? 2`). |
+
+### 5.2 Session Detail (`lib/features/sessions/presentation/session_detail_screen.dart`)
+
+| Element | Status | Detail |
+|---------|--------|--------|
+| Timer `_SessionHeader` | **LEAK** | Hardcoded `"28:14"` is shown for every session header. |
+| `_ApprovalNeededPill` | **LEAK** | Rendered unconditionally in every session detail, even when no approval is pending. |
+| `_DateDivider` | Minor | Hardcoded `"Today"`; acceptable placeholder. |
+
+### 5.3 Approvals (`lib/features/approvals/presentation/approvals_screen.dart`)
+
+| Element | Status | Detail |
+|---------|--------|--------|
+| `_ApprovalCard._Header` sessionName | **LEAK** | Hardcoded `"refactor-auth"` for every approval card. |
+| `_ApprovalCard._Body` path | **LEAK** | Hardcoded `"/etc/hosts"` path for every approval. |
+| `_ApprovalCard._Body` description | **LEAK** | Static `"Agent requested permission to perform this action."` for all approvals. |
+| `_WarningBlock` | **LEAK** | Always rendered for high-risk approvals with static copy. |
+
+### 5.4 Devices (`lib/features/settings/presentation/devices_screen.dart`)
+
+| Element | Status | Detail |
+|---------|--------|--------|
+| `_fallbackDevices` | **LEAK** | If live trusted-device list is empty, renders two synthetic devices (`macbook-local`, `ubuntu-workstation`). |
+| `_DeviceCard` platform / trustLabel | **LEAK** | Derived from list index (`entry.$1 == 0 ? 'Mac' : 'Linux'`, `entry.$1 == 0 ? 'Trusted' : 'Limited'`), not from device data. |
+| `_DeviceCard` date | **LEAK** | Hardcoded `"Paired Apr 28, 2026"`. |
+| `_DeviceCard` online status | **LEAK** | Derived from list index (`entry.$1 == 0`), not from real connectivity state. |
+
+### 5.5 Settings (`lib/features/settings/presentation/settings_screen.dart`)
+
+| Element | Status | Detail |
+|---------|--------|--------|
+| `_UserSummaryCard` | **LEAK** | Hardcoded `"Muhammad"` and `"MacBook Pro · Local"`. |
+| Appearance section | **LEAK** | Static `"System"` and `"Comfortable"` with no backing repository. |
+| Notifications toggles | **LEAK** | Hardcoded `active` / `value` booleans; not wired to any store. |
+| Connection section | **LEAK** | Static `"30 seconds"` and `"Local first"`; not wired to any store. |
+| Diagnostics section | **LEAK** | Static `"0.1.0"`, `"ASCP"`, `"Just now"`; should read from live diagnostics or build info. |
+
+### 5.6 Inspect (`lib/features/inspect/presentation/inspect_screen.dart`)
+
+| Element | Status | Detail |
+|---------|--------|--------|
+| `_ArtifactTopBar` | **LEAK** | Hardcoded title `"middleware.ts"` and subtitle `"src/auth/middleware.ts"`. |
+| `_MetadataStrip` | **LEAK** | Hardcoded `"8.4 KB"`, `+18/−6`, and session name `"refactor-auth"`. |
+| `_DiffViewer` | **LEAK** | Entire diff content is hardcoded sample lines. |
+| `_FileTree` | **LEAK** | Hardcoded directory tree (`src/auth/middleware.ts`, `session.ts`, `package.json`). |
+
+### 5.7 Acceptable Memory / Demo Mode Data
+
+The following are **isolated to explicit demo constructors** and do **not** leak into live mode:
+
+- `MemorySessionRepository` and its default empty sessions/timelines.
+- `MemoryApprovalRepository` and its default empty approvals.
+- `MemoryInspectRepository` and its default empty items.
+- `MemorySettingsRepository` and its default devices/diagnostics.
+- `MobileDependencies.memory()` defaults (`hostId: 'host_1'`, `activeSessionId: 'session_1'`).
+
+### Verdict
+**Live mode is compromised by pervasive hardcoded UI copy and synthetic fallbacks.** The architecture correctly swaps repositories, but the presentation layer currently assumes demo data is acceptable when live data is absent or empty.
+
+---
+
+## 6. iOS Test Readiness Audit
+
+**Files:** `integration_test/**`, `README.md`, `pubspec.yaml`
+
+### Findings
+
+- **Backend start command is documented.**
+  - `README.md` provides:
+    ```bash
+    ASCP_HOST=127.0.0.1 ASCP_PORT=9875 ASCP_ADMIN_PORT=9876 \
+      ASCP_DATABASE_PATH=/private/tmp/continuum-mobile-live.sqlite \
+      npm --workspace @ascp/host-daemon run start
+    ```
+  - It also provides a `curl` command to create a pairing session with requested scopes.
+
+- **Flutter run with dart-defines is documented.**
+  - `README.md` provides:
+    ```bash
+    flutter run \
+      --dart-define=CONTINUUM_MOBILE_MODE=live \
+      --dart-define=CONTINUUM_ASCP_RPC_ENDPOINT=http://127.0.0.1:18787/rpc \
+      --dart-define=CONTINUUM_ASCP_WS_ENDPOINT=ws://127.0.0.1:18787/rpc \
+      --dart-define=CONTINUUM_DAEMON_ADMIN_BASE_URL=http://127.0.0.1:18787 \
+      --dart-define=CONTINUUM_HOST_ID=host_local \
+      --dart-define=CONTINUUM_ACTIVE_SESSION_ID=sess_active \
+      --dart-define=CONTINUUM_DEVICE_ID=device_mobile
+    ```
+
+- **Integration test infrastructure exists.**
+  - `pubspec.yaml` includes `integration_test` and `http` dependencies.
+  - `integration_test/test_app.dart` constructs `MobileDependencies` with `DaemonPairingRepository` pointing to `127.0.0.1:8767`.
+  - `integration_test/helpers/daemon_client.dart` provides helper methods to create/approve pairing sessions via the daemon admin API.
+
+- **Integration test UI selectors are misaligned with the current app.**
+  - `pairing_flow_test.dart` expects text `"Enter code manually"`, `"Verify"`, `"Continuum"`, `"Unpaired"`, `"Scanning"`, `"Pair New Device"`. The actual `pairing_screen.dart` uses `"or enter code"`, `"Claim device"`, `"Pair a host"`, `"Scan QR code"`, and `"Enter the 6-digit host code"`. These tests will fail.
+  - `dashboard_test.dart` expects `"Active Sessions"`, `"Pending Approvals"`, `"Continuum"`, `"Connected"`, `"ASCP Protocol Controller"`. The actual dashboard renders `"Recent sessions"`, `"Approvals"`, `"Sessio"`, and host-specific copy (`"MacBook Pro · Local"`). These selectors will fail.
+  - `sessions_test.dart` expects `"Live feed"`. The `session_detail_screen.dart` does not contain this text; it renders the raw `sessionId` in the header.
+  - `inspect_test.dart` taps `"Inspect"`. The bottom navigation tabs are `"Home"`, `"Sessions"`, `"Approvals"`, `"Devices"`, `"Settings"`. There is no `"Inspect"` tab exposed in the trusted shell.
+  - `settings_test.dart` and `approvals_test.dart` selectors mostly match (e.g., `"Settings"`, `"Approvals"`), though some rely on uppercase section headers that are generated by the `_SectionHeader` widget.
+
+- **No `flutter drive` or `test` command with dart-defines is shown for iOS simulator integration tests.**
+  - The README shows `flutter test integration_test/` without dart-defines. The integration test app (`test_app.dart`) hardcodes the daemon endpoint, so dart-defines are not strictly necessary for the test harness, but the app-under-test still needs to know it is in test mode.
+
+### Verdict
+**Partially ready.** The documentation and infrastructure are in place, but the integration tests themselves are out of sync with the current UI text and navigation structure. They require a realignment pass before they can run successfully against the simulator.
+
+---
+
+## Recommendations Summary (Informational Only)
+
+1. **Remove or gate all hardcoded fallbacks** (`_fallbackSessions`, `_fallbackDevices`) so that empty live responses result in empty-state UI rather than demo data.
+2. **Replace unconditional hardcoded copy** (names, health stats, paths, session names, diff content) with live data bindings or mode-aware placeholders.
+3. **Add a model-switching feature** if required by the product spec, or explicitly document it as out-of-scope.
+4. **Re-align integration test selectors** with the current presentation text and navigation structure.
+5. **Audit `deriveTrustMaterialFromApprovedClaim` fallback** in `PairingController` to throw instead of storing synthetic credentials when a live repository is active.
+
+---
+
+*End of report.*

@@ -296,16 +296,18 @@ class _HomeDashboardState extends State<_HomeDashboard> {
       future: _future,
       builder: (context, snapshot) {
         final data = snapshot.data;
-        final sessions = data?.sessions.isNotEmpty == true
-            ? data!.sessions
-            : _fallbackSessions;
+        final sessions = data?.sessions ?? const <SessionSummary>[];
+        final runningCount = data?.runningCount ?? 0;
 
         return ListView(
           padding: const EdgeInsets.fromLTRB(22, 14, 22, 24),
           children: [
-            const _HomeHeader(),
+            _HomeHeader(hostId: widget.dependencies.hostId),
             const SizedBox(height: 22),
-            _HostCard(diagnosticsText: 'Connected via local relay'),
+            _HostCard(
+              hostId: widget.dependencies.hostId,
+              runningCount: runningCount,
+            ),
             const SizedBox(height: 16),
             Row(
               children: [
@@ -321,7 +323,7 @@ class _HomeDashboardState extends State<_HomeDashboard> {
                   child: _SecondaryAction(
                     label: 'Approvals',
                     glyph: '✓',
-                    badgeCount: data?.pendingCount ?? 2,
+                    badgeCount: data?.pendingCount ?? 0,
                     onTap: () => widget.onNavigate(2),
                   ),
                 ),
@@ -330,25 +332,37 @@ class _HomeDashboardState extends State<_HomeDashboard> {
             const SizedBox(height: 24),
             const _SectionLabel('Recent sessions'),
             const SizedBox(height: 12),
-            for (final session in sessions.take(4)) ...[
-              _RecentSessionCard(session: session),
-              const SizedBox(height: 10),
-            ],
+            if (sessions.isEmpty)
+              const _EmptyDashboardState(label: 'No live sessions yet.')
+            else
+              for (final session in sessions.take(4)) ...[
+                _RecentSessionCard(session: session),
+                const SizedBox(height: 10),
+              ],
             const SizedBox(height: 14),
-            const _SectionLabel('System health'),
+            const _SectionLabel('Live summary'),
             const SizedBox(height: 12),
-            const Row(
+            Row(
               children: [
                 Expanded(
-                  child: _HealthCard(label: 'CPU', value: '34%'),
+                  child: _HealthCard(
+                    label: 'Running',
+                    value: runningCount.toString(),
+                  ),
                 ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 Expanded(
-                  child: _HealthCard(label: 'Memory', value: '6.8 GB'),
+                  child: _HealthCard(
+                    label: 'Pending',
+                    value: (data?.pendingCount ?? 0).toString(),
+                  ),
                 ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 Expanded(
-                  child: _HealthCard(label: 'Active\nagents', value: '3'),
+                  child: _HealthCard(
+                    label: 'Sessions',
+                    value: sessions.length.toString(),
+                  ),
                 ),
               ],
             ),
@@ -373,7 +387,9 @@ class _HomeDashboardState extends State<_HomeDashboard> {
 }
 
 class _HomeHeader extends StatelessWidget {
-  const _HomeHeader();
+  const _HomeHeader({required this.hostId});
+
+  final String hostId;
 
   @override
   Widget build(BuildContext context) {
@@ -384,8 +400,8 @@ class _HomeHeader extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Good evening, Muhammad',
+              const Text(
+                'Connected host',
                 style: TextStyle(
                   color: SessionColors.textMuted,
                   fontSize: 17,
@@ -396,7 +412,7 @@ class _HomeHeader extends StatelessWidget {
               Semantics(
                 identifier: 'continuum_header',
                 child: Text(
-                  'Sessio',
+                  hostId,
                   style: TextStyle(
                     color: SessionColors.textDark,
                     fontSize: 38,
@@ -415,9 +431,10 @@ class _HomeHeader extends StatelessWidget {
 }
 
 class _HostCard extends StatelessWidget {
-  const _HostCard({required this.diagnosticsText});
+  const _HostCard({required this.hostId, required this.runningCount});
 
-  final String diagnosticsText;
+  final String hostId;
+  final int runningCount;
 
   @override
   Widget build(BuildContext context) {
@@ -433,8 +450,8 @@ class _HostCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'MacBook Pro · Local',
+                    Text(
+                      hostId,
                       style: TextStyle(
                         color: SessionColors.textDark,
                         fontSize: 20,
@@ -443,7 +460,7 @@ class _HostCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      diagnosticsText,
+                      'Connected via ASCP daemon',
                       style: const TextStyle(
                         color: SessionColors.textMuted,
                         fontSize: 16,
@@ -458,11 +475,11 @@ class _HostCard extends StatelessWidget {
           const SizedBox(height: 16),
           const _Hairline(),
           const SizedBox(height: 14),
-          const Row(
+          Row(
             children: [
-              Expanded(
+              const Expanded(
                 child: Text(
-                  'Last heartbeat 4s  ago',
+                  'Live sessions',
                   style: TextStyle(
                     color: SessionColors.textMuted,
                     fontSize: 15,
@@ -470,8 +487,8 @@ class _HostCard extends StatelessWidget {
                 ),
               ),
               Text(
-                '18 ms',
-                style: TextStyle(
+                runningCount.toString(),
+                style: const TextStyle(
                   color: SessionColors.textSecondary,
                   fontSize: 17,
                   fontWeight: FontWeight.w700,
@@ -489,6 +506,27 @@ class _HostCard extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _EmptyDashboardState extends StatelessWidget {
+  const _EmptyDashboardState({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return _LightCard(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: SessionColors.textMuted,
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }
@@ -1065,33 +1103,6 @@ class _Hairline extends StatelessWidget {
     );
   }
 }
-
-final _fallbackSessions = [
-  SessionSummary(
-    id: 'code-review',
-    title: 'code-review',
-    status: 'running',
-    updatedAt: DateTime(2026, 5, 31, 9, 29),
-  ),
-  SessionSummary(
-    id: 'refactor-auth',
-    title: 'refactor-auth',
-    status: 'waiting_approval',
-    updatedAt: DateTime(2026, 5, 31, 9, 13),
-  ),
-  SessionSummary(
-    id: 'fix-streaming-sse',
-    title: 'fix-streaming-sse',
-    status: 'stopped',
-    updatedAt: DateTime(2026, 5, 31, 8, 37),
-  ),
-  SessionSummary(
-    id: 'ship-mobile-ui',
-    title: 'ship-mobile-ui',
-    status: 'completed',
-    updatedAt: DateTime(2026, 5, 30, 15, 10),
-  ),
-];
 
 Color _statusColor(String status) {
   return switch (status) {

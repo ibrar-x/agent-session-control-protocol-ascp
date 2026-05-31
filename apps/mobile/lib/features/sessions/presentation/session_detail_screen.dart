@@ -55,7 +55,11 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
           decoration: const BoxDecoration(color: SessionColors.pageBackground),
           child: Column(
             children: [
-              _SessionHeader(sessionId: widget.sessionId),
+              _SessionHeader(
+                title: widget.controller.title,
+                status: widget.controller.status,
+                modelId: widget.controller.currentModel,
+              ),
               const _DateDivider(label: 'Today'),
               Expanded(
                 child: _TimelineFeed(
@@ -91,12 +95,19 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
 }
 
 class _SessionHeader extends StatelessWidget {
-  const _SessionHeader({required this.sessionId});
+  const _SessionHeader({
+    required this.title,
+    required this.status,
+    required this.modelId,
+  });
 
-  final String sessionId;
+  final String title;
+  final String? status;
+  final String? modelId;
 
   @override
   Widget build(BuildContext context) {
+    final needsApproval = status == 'waiting_approval';
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 18, 16, 10),
       child: Row(
@@ -105,7 +116,7 @@ class _SessionHeader extends StatelessWidget {
           const SizedBox(width: 16),
           Expanded(
             child: Text(
-              sessionId,
+              title,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
@@ -117,19 +128,47 @@ class _SessionHeader extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          const _ApprovalNeededPill(),
-          const SizedBox(width: 10),
-          const Text(
-            '28:14',
-            style: TextStyle(
-              color: SessionColors.textMuted,
-              fontSize: 22,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+          if (needsApproval) ...[
+            const _ApprovalNeededPill(),
+            const SizedBox(width: 10),
+          ],
+          if (modelId != null) ...[
+            _ModelPill(modelId: modelId!),
+            const SizedBox(width: 10),
+          ],
           const SizedBox(width: 10),
           const _HeaderIcon(label: '□'),
         ],
+      ),
+    );
+  }
+}
+
+class _ModelPill extends StatelessWidget {
+  const _ModelPill({required this.modelId});
+
+  final String modelId;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: SessionColors.cardSurface,
+        border: Border.all(color: SessionColors.borderCard),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+        child: Text(
+          modelId,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            color: ContinuumColorTokens.mutedText,
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
       ),
     );
   }
@@ -263,15 +302,13 @@ class _EventRenderer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final kind = _classifyEvent(event.label);
-
-    return switch (kind) {
-      _EventKind.userMessage => _UserBubble(event: event),
-      _EventKind.agentMessage => _AgentMessage(event: event),
-      _EventKind.tool => _ToolCard(event: event),
-      _EventKind.approval => _ApprovalCard(event: event),
-      _EventKind.terminal => _TerminalBlock(event: event),
-      _EventKind.generic => _GenericEvent(event: event),
+    return switch (event.kind) {
+      TimelineEventKind.userMessage => _UserBubble(event: event),
+      TimelineEventKind.agentMessage => _AgentMessage(event: event),
+      TimelineEventKind.tool => _ToolCard(event: event),
+      TimelineEventKind.approval => _ApprovalCard(event: event),
+      TimelineEventKind.terminal => _TerminalBlock(event: event),
+      TimelineEventKind.generic => _GenericEvent(event: event),
     };
   }
 }
@@ -301,7 +338,7 @@ class _UserBubble extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
             child: Text(
-              _eventDetail(event.label),
+              event.primaryDetail,
               style: const TextStyle(
                 color: Color(0xFF3A2510),
                 fontSize: 25,
@@ -322,7 +359,7 @@ class _AgentMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final detail = _eventDetail(event.label);
+    final detail = event.primaryDetail;
 
     return Align(
       alignment: Alignment.centerLeft,
@@ -332,7 +369,7 @@ class _AgentMessage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              _eventTitle(event.label),
+              event.title,
               style: const TextStyle(
                 color: ContinuumColorTokens.mutedText,
                 fontSize: 11,
@@ -365,9 +402,9 @@ class _ToolCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final title = _eventTitle(event.label);
-    final detail = _eventDetail(event.label);
-    final blocked = _isToolBlocked(event.label);
+    final title = event.title;
+    final detail = event.primaryDetail;
+    final blocked = event.isBlocked;
 
     return Align(
       alignment: Alignment.centerLeft,
@@ -500,7 +537,7 @@ class _ApprovalCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final detail = _eventDetail(event.label);
+    final detail = event.primaryDetail;
 
     return Align(
       alignment: Alignment.centerLeft,
@@ -664,7 +701,7 @@ class _TerminalBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final detail = _eventDetail(event.label);
+    final detail = event.primaryDetail;
 
     return Align(
       alignment: Alignment.centerLeft,
@@ -770,8 +807,8 @@ class _GenericEvent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final title = _eventTitle(event.label);
-    final detail = _eventDetail(event.label);
+    final title = event.title;
+    final detail = event.primaryDetail;
 
     return Align(
       alignment: Alignment.centerLeft,
@@ -1019,57 +1056,6 @@ class _AgentAvatar extends StatelessWidget {
       ),
     );
   }
-}
-
-enum _EventKind { userMessage, agentMessage, tool, approval, terminal, generic }
-
-_EventKind _classifyEvent(String label) {
-  final normalized = label.toLowerCase();
-  if (normalized.startsWith('message.user') || normalized.startsWith('user.')) {
-    return _EventKind.userMessage;
-  }
-  if (normalized.startsWith('message.agent') ||
-      normalized.startsWith('message.assistant') ||
-      normalized.contains('thinking')) {
-    return _EventKind.agentMessage;
-  }
-  if (normalized.contains('approval')) {
-    return _EventKind.approval;
-  }
-  if (normalized.startsWith('terminal') ||
-      normalized.contains('terminal.') ||
-      normalized.contains('stdout') ||
-      normalized.contains('stderr')) {
-    return _EventKind.terminal;
-  }
-  if (normalized.startsWith('tool.') || normalized.contains('tool')) {
-    return _EventKind.tool;
-  }
-  return _EventKind.generic;
-}
-
-String _eventTitle(String label) {
-  if (label.startsWith('message.user')) return 'You';
-  if (label.startsWith('message.agent') ||
-      label.startsWith('message.assistant')) {
-    return 'Agent';
-  }
-  if (label.toLowerCase().contains('approval')) return 'Approval requested';
-  if (label.toLowerCase().startsWith('terminal')) return 'Terminal';
-  if (label.toLowerCase().contains('tool')) return label.split(' ').first;
-  final detail = _eventDetail(label);
-  return detail.isEmpty ? label : label.split(' ').first;
-}
-
-String _eventDetail(String label) {
-  final separator = label.indexOf(' ');
-  if (separator == -1 || separator == label.length - 1) return '';
-  return label.substring(separator + 1);
-}
-
-bool _isToolBlocked(String label) {
-  final normalized = label.toLowerCase();
-  return normalized.contains('blocked') || normalized.contains('failed');
 }
 
 class _MutedCopy extends StatelessWidget {

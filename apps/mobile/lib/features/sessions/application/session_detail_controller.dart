@@ -14,10 +14,12 @@ class SessionDetailController {
   final SessionRepository repository;
   final SessionSubscriptionRepository? subscriptionRepository;
   List<TimelineEvent> timeline = const [];
+  SessionSummary? session;
   SessionEventSubscription? _subscription;
   StreamSubscription<TimelineEvent>? _eventSubscription;
 
   Future<void> load({void Function()? onEvent}) async {
+    await _loadSessionSummary();
     timeline = orderTimelineEvents(await repository.readTimeline(sessionId));
     final liveRepository = subscriptionRepository;
     if (liveRepository == null) {
@@ -41,6 +43,20 @@ class SessionDetailController {
     return repository.sendInput(sessionId: sessionId, text: text);
   }
 
+  String get title => session?.title ?? sessionId;
+
+  String? get status => session?.status;
+
+  String? get currentModel {
+    for (final event in timeline.reversed) {
+      final modelId = event.modelId;
+      if (modelId != null && modelId.isNotEmpty) {
+        return modelId;
+      }
+    }
+    return null;
+  }
+
   Future<void> dispose() async {
     await _eventSubscription?.cancel();
     await _subscription?.cancel();
@@ -55,6 +71,20 @@ class SessionDetailController {
       }
     }
     return last;
+  }
+
+  Future<void> _loadSessionSummary() async {
+    try {
+      final sessions = await repository.listSessions();
+      for (final candidate in sessions) {
+        if (candidate.id == sessionId) {
+          session = candidate;
+          return;
+        }
+      }
+    } on Object {
+      session = null;
+    }
   }
 }
 

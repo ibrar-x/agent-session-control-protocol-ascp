@@ -21,7 +21,6 @@ describe("pairing service", () => {
     });
 
     const session = service.startPairing({
-      now: "2026-04-28T12:00:00.000Z",
       requestedScopes: ["read:hosts", "read:sessions"],
       ttlMs: 300_000
     });
@@ -64,7 +63,6 @@ describe("pairing service", () => {
     });
 
     const session = service.startPairing({
-      now: "2026-04-28T12:00:00.000Z",
       requestedScopes: ["read:sessions"],
       ttlMs: 300_000
     });
@@ -98,7 +96,6 @@ describe("pairing service", () => {
     ).rejects.toThrow("Pairing session expired.");
 
     const active = service.startPairing({
-      now: "2026-04-28T12:00:00.000Z",
       requestedScopes: ["read:sessions"],
       ttlMs: 300_000
     });

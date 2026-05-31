@@ -168,7 +168,7 @@ void main() {
     await tester.tap(find.text('Continue'));
     await tester.pump();
 
-    expect(find.text('MacBook Pro · Local'), findsOneWidget);
+    expect(find.text('host_1'), findsWidgets);
     expect(find.text('Sessions'), findsWidgets);
   });
 
@@ -194,7 +194,7 @@ void main() {
     await tester.pumpWidget(ContinuumMobileApp(dependencies: dependencies));
     await tester.pumpAndSettle();
 
-    expect(find.text('MacBook Pro · Local'), findsOneWidget);
-    expect(find.text('Connected via local relay'), findsOneWidget);
+    expect(find.text('host_1'), findsWidgets);
+    expect(find.text('Connected via ASCP daemon'), findsOneWidget);
   });
 }
