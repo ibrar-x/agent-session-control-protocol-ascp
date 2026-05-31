@@ -7,6 +7,6 @@ void main() {
 
     expect(find.text('Pair a host'), findsOneWidget);
     expect(find.text('Scan QR code'), findsOneWidget);
-    expect(find.text('Enter code manually'), findsOneWidget);
+    expect(find.text('● Enter the 6-digit host code'), findsOneWidget);
   });
 }

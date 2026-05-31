@@ -53,10 +53,20 @@ PairingPayload parsePairingPayload(String raw) {
   return PairingPayload(hostUrl: hostUri, code: code);
 }
 
-PairingPayload parseManualPairingPayload(String raw) {
+PairingPayload parseManualPairingPayload(String raw, {String? defaultHostUrl}) {
   raw = raw.trim();
   if (raw.isEmpty) {
     throw const FormatException('Manual pairing payload cannot be empty.');
+  }
+
+  if (RegExp(r'^\d{4,8}$').hasMatch(raw)) {
+    final hostUri = Uri.tryParse(defaultHostUrl ?? '');
+    if (hostUri == null || !hostUri.hasScheme) {
+      throw const FormatException(
+        'Manual pairing code requires a default host URL.',
+      );
+    }
+    return PairingPayload(hostUrl: hostUri, code: raw);
   }
 
   // Try JSON first
@@ -111,7 +121,7 @@ PairingPayload parseManualPairingPayload(String raw) {
   }
 
   throw FormatException(
-    'Manual pairing payload must be a JSON object, host:port:code, or a URI with a code query param. Input: $raw',
+    'Manual pairing payload must be a numeric pairing code, JSON object, host:port:code, or a URI with a code query param. Input: $raw',
   );
 }
 
@@ -135,19 +145,19 @@ class DeterministicPairingPollSimulator implements PairingPollSimulator {
   @override
   PairingPollState simulatePoll(PairingClaim claim) {
     final upper = claim.code.toUpperCase();
-    if (upper == 'APPROVE' || upper == 'WIN') {
+    if (upper == 'APPROVE' || upper == 'WIN' || upper == '111111') {
       return PairingPollState.approved;
     }
-    if (upper.startsWith('REJECT') || upper == 'FAIL') {
+    if (upper.startsWith('REJECT') || upper == 'FAIL' || upper == '222222') {
       return PairingPollState.rejected;
     }
-    if (upper.startsWith('EXPIRE') || upper == 'OLD') {
+    if (upper.startsWith('EXPIRE') || upper == 'OLD' || upper == '333333') {
       return PairingPollState.expired;
     }
-    if (upper.startsWith('REVOKE') || upper == 'RVK') {
+    if (upper.startsWith('REVOKE') || upper == 'RVK' || upper == '444444') {
       return PairingPollState.revoked;
     }
-    if (upper.startsWith('UNREACH') || upper == 'NET') {
+    if (upper.startsWith('UNREACH') || upper == 'NET' || upper == '555555') {
       return PairingPollState.unreachable;
     }
     return PairingPollState.pending;

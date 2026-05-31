@@ -57,9 +57,7 @@ void main() {
     expect(find.text('Pair a host'), findsOneWidget);
     expect(find.text('Scan QR code'), findsOneWidget);
 
-    await tester.tap(find.text('Enter code manually'));
-    await tester.pump();
-
+    expect(find.byType(EditableText), findsNWidgets(6));
     expect(find.text('Claim device'), findsOneWidget);
   });
 
@@ -136,7 +134,7 @@ void main() {
     await tester.tap(find.text('Live ASCP session'));
     await tester.pump();
 
-    expect(find.text('Live feed'), findsOneWidget);
+    expect(find.text('sess_live'), findsOneWidget);
     expect(find.text('Back'), findsOneWidget);
 
     subscriptionRepository.add(
@@ -148,7 +146,6 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('Agent'), findsOneWidget);
     expect(find.text('Thinking through the next patch'), findsOneWidget);
   });
 
@@ -165,10 +162,8 @@ void main() {
 
     await tester.pumpWidget(ContinuumMobileApp(dependencies: dependencies));
 
-    await tester.tap(find.text('Enter code manually'));
+    await tester.enterText(find.byType(EditableText).first, '111111');
     await tester.pump();
-    await tester.enterText(find.byType(EditableText), '127.0.0.1:8765:APPROVE');
-    await tester.tap(find.text('Claim device'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Continue'));
     await tester.pump();

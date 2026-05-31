@@ -406,6 +406,42 @@
     },
     {
       "namespace": "shadcn",
+      "componentId": "input_otp",
+      "qualifiedId": "@shadcn/input_otp",
+      "version": "1.0.0",
+      "registryRoot": "/Users/ibrar/.config/superpowers/worktrees/shadcn_flutter_kit/branch-v1-registry-overlay-nav-manifests/flutter_shadcn_kit/lib/registry",
+      "sourceManifestHash": "2787b9f58277a3fb7cced0a3ab0762ae522b48916646cfd8f82d6cf88edee74f",
+      "installedFiles": [
+        "lib/ui/shadcn/components/form/input_otp/_impl/core/_input_otp_child.dart",
+        "lib/ui/shadcn/components/form/input_otp/_impl/core/_input_otp_spacing.dart",
+        "lib/ui/shadcn/components/form/input_otp/_impl/core/_otp_character_input.dart",
+        "lib/ui/shadcn/components/form/input_otp/_impl/core/character_input_otp_child.dart",
+        "lib/ui/shadcn/components/form/input_otp/_impl/core/input_otp_child.dart",
+        "lib/ui/shadcn/components/form/input_otp/_impl/core/input_otp_child_data.dart",
+        "lib/ui/shadcn/components/form/input_otp/_impl/core/otp_separator.dart",
+        "lib/ui/shadcn/components/form/input_otp/_impl/core/widget_input_otp_child.dart",
+        "lib/ui/shadcn/components/form/input_otp/_impl/state/_input_otp_state.dart",
+        "lib/ui/shadcn/components/form/input_otp/_impl/state/_otp_character_input_state.dart",
+        "lib/ui/shadcn/components/form/input_otp/_impl/themes/base/input_otp_theme.dart",
+        "lib/ui/shadcn/components/form/input_otp/_impl/themes/config/input_otp_theme_config.dart",
+        "lib/ui/shadcn/components/form/input_otp/_impl/themes/config/input_otp_theme_defaults.dart",
+        "lib/ui/shadcn/components/form/input_otp/_impl/themes/config/input_otp_theme_schema.dart",
+        "lib/ui/shadcn/components/form/input_otp/_impl/themes/config/input_otp_theme_tokens.dart",
+        "lib/ui/shadcn/components/form/input_otp/input_otp.dart"
+      ],
+      "dependencies": {
+        "data_widget": "^0.0.2"
+      },
+      "postInstall": [],
+      "localeKeys": [],
+      "assetPaths": [],
+      "manifestKeys": [],
+      "postInstallNamespaces": [],
+      "localeNamespaces": [],
+      "sharedFiles": []
+    },
+    {
+      "namespace": "shadcn",
       "componentId": "linear_progress_indicator",
       "qualifiedId": "@shadcn/linear_progress_indicator",
       "version": "1.0.0",

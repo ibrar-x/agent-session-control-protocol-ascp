@@ -52,9 +52,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
       future: _load,
       builder: (context, snapshot) {
         return DecoratedBox(
-          decoration: const BoxDecoration(
-            color: ContinuumColorTokens.bgSurface,
-          ),
+          decoration: const BoxDecoration(color: SessionColors.pageBackground),
           child: Column(
             children: [
               _SessionHeader(sessionId: widget.sessionId),
@@ -100,56 +98,94 @@ class _SessionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.fromLTRB(16, 18, 16, 10),
+      child: Row(
         children: [
-          Row(
-            children: [
-              const Text(
-                'Live feed',
-                style: TextStyle(
-                  color: ContinuumColorTokens.textPrimary,
-                  fontSize: 17,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.2,
-                ),
+          const _HeaderIcon(label: '☰'),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              sessionId,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: SessionColors.textDark,
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0,
               ),
-              const SizedBox(width: 8),
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  color: SessionColors.amberBg,
-                  border: Border.all(color: SessionColors.amberBorder),
-                  borderRadius: BorderRadius.circular(
-                    ContinuumRadiusTokens.pill,
-                  ),
-                ),
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  child: Text(
-                    'Live',
-                    style: TextStyle(
-                      color: SessionColors.amberText,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 3),
-          Text(
-            sessionId,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: ContinuumColorTokens.mutedText,
-              fontSize: 11,
-              fontFamily: 'monospace',
             ),
           ),
+          const SizedBox(width: 8),
+          const _ApprovalNeededPill(),
+          const SizedBox(width: 10),
+          const Text(
+            '28:14',
+            style: TextStyle(
+              color: SessionColors.textMuted,
+              fontSize: 22,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(width: 10),
+          const _HeaderIcon(label: '□'),
         ],
+      ),
+    );
+  }
+}
+
+class _HeaderIcon extends StatelessWidget {
+  const _HeaderIcon({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xFFEDE7DE),
+        borderRadius: BorderRadius.circular(13),
+      ),
+      child: SizedBox(
+        width: 46,
+        height: 46,
+        child: Center(
+          child: Text(
+            label,
+            style: const TextStyle(
+              color: Color(0xFF1E170F),
+              fontSize: 24,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ApprovalNeededPill extends StatelessWidget {
+  const _ApprovalNeededPill();
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xFFF9E5CC),
+        border: Border.all(color: const Color(0xFFE9B67C)),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+        child: Text(
+          '● Approval needed',
+          style: TextStyle(
+            color: Color(0xFFB66C2E),
+            fontSize: 14,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
       ),
     );
   }
@@ -163,16 +199,16 @@ class _DateDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
       child: Row(
         children: [
           Text(
             label.toUpperCase(),
             style: const TextStyle(
               color: ContinuumColorTokens.mutedText,
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-              letterSpacing: 0.4,
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.8,
             ),
           ),
           const SizedBox(width: 10),
@@ -212,7 +248,7 @@ class _TimelineFeed extends StatelessWidget {
     }
 
     return ListView.separated(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
       itemCount: timeline.length,
       separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (context, index) => _EventRenderer(event: timeline[index]),
@@ -268,8 +304,8 @@ class _UserBubble extends StatelessWidget {
               _eventDetail(event.label),
               style: const TextStyle(
                 color: Color(0xFF3A2510),
-                fontSize: 15,
-                height: 1.45,
+                fontSize: 25,
+                height: 1.34,
               ),
             ),
           ),
@@ -310,8 +346,8 @@ class _AgentMessage extends StatelessWidget {
                 detail,
                 style: const TextStyle(
                   color: ContinuumColorTokens.textPrimary,
-                  fontSize: 15,
-                  height: 1.6,
+                  fontSize: 24,
+                  height: 1.45,
                 ),
               ),
             ],
@@ -336,10 +372,10 @@ class _ToolCard extends StatelessWidget {
     return Align(
       alignment: Alignment.centerLeft,
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 340),
+        constraints: const BoxConstraints(maxWidth: 430),
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: ContinuumColorTokens.bgElevated,
+            color: SessionColors.cardSurface,
             border: Border.all(
               color: blocked
                   ? ContinuumColorTokens.danger.withValues(alpha: 0.35)
@@ -348,7 +384,7 @@ class _ToolCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(14),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(14),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -363,8 +399,8 @@ class _ToolCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           color: ContinuumColorTokens.mutedText,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                     ),
@@ -379,7 +415,7 @@ class _ToolCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       color: ContinuumColorTokens.mutedText,
-                      fontSize: 12,
+                      fontSize: 16,
                       height: 1.4,
                     ),
                   ),
@@ -469,10 +505,10 @@ class _ApprovalCard extends StatelessWidget {
     return Align(
       alignment: Alignment.centerLeft,
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 360),
+        constraints: const BoxConstraints(maxWidth: 430),
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: SessionColors.approvalBg,
+            color: const Color(0xFFFFF8ED),
             border: Border.all(color: SessionColors.amberBorder),
             borderRadius: BorderRadius.circular(16),
           ),
@@ -490,8 +526,8 @@ class _ApprovalCard extends StatelessWidget {
                         'Approval requested',
                         style: TextStyle(
                           color: SessionColors.amberText,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                     ),
@@ -515,7 +551,7 @@ class _ApprovalCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           color: SessionColors.codeText,
-                          fontSize: 11,
+                          fontSize: 17,
                           fontFamily: 'monospace',
                         ),
                       ),
@@ -852,73 +888,100 @@ class _InputBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(14, 8, 14, 24),
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 18),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: ContinuumColorTokens.bgElevated,
+          color: SessionColors.cardSurface,
           border: Border.all(
             color: focusNode.hasFocus
                 ? ContinuumColorTokens.accent
-                : ContinuumColorTokens.border,
+                : SessionColors.borderCard,
           ),
-          borderRadius: BorderRadius.circular(ContinuumRadiusTokens.xl),
+          borderRadius: BorderRadius.circular(24),
         ),
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(14, 10, 8, 6),
+          padding: const EdgeInsets.fromLTRB(18, 14, 12, 10),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              EditableText(
-                controller: controller,
-                focusNode: focusNode,
-                style: const TextStyle(
-                  color: ContinuumColorTokens.textPrimary,
-                  fontSize: 15,
-                  height: 1.35,
-                ),
-                cursorColor: ContinuumColorTokens.accent,
-                backgroundCursorColor: ContinuumColorTokens.border,
-                minLines: 1,
-                maxLines: 4,
-                keyboardType: TextInputType.multiline,
-                textInputAction: TextInputAction.send,
-                onSubmitted: (_) => onSend(),
+              Stack(
+                alignment: Alignment.centerLeft,
+                children: [
+                  ListenableBuilder(
+                    listenable: controller,
+                    builder: (context, _) {
+                      if (controller.text.isNotEmpty) {
+                        return const SizedBox.shrink();
+                      }
+                      return const IgnorePointer(
+                        child: Text(
+                          'Message Sessio agent...',
+                          style: TextStyle(
+                            color: SessionColors.textTertiary,
+                            fontSize: 22,
+                            height: 1.35,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  EditableText(
+                    controller: controller,
+                    focusNode: focusNode,
+                    style: const TextStyle(
+                      color: ContinuumColorTokens.textPrimary,
+                      fontSize: 22,
+                      height: 1.35,
+                    ),
+                    cursorColor: ContinuumColorTokens.accent,
+                    backgroundCursorColor: ContinuumColorTokens.border,
+                    minLines: 1,
+                    maxLines: 4,
+                    keyboardType: TextInputType.multiline,
+                    textInputAction: TextInputAction.send,
+                    onSubmitted: (_) => onSend(),
+                  ),
+                ],
               ),
               const SizedBox(height: 6),
               Row(
                 children: [
                   _AgentAvatar(),
-                  const SizedBox(width: 6),
+                  const SizedBox(width: 10),
                   const Text(
                     'Quick',
                     style: TextStyle(
                       color: ContinuumColorTokens.mutedText,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const Text(
+                    '⌄',
+                    style: TextStyle(
+                      color: ContinuumColorTokens.mutedText,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                   const Spacer(),
+                  const Text(
+                    '+',
+                    style: TextStyle(
+                      color: ContinuumColorTokens.mutedText,
+                      fontSize: 28,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
                   GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onTap: onSend,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: ContinuumColorTokens.accent,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        child: Text(
-                          'Send',
-                          style: TextStyle(
-                            color: ContinuumColorTokens.accentForeground,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
+                    child: const SizedBox(
+                      width: 34,
+                      height: 34,
+                      child: Center(
+                        child: Text('🎙', style: TextStyle(fontSize: 24)),
                       ),
                     ),
                   ),

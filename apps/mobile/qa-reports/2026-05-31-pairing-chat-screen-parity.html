@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Continuum Mobile UI QA Report</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 36px;
+      background: #f7f0e8;
+      color: #1a1208;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Arial, sans-serif;
+      line-height: 1.45;
+    }
+    h1 {
+      margin: 0 0 6px;
+      font-size: 30px;
+      letter-spacing: 0;
+    }
+    h2 {
+      margin-top: 28px;
+      font-size: 18px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: #8f8578;
+    }
+    .meta, li {
+      font-size: 14px;
+    }
+    .card {
+      margin-top: 14px;
+      padding: 18px;
+      border: 1px solid #ded4c8;
+      border-radius: 16px;
+      background: #fffdfa;
+    }
+    .pass {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #e6f3ec;
+      color: #47785c;
+      font-weight: 700;
+    }
+    code {
+      padding: 2px 5px;
+      border-radius: 5px;
+      background: #eee8de;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    img {
+      width: 230px;
+      border-radius: 24px;
+      border: 1px solid #2a221b;
+      box-shadow: 0 18px 40px rgba(26, 18, 8, 0.18);
+    }
+  </style>
+</head>
+<body>
+  <h1>Continuum Mobile UI QA Report</h1>
+  <div class="meta">Run date: 2026-05-31 · Branch: <code>codex/mobile-live-session-detail</code></div>
+
+  <div class="card">
+    <span class="pass">Passed</span>
+    <p>Codex acted as orchestrator and QA reviewer. Agent Forge routing was used through an OpenCode/Qwen subagent for implementation guidance. Codex merged the final changes, ran verification, and performed simulator screenshot QA.</p>
+  </div>
+
+  <h2>Changes Verified</h2>
+  <ul>
+    <li>Pairing screen changed from a scrollable layout to a single-screen compact layout.</li>
+    <li>Manual pairing now uses the Flutter shadcn <code>InputOTP</code> component.</li>
+    <li>Manual entry accepts a six-digit pairing code and resolves it against the configured pairing host instead of requiring <code>host:port:code</code>.</li>
+    <li>Active session detail was restyled as a warm chat screen with a top bar, approval pill, larger message prose, tool cards, approval card, and bottom composer.</li>
+    <li>Flutter shadcn registry validation, audit, and dependency checks pass with <code>input_otp</code> installed.</li>
+  </ul>
+
+  <h2>Simulator Evidence</h2>
+  <p>iPhone 17 Pro simulator build succeeded through XcodeBuildMCP. Pairing screenshot:</p>
+  <img src="file:///var/folders/dt/p77q2g1j7190pw1cc_h07hg80000gn/T/screenshot_optimized_14cee1ae-5044-4eb5-8af7-177262e227ff.jpg" alt="Updated pairing screen screenshot">
+
+  <h2>Commands</h2>
+  <ul>
+    <li><code>flutter analyze</code> passed.</li>
+    <li><code>flutter test</code> passed with 154 tests.</li>
+    <li><code>flutter_shadcn validate --json</code> passed.</li>
+    <li><code>flutter_shadcn audit --json</code> passed.</li>
+    <li><code>flutter_shadcn deps --json</code> passed.</li>
+    <li>XcodeBuildMCP <code>build_run_sim</code> passed on iPhone 17 Pro, iOS 26.3.</li>
+  </ul>
+
+  <h2>Known Note</h2>
+  <p>External CLI subagents in this Codex session do not receive direct XcodeBuildMCP tool handles, so simulator execution was performed by Codex as QA verification after subagent guidance returned.</p>
+</body>
+</html>

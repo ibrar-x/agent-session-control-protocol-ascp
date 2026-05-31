@@ -561,3 +561,12 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 - Documentation updated: `internal/plans.md`, `internal/status.md`
 - Verification: `flutter analyze` passed; `flutter test` passed; `flutter_shadcn validate --json`, `flutter_shadcn audit --json`, and `flutter_shadcn deps --json` passed; XcodeBuildMCP built and launched Runner on iPhone 17 Pro and captured the updated dark pairing screenshot at `/var/folders/dt/p77q2g1j7190pw1cc_h07hg80000gn/T/screenshot_optimized_b395d82c-fb5b-48b6-8cd4-31a29ab495db.jpg`.
 - Next likely step: tighten the live session detail screen against the attached chat reference and add automated XCUITest coverage for the simulator parity path.
+
+### 2026-05-31 - Mobile compact pairing and chat parity pass
+
+- Branch: `codex/mobile-live-session-detail`
+- Commit: `not committed`
+- Summary: used Agent Forge routing with OpenCode/Qwen for implementation guidance and Codex as reviewer/QA. Pairing is now a single-screen compact layout, manual entry uses Flutter shadcn `InputOTP`, manual pairing accepts six-digit code-only entry against the configured default pairing host, and active session detail was moved closer to the attached warm chat reference with a title bar, approval pill, larger chat prose/tool cards, approval card, and composer placeholder.
+- Documentation updated: `internal/plans.md`, `internal/status.md`, `apps/mobile/qa-reports/2026-05-31-pairing-chat-screen-parity.html`, `apps/mobile/qa-reports/2026-05-31-pairing-chat-screen-parity.pdf`
+- Verification: `flutter analyze` passed; `flutter test` passed with 154 tests; `flutter_shadcn validate --json`, `flutter_shadcn audit --json`, and `flutter_shadcn deps --json` passed; XcodeBuildMCP built and launched Runner on iPhone 17 Pro and captured the updated single-screen pairing screenshot at `/var/folders/dt/p77q2g1j7190pw1cc_h07hg80000gn/T/screenshot_optimized_14cee1ae-5044-4eb5-8af7-177262e227ff.jpg`.
+- Next likely step: wire external CLI agents to direct simulator/MCP access if that environment becomes available, then add automated XCUITest coverage for the pairing and active-chat parity path.

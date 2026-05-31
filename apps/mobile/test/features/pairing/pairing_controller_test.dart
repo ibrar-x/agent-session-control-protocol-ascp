@@ -154,6 +154,16 @@ void main() {
     expect(payload.code, '123456');
   });
 
+  test('manual payload parser accepts code-only entry with default host', () {
+    final payload = parseManualPairingPayload(
+      '111111',
+      defaultHostUrl: 'http://127.0.0.1:8765',
+    );
+
+    expect(payload.hostUrl.toString(), 'http://127.0.0.1:8765');
+    expect(payload.code, '111111');
+  });
+
   test('manual payload parser accepts host:port:code format', () {
     final payload = parseManualPairingPayload('127.0.0.1:8765:ABCDEF');
 

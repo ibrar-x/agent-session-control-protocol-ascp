@@ -97,6 +97,7 @@ Files expected to be added or modified in this slice:
 | completed | rebuild mobile screens from HTML design system | external OpenCode/Kiro/Blackbox routes were exercised with Codex as reviewer; Home, Sessions, session detail, Approvals, Inspect, and Settings were restyled toward the HTML references, duplicate shell headers were removed, approval empty-state counts were corrected, widget coverage was added, and simulator QA verified the trusted tab flow |
 | completed | run live iOS simulator QA and produce evidence report | real daemon pairing, trusted-shell navigation, sessions, live WebSocket input, approvals, inspect, settings, adaptive dark UI, screenshot evidence, and PDF report are verified; stale pairing retry input bug is fixed with widget coverage |
 | completed | align attached mobile screen designs | Agent Forge routes were used for review/implementation attempts with Codex as orchestrator and QA; the shell now exposes Home, Sessions, Approvals, Devices, and Settings; Home, Approvals, Settings, Trusted devices, and Pairing were rebuilt toward the attached screenshots; pairing uses the dark scanner/code-entry layout; tests and simulator screenshot verification pass |
+| completed | compact pairing and chat screen parity | OpenCode/Qwen was used through Agent Forge for implementation guidance while Codex reviewed and merged; pairing is now a single-screen layout using Flutter shadcn `InputOTP`, manual pairing accepts six-digit code-only entry against the configured host, active session detail is restyled as a warm chat surface, QA HTML/PDF evidence was generated, and tests/shadcn/simulator checks pass |
 
 ## Acceptance Criteria
 
@@ -111,4 +112,4 @@ This slice is done only when all of the following are true:
 
 ## Next Likely Step
 
-Mobile Flutter foundation is ready for the next backend-connected interaction slice. The latest visual parity pass verified the updated attached-screen shell, dedicated Devices tab, warm light Home/Approvals/Settings surfaces, and dark pairing scanner in tests and on the iOS simulator. The next likely work is tightening the live session detail screen against the chat reference and adding automated XCUITest coverage for the same simulator path.
+Mobile Flutter foundation is ready for the next backend-connected interaction slice. The latest pass verified the compact one-screen pairing layout, Flutter shadcn OTP entry, code-only manual pairing, and warm chat-style active session detail. The next likely work is giving external CLI agents direct simulator/MCP access or adding automated XCUITest coverage for the same parity path.

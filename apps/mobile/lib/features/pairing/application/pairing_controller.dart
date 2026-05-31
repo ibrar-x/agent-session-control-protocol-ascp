@@ -10,6 +10,10 @@ class PairingController {
     required LocalAuthGate localAuth,
     this.pollSimulator,
     this.claimRepository,
+    this.defaultManualHostUrl = const String.fromEnvironment(
+      'CONTINUUM_PAIRING_HOST_URL',
+      defaultValue: 'http://127.0.0.1:8765',
+    ),
     this.repositoryPollInterval = const Duration(seconds: 1),
     this.repositoryMaxPollAttempts = 60,
     DateTime Function()? now,
@@ -23,6 +27,7 @@ class PairingController {
   final SecureWriteGate secureStore;
   final PairingPollSimulator? pollSimulator;
   final PairingClaimRepository? claimRepository;
+  final String defaultManualHostUrl;
   final Duration repositoryPollInterval;
   final int repositoryMaxPollAttempts;
   final DateTime Function() _now;
@@ -49,7 +54,10 @@ class PairingController {
       await submitParsedPayload(payload);
     } on FormatException {
       try {
-        final payload = parseManualPairingPayload(rawPayload);
+        final payload = parseManualPairingPayload(
+          rawPayload,
+          defaultHostUrl: defaultManualHostUrl,
+        );
         await submitParsedPayload(payload);
       } on FormatException {
         state = const PairingScreenState.failed(

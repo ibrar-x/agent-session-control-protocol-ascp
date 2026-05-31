@@ -3,18 +3,39 @@
   "installPath": "lib/ui/shadcn",
   "sharedPath": "lib/ui/shadcn/shared",
   "installed": [
-    "overflow_marquee"
+    "button",
+    "input_otp",
+    "text_field"
   ],
-  "managedDependencies": [],
+  "managedDependencies": [
+    "data_widget",
+    "gap"
+  ],
   "componentMeta": {
-    "overflow_marquee": {
+    "button": {
       "version": "1.0.0",
       "tags": [
-        "animation",
-        "scroll",
-        "layout"
+        "controls",
+        "forms",
+        "buttons"
+      ]
+    },
+    "input_otp": {
+      "version": "1.0.0",
+      "tags": [
+        "form",
+        "input",
+        "otp"
+      ]
+    },
+    "text_field": {
+      "version": "1.0.0",
+      "tags": [
+        "forms",
+        "input",
+        "text"
       ]
     }
   },
-  "updatedAt": "2026-05-25T11:27:27.531824Z"
+  "updatedAt": "2026-05-31T01:09:25.930322Z"
 }

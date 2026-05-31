@@ -8,20 +8,19 @@ import 'package:mobile/features/sessions/domain/timeline_event.dart';
 import 'package:mobile/features/sessions/presentation/session_detail_screen.dart';
 
 void main() {
-  testWidgets(
-    'session detail screen renders live feed heading and session id',
-    (tester) async {
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: SessionDetailScreen(sessionId: 'sess_1'),
-        ),
-      );
+  testWidgets('session detail screen renders chat header and session id', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SessionDetailScreen(sessionId: 'sess_1'),
+      ),
+    );
 
-      expect(find.text('Live feed'), findsOneWidget);
-      expect(find.text('sess_1'), findsOneWidget);
-    },
-  );
+    expect(find.text('sess_1'), findsOneWidget);
+    expect(find.text('● Approval needed'), findsOneWidget);
+  });
 
   testWidgets('session detail screen loads ordered timeline', (tester) async {
     final controller = SessionDetailController(
@@ -67,7 +66,7 @@ void main() {
     );
     await tester.pump();
     await tester.enterText(find.byType(EditableText), 'hello host');
-    await tester.tap(find.text('Send'));
+    await tester.tap(find.text('🎙'));
     await tester.pump();
 
     expect(repository.sentInputs, ['sess_1:hello host']);
@@ -104,7 +103,7 @@ void main() {
 
     expect(find.text('tool.started'), findsOneWidget);
     expect(find.text('read_file'), findsOneWidget);
-    expect(find.text('Live feed'), findsOneWidget);
+    expect(find.text('sess_1'), findsOneWidget);
   });
 
   testWidgets('session detail screen styles approval and terminal events', (

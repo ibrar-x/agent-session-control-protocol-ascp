@@ -123,6 +123,7 @@ class MobileDependencies {
       pairingController: PairingController(
         secureStore: secureStore,
         localAuth: resolvedLocalAuth,
+        defaultManualHostUrl: daemonAdminBaseUrl.toString(),
         claimRepository: DaemonPairingRepository(dio: sharedDio),
       ),
       pairingScanner: const MobileScannerPairingScanner(),

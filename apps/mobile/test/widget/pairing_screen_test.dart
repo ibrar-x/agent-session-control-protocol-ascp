@@ -40,6 +40,26 @@ class _NullScanner implements PairingScanner {
   Future<String?> scan(BuildContext context) async => null;
 }
 
+Future<void> _enterPairingCode(WidgetTester tester, String code) async {
+  await tester.enterText(find.byType(EditableText).first, code);
+  await tester.pump();
+}
+
+Widget _pairingHarness(PairingScreen screen) {
+  return WidgetsApp(
+    color: const Color(0xFF100D08),
+    pageRouteBuilder: <T>(settings, builder) {
+      return PageRouteBuilder<T>(
+        settings: settings,
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return builder(context);
+        },
+      );
+    },
+    home: screen,
+  );
+}
+
 void main() {
   testWidgets('pairing screen renders idle with scan and manual buttons', (
     tester,
@@ -51,15 +71,15 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: PairingScreen(controller: controller, scanner: _NullScanner()),
+      _pairingHarness(
+        PairingScreen(controller: controller, scanner: _NullScanner()),
       ),
     );
 
     expect(find.text('Pair a host'), findsOneWidget);
     expect(find.text('Scan QR code'), findsOneWidget);
-    expect(find.text('Enter code manually'), findsOneWidget);
+    expect(find.text('● Enter the 6-digit host code'), findsOneWidget);
+    expect(find.byType(EditableText), findsNWidgets(6));
   });
 
   testWidgets('pairing screen shows scanning placeholder when scan tapped', (
@@ -72,9 +92,8 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: PairingScreen(controller: controller, scanner: _NullScanner()),
+      _pairingHarness(
+        PairingScreen(controller: controller, scanner: _NullScanner()),
       ),
     );
 
@@ -86,9 +105,7 @@ void main() {
     expect(find.text('Claim device'), findsOneWidget);
   });
 
-  testWidgets('pairing screen shows manual entry input when manual tapped', (
-    tester,
-  ) async {
+  testWidgets('pairing screen shows shadcn OTP entry', (tester) async {
     final controller = PairingController(
       secureStore: _FakeSecureStore(),
       localAuth: _AllowingAuth(),
@@ -96,16 +113,12 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: PairingScreen(controller: controller, scanner: _NullScanner()),
+      _pairingHarness(
+        PairingScreen(controller: controller, scanner: _NullScanner()),
       ),
     );
 
-    await tester.tap(find.text('Enter code manually'));
-    await tester.pump();
-
-    expect(find.byType(EditableText), findsOneWidget);
+    expect(find.byType(EditableText), findsNWidgets(6));
     expect(find.text('Claim device'), findsOneWidget);
   });
 
@@ -117,17 +130,12 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: PairingScreen(controller: controller, scanner: _NullScanner()),
+      _pairingHarness(
+        PairingScreen(controller: controller, scanner: _NullScanner()),
       ),
     );
 
-    await tester.tap(find.text('Enter code manually'));
-    await tester.pump();
-
-    await tester.enterText(find.byType(EditableText), '127.0.0.1:8765:TEST01');
-    await tester.tap(find.text('Claim device'));
+    await _enterPairingCode(tester, '123456');
     await tester.pumpAndSettle();
 
     expect(controller.state.isTrusted, isTrue);
@@ -143,17 +151,12 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: PairingScreen(controller: controller, scanner: _NullScanner()),
+      _pairingHarness(
+        PairingScreen(controller: controller, scanner: _NullScanner()),
       ),
     );
 
-    await tester.tap(find.text('Enter code manually'));
-    await tester.pump();
-
-    await tester.enterText(find.byType(EditableText), '127.0.0.1:8765:APPROVE');
-    await tester.tap(find.text('Claim device'));
+    await _enterPairingCode(tester, '111111');
     await tester.pumpAndSettle();
 
     expect(find.text('● Host approved this device.'), findsOneWidget);
@@ -174,15 +177,14 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: PairingScreen(controller: controller, scanner: _NullScanner()),
+      _pairingHarness(
+        PairingScreen(controller: controller, scanner: _NullScanner()),
       ),
     );
 
     expect(find.text('● Waiting for host approval...'), findsOneWidget);
     expect(find.text('Scan QR code'), findsOneWidget);
-    expect(find.text('Enter code manually'), findsOneWidget);
+    expect(find.byType(EditableText), findsNWidgets(6));
   });
 
   testWidgets('pairing screen notifies parent when trusted continue tapped', (
@@ -196,9 +198,8 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: PairingScreen(
+      _pairingHarness(
+        PairingScreen(
           controller: controller,
           scanner: _NullScanner(),
           onContinue: () => continued = true,
@@ -206,11 +207,7 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('Enter code manually'));
-    await tester.pump();
-
-    await tester.enterText(find.byType(EditableText), '127.0.0.1:8765:APPROVE');
-    await tester.tap(find.text('Claim device'));
+    await _enterPairingCode(tester, '111111');
     await tester.pumpAndSettle();
     await tester.tap(find.text('Continue'));
     await tester.pump();
@@ -228,17 +225,12 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: PairingScreen(controller: controller, scanner: _NullScanner()),
+      _pairingHarness(
+        PairingScreen(controller: controller, scanner: _NullScanner()),
       ),
     );
 
-    await tester.tap(find.text('Enter code manually'));
-    await tester.pump();
-
-    await tester.enterText(find.byType(EditableText), '127.0.0.1:8765:REJECT');
-    await tester.tap(find.text('Claim device'));
+    await _enterPairingCode(tester, '222222');
     await tester.pumpAndSettle();
 
     expect(find.text('Rejected by host'), findsOneWidget);
@@ -253,20 +245,15 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: PairingScreen(controller: controller, scanner: _NullScanner()),
+      _pairingHarness(
+        PairingScreen(controller: controller, scanner: _NullScanner()),
       ),
     );
 
-    await tester.tap(find.text('Enter code manually'));
-    await tester.pump();
-    await tester.enterText(find.byType(EditableText), '127.0.0.1:8765:REJECT');
-    await tester.tap(find.text('Claim device'));
+    await _enterPairingCode(tester, '222222');
     await tester.pumpAndSettle();
 
-    final input = tester.widget<EditableText>(find.byType(EditableText));
-    expect(input.controller.text, '127.0.0.1:8765:REJECT');
+    expect(find.text('2'), findsNWidgets(6));
   });
 
   testWidgets('pairing screen shows expired error', (tester) async {
@@ -277,17 +264,12 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: PairingScreen(controller: controller, scanner: _NullScanner()),
+      _pairingHarness(
+        PairingScreen(controller: controller, scanner: _NullScanner()),
       ),
     );
 
-    await tester.tap(find.text('Enter code manually'));
-    await tester.pump();
-
-    await tester.enterText(find.byType(EditableText), '127.0.0.1:8765:EXPIRE');
-    await tester.tap(find.text('Claim device'));
+    await _enterPairingCode(tester, '333333');
     await tester.pumpAndSettle();
 
     expect(find.text('Pairing code expired'), findsOneWidget);
@@ -301,17 +283,12 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: PairingScreen(controller: controller, scanner: _NullScanner()),
+      _pairingHarness(
+        PairingScreen(controller: controller, scanner: _NullScanner()),
       ),
     );
 
-    await tester.tap(find.text('Enter code manually'));
-    await tester.pump();
-
-    await tester.enterText(find.byType(EditableText), '127.0.0.1:8765:REVOKE');
-    await tester.tap(find.text('Claim device'));
+    await _enterPairingCode(tester, '444444');
     await tester.pumpAndSettle();
 
     expect(find.text('Pairing revoked'), findsOneWidget);
@@ -325,17 +302,12 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: PairingScreen(controller: controller, scanner: _NullScanner()),
+      _pairingHarness(
+        PairingScreen(controller: controller, scanner: _NullScanner()),
       ),
     );
 
-    await tester.tap(find.text('Enter code manually'));
-    await tester.pump();
-
-    await tester.enterText(find.byType(EditableText), '127.0.0.1:8765:UNREACH');
-    await tester.tap(find.text('Claim device'));
+    await _enterPairingCode(tester, '555555');
     await tester.pumpAndSettle();
 
     expect(find.text('Host unreachable'), findsOneWidget);
@@ -350,19 +322,13 @@ void main() {
       pollSimulator: _DeterministicPoll(PairingPollState.pending),
     );
 
+    await controller.submitPayload('totally-invalid');
+
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: PairingScreen(controller: controller, scanner: _NullScanner()),
+      _pairingHarness(
+        PairingScreen(controller: controller, scanner: _NullScanner()),
       ),
     );
-
-    await tester.tap(find.text('Enter code manually'));
-    await tester.pump();
-
-    await tester.enterText(find.byType(EditableText), 'totally-invalid');
-    await tester.tap(find.text('Claim device'));
-    await tester.pumpAndSettle();
 
     expect(find.text('Invalid pairing code'), findsOneWidget);
   });
@@ -403,9 +369,8 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: PairingScreen(controller: controller, scanner: _NullScanner()),
+      _pairingHarness(
+        PairingScreen(controller: controller, scanner: _NullScanner()),
       ),
     );
 
