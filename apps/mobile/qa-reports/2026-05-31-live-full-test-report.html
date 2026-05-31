@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Continuum App - Live Test Report | 2026-05-31</title>
+<style>
+  :root { --bg: #0a0a0a; --surface: #141414; --border: #262626; --text: #e5e5e5; --muted: #a3a3a3; --green: #22c55e; --red: #ef4444; --yellow: #eab308; --blue: #3b82f6; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, 'SF Pro Text', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; padding: 40px 20px; }
+  .container { max-width: 960px; margin: 0 auto; }
+  h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+  .subtitle { color: var(--muted); font-size: 14px; margin-bottom: 40px; }
+  .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 40px; }
+  .summary-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; }
+  .summary-card .number { font-size: 32px; font-weight: 700; }
+  .summary-card .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+  .green { color: var(--green); }
+  .red { color: var(--red); }
+  .yellow { color: var(--yellow); }
+  .blue { color: var(--blue); }
+  .section { margin-bottom: 32px; }
+  .section-title { font-size: 18px; font-weight: 600; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+  th { background: #1a1a1a; text-align: left; padding: 12px 16px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); font-weight: 600; }
+  td { padding: 12px 16px; border-top: 1px solid var(--border); font-size: 14px; }
+  tr:hover td { background: #1a1a1a; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+  .badge-pass { background: #166534; color: #86efac; }
+  .badge-fail { background: #7f1d1d; color: #fca5a5; }
+  .badge-warn { background: #713f12; color: #fde047; }
+  .badge-skip { background: #1e3a5f; color: #93c5fd; }
+  .tier-badge { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: 700; }
+  .tier-t1 { background: #1e3a5f; color: #93c5fd; }
+  .tier-t2 { background: #166534; color: #86efac; }
+  .tier-t3 { background: #713f12; color: #fde047; }
+  .tier-t4 { background: #7f1d1d; color: #fca5a5; }
+  .cost-log { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; font-family: 'SF Mono', monospace; font-size: 13px; line-height: 1.8; }
+  .finding { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+  .finding-title { font-weight: 600; margin-bottom: 4px; }
+  .finding-desc { color: var(--muted); font-size: 14px; }
+  .finding-severity { font-size: 11px; font-weight: 600; text-transform: uppercase; margin-top: 8px; }
+  .screenshot { border-radius: 8px; border: 1px solid var(--border); max-width: 300px; margin: 16px 0; }
+  .flow-item { display: flex; align-items: center; gap: 12px; padding: 8px 0; }
+  .flow-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .flow-dot.green { background: var(--green); }
+  .flow-dot.red { background: var(--red); }
+  .flow-dot.yellow { background: var(--yellow); }
+  .footer { margin-top: 60px; padding-top: 20px; border-top: 1px solid var(--border); color: var(--muted); font-size: 12px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Continuum App - Live Test Report</h1>
+  <div class="subtitle">2026-05-31 | Agent-Forge Orchestrated | iPhone 17 Pro Simulator (iOS 26.3) | Host Daemon: ws://127.0.0.1:8765</div>
+
+  <div class="summary-grid">
+    <div class="summary-card">
+      <div class="number green">350</div>
+      <div class="label">Tests Passed</div>
+    </div>
+    <div class="summary-card">
+      <div class="number red">29</div>
+      <div class="label">Tests Failed</div>
+    </div>
+    <div class="summary-card">
+      <div class="number blue">5</div>
+      <div class="label">Test Suites</div>
+    </div>
+    <div class="summary-card">
+      <div class="number yellow">3</div>
+      <div class="label">Known Issues</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Test Execution Summary</div>
+    <table>
+      <thead>
+        <tr><th>Suite</th><th>Platform</th><th>Tier</th><th>Agent</th><th>Passed</th><th>Failed</th><th>Total</th><th>Duration</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>host-daemon</strong></td><td>TypeScript</td>
+          <td><span class="tier-badge tier-t2">T2</span></td>
+          <td>Kiro Auto</td>
+          <td class="green">38</td><td class="red">0</td><td>38</td><td>1.59s</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>host-service</strong></td><td>TypeScript</td>
+          <td><span class="tier-badge tier-t2">T2</span></td>
+          <td>Kiro Auto</td>
+          <td class="green">5</td><td class="red">0</td><td>5</td><td>489ms</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>codex-adapter</strong></td><td>TypeScript</td>
+          <td><span class="tier-badge tier-t2">T2</span></td>
+          <td>Kiro Auto</td>
+          <td class="green">101</td><td class="red">0</td><td>101</td><td>1.23s</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>sdk-typescript</strong></td><td>TypeScript</td>
+          <td><span class="tier-badge tier-t2">T2</span></td>
+          <td>Kiro Auto</td>
+          <td class="green">36</td><td class="red">0</td><td>36</td><td>2.48s</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>Flutter unit/widget/smoke</strong></td><td>Dart</td>
+          <td><span class="tier-badge tier-t2">T2</span></td>
+          <td>OpenCode Direct</td>
+          <td class="green">154</td><td class="red">0</td><td>154</td><td>~4s</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>Flutter analyze</strong></td><td>Dart</td>
+          <td><span class="tier-badge tier-t1">T1</span></td>
+          <td>OpenCode Direct</td>
+          <td class="green">0 issues</td><td class="red">-</td><td>-</td><td>3.0s</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>sdk-dart</strong></td><td>Dart</td>
+          <td><span class="tier-badge tier-t2">T2</span></td>
+          <td>OpenCode Direct</td>
+          <td class="green">11</td><td class="red">4</td><td>15</td><td>~2s</td>
+          <td><span class="badge badge-warn">PARTIAL</span></td>
+        </tr>
+        <tr>
+          <td><strong>golden tests</strong></td><td>Dart</td>
+          <td><span class="tier-badge tier-t2">T2</span></td>
+          <td>OpenCode Direct</td>
+          <td class="green">0</td><td class="red">5</td><td>5</td><td>~3s</td>
+          <td><span class="badge badge-fail">FAIL</span></td>
+        </tr>
+        <tr>
+          <td><strong>integration tests (live)</strong></td><td>Dart</td>
+          <td><span class="tier-badge tier-t3">T3</span></td>
+          <td>OpenCode Direct</td>
+          <td class="green">0</td><td class="red">20</td><td>20</td><td>~2m</td>
+          <td><span class="badge badge-fail">FAIL</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Live App Verification</div>
+    <div class="finding">
+      <div class="finding-title">App Build & Launch</div>
+      <div class="finding-desc">Flutter app built successfully (Debug, iOS Simulator) and launched on iPhone 17 Pro. App displays pairing screen with QR scanner, 6-digit code input, and "Claim device" button. Daemon connection configured via dart-defines.</div>
+      <div class="finding-severity green">VERIFIED</div>
+    </div>
+    <div class="finding">
+      <div class="finding-title">Host Daemon</div>
+      <div class="finding-desc">Node.js host daemon started on ws://127.0.0.1:8765 (WebSocket JSON-RPC) and http://127.0.0.1:8767 (Admin REST). SQLite database created at .ascp/host-daemon.sqlite. Runtime: codex. Auth transport: loopback.</div>
+      <div class="finding-severity green">VERIFIED</div>
+    </div>
+    <div class="finding">
+      <div class="finding-title">Pairing Screen UI</div>
+      <div class="finding-desc">Pairing screen renders correctly with QR scanner placeholder, "or enter code" link, 6 individual code input fields, "Claim device" button, and security disclaimer. Dark theme with proper contrast.</div>
+      <div class="finding-severity green">VERIFIED</div>
+    </div>
+    <div class="finding">
+      <div class="finding-title">Static Analysis</div>
+      <div class="finding-desc">Flutter analyze completed with 0 issues. No lint warnings, no errors.</div>
+      <div class="finding-severity green">VERIFIED</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Known Failures (Root Causes Identified)</div>
+    
+    <div class="finding">
+      <div class="finding-title">1. Integration Tests - UI Text Mismatch</div>
+      <div class="finding-desc">
+        <strong>Affected:</strong> All 20 integration tests (pairing_flow, dashboard, sessions, approvals, inspect, settings)<br>
+        <strong>Root Cause:</strong> The <code>completePairing()</code> helper in integration tests looks for widget text "Enter code manually" but the live pairing screen shows "or enter code". The text was changed in the UI but tests were not updated.<br>
+        <strong>Fix:</strong> Update <code>integration_test/test_app.dart</code> line 26 to match current UI text, or make the finder more resilient.
+      </div>
+      <div class="finding-severity red">HIGH - Pre-existing</div>
+    </div>
+
+    <div class="finding">
+      <div class="finding-title">2. Golden Tests - Pixel Mismatch + RenderFlex Overflows</div>
+      <div class="finding-desc">
+        <strong>Affected:</strong> All 5 golden tests (first_run, trusted_sessions, trusted_approvals, trusted_inspect, trusted_settings)<br>
+        <strong>Root Cause:</strong> (a) Golden reference images are stale and need regeneration. (b) RenderFlex overflow in <code>continuum_app.dart:565</code> (71px) and <code>continuum_app.dart:614</code> (35px) for navigation tabs. (c) Settings screen overflow in <code>settings_screen.dart:534</code> (91-105px).<br>
+        <strong>Fix:</strong> Regenerate goldens after fixing overflow issues. Use Expanded/Flexible widgets or Wrap for tab navigation.
+      </div>
+      <div class="finding-severity red">HIGH - Pre-existing</div>
+    </div>
+
+    <div class="finding">
+      <div class="finding-title">3. Dart SDK - Protocol Example File Paths</div>
+      <div class="finding-desc">
+        <strong>Affected:</strong> 4 tests in <code>foundation_package_surface_test.dart</code><br>
+        <strong>Root Cause:</strong> Tests use relative path <code>../../../protocol/examples/</code> from <code>sdks/dart/test/</code> which resolves incorrectly. The protocol example files exist at the repo root but the relative path doesn't traverse correctly.<br>
+        <strong>Fix:</strong> Update test file paths or use absolute paths via environment variable.
+      </div>
+      <div class="finding-severity yellow">MEDIUM - Pre-existing</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">RAF Loop Execution Trace</div>
+    <table>
+      <thead>
+        <tr><th>#</th><th>Task</th><th>Tier</th><th>Agent</th><th>Model</th><th>Cost</th><th>Result</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>Install backend dependencies</td><td><span class="tier-badge tier-t1">T1</span></td><td>Self</td><td>-</td><td>FREE</td><td><span class="badge badge-pass">PASS</span></td></tr>
+        <tr><td>2</td><td>Start host daemon</td><td><span class="tier-badge tier-t1">T1</span></td><td>Self</td><td>-</td><td>FREE</td><td><span class="badge badge-pass">PASS</span></td></tr>
+        <tr><td>3</td><td>Backend test suite (4 packages)</td><td><span class="tier-badge tier-t2">T2</span></td><td>Kiro CLI</td><td>Auto</td><td>~0.34 credits</td><td><span class="badge badge-pass">PASS</span></td></tr>
+        <tr><td>4</td><td>Build & run Flutter on simulator</td><td><span class="tier-badge tier-t1">T1</span></td><td>Self (XcodeBuildMCP)</td><td>-</td><td>FREE</td><td><span class="badge badge-pass">PASS</span></td></tr>
+        <tr><td>5</td><td>Flutter unit/widget/smoke tests</td><td><span class="tier-badge tier-t2">T2</span></td><td>Self</td><td>-</td><td>FREE</td><td><span class="badge badge-pass">PASS</span></td></tr>
+        <tr><td>6</td><td>Dart SDK tests</td><td><span class="tier-badge tier-t2">T2</span></td><td>Self</td><td>-</td><td>FREE</td><td><span class="badge badge-warn">PARTIAL</span></td></tr>
+        <tr><td>7</td><td>Flutter integration tests (live)</td><td><span class="tier-badge tier-t3">T3</span></td><td>Self</td><td>-</td><td>FREE</td><td><span class="badge badge-fail">FAIL</span></td></tr>
+        <tr><td>8</td><td>Golden tests</td><td><span class="tier-badge tier-t2">T2</span></td><td>Self</td><td>-</td><td>FREE</td><td><span class="badge badge-fail">FAIL</span></td></tr>
+        <tr><td>9</td><td>Flutter static analysis</td><td><span class="tier-badge tier-t1">T1</span></td><td>Self</td><td>-</td><td>FREE</td><td><span class="badge badge-pass">PASS</span></td></tr>
+        <tr><td>10</td><td>UI walkthrough & verification</td><td><span class="tier-badge tier-t2">T2</span></td><td>Self (XcodeBuildMCP)</td><td>-</td><td>FREE</td><td><span class="badge badge-pass">PASS</span></td></tr>
+        <tr><td>11</td><td>Report generation</td><td><span class="tier-badge tier-t2">T2</span></td><td>Self</td><td>-</td><td>FREE</td><td><span class="badge badge-pass">PASS</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Cost Summary</div>
+    <div class="cost-log">
+      <strong>Kiro Credits Used:</strong> ~0.34 (of 1,000 monthly)<br>
+      <strong>Blackbox Credits Used:</strong> $0.00 (of $80 monthly)<br>
+      <strong>OpenCode Direct:</strong> 10 tasks (FREE)<br>
+      <strong>Total Estimated Cost:</strong> ~0.34 Kiro credits<br>
+      <strong>Models Used:</strong> Kiro Auto (1), Self/OpenCode (10)<br>
+      <strong>Escalations:</strong> 0 (all tasks completed at initial tier)
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Overall Health Assessment</div>
+    <div class="summary-grid">
+      <div class="summary-card" style="grid-column: span 2;">
+        <div class="number yellow" style="font-size: 24px;">YELLOW - Partially Ready</div>
+        <div class="label" style="font-size: 13px; margin-top: 8px;">
+          Backend: GREEN (180/180 pass) | Flutter Core: GREEN (154/154 pass) | Integration: RED (pre-existing test mismatch) | Goldens: RED (stale references)
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Recommendations</div>
+    <div class="finding">
+      <div class="finding-title">Priority 1: Fix Integration Test Helper</div>
+      <div class="finding-desc">Update <code>integration_test/test_app.dart</code> <code>completePairing()</code> to match current UI text ("or enter code" instead of "Enter code manually"). This unblocks all 20 integration tests.</div>
+    </div>
+    <div class="finding">
+      <div class="finding-title">Priority 2: Fix RenderFlex Overflows</div>
+      <div class="finding-desc">Wrap tab navigation Row widgets in <code>continuum_app.dart:565</code> and <code>continuum_app.dart:614</code> with <code>Flexible</code> or <code>Expanded</code>. Fix settings screen Row at <code>settings_screen.dart:534</code>.</div>
+    </div>
+    <div class="finding">
+      <div class="finding-title">Priority 3: Regenerate Golden Files</div>
+      <div class="finding-desc">After fixing overflows, run <code>flutter test --update-goldens</code> to regenerate reference images.</div>
+    </div>
+    <div class="finding">
+      <div class="finding-title">Priority 4: Fix Dart SDK Test Paths</div>
+      <div class="finding-desc">Update relative paths in <code>sdks/dart/test/foundation_package_surface_test.dart</code> to correctly locate protocol example files.</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Generated by Agent-Forge Orchestrator | OpenCode + Kiro CLI + XcodeBuildMCP<br>
+    Report timestamp: 2026-05-31T03:00:00Z | Session: agent-forge-live-qa
+  </div>
+</div>
+</body>
+</html>

@@ -17,6 +17,9 @@ class RunnerUITests: XCTestCase {
     // MARK: - Pairing Flow Tests
 
     func testFirstRunPairingScreenAppears() {
+        // Wait for app to load
+        XCTAssertTrue(app.staticTexts["Continuum"].waitForExistence(timeout: 10))
+        
         // Verify first-run pairing screen elements
         XCTAssertTrue(app.staticTexts["Continuum"].exists)
         XCTAssertTrue(app.staticTexts["Unpaired"].exists)
@@ -26,32 +29,45 @@ class RunnerUITests: XCTestCase {
     }
 
     func testManualCodeEntryNavigation() {
+        // Wait for app to load
+        XCTAssertTrue(app.staticTexts["Continuum"].waitForExistence(timeout: 10))
+        
         // Tap "Enter code manually"
-        app.staticTexts["Enter code manually"].tap()
+        let enterCodeButton = app.staticTexts["Enter code manually"]
+        XCTAssertTrue(enterCodeButton.waitForExistence(timeout: 5))
+        enterCodeButton.tap()
 
-        // Verify text field appears
-        XCTAssertTrue(app.textFields.firstMatch.exists)
-        XCTAssertTrue(app.buttons["Verify"].exists)
+        // Wait for text field to appear
+        XCTAssertTrue(app.textFields.firstMatch.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["Verify"].waitForExistence(timeout: 5))
     }
 
     func testPairingCodeSubmission() {
+        // Wait for app to load
+        XCTAssertTrue(app.staticTexts["Continuum"].waitForExistence(timeout: 10))
+        
         // Create a pairing session via daemon API
         let session = createPairingSession()
         let code = session["code"] as! String
 
         // Navigate to manual entry
-        app.staticTexts["Enter code manually"].tap()
+        let enterCodeButton = app.staticTexts["Enter code manually"]
+        XCTAssertTrue(enterCodeButton.waitForExistence(timeout: 5))
+        enterCodeButton.tap()
 
-        // Enter pairing code
+        // Wait for text field to appear
         let textField = app.textFields.firstMatch
+        XCTAssertTrue(textField.waitForExistence(timeout: 5))
         textField.tap()
         textField.typeText("127.0.0.1:8767:\(code)")
 
         // Submit
-        app.buttons["Verify"].tap()
+        let verifyButton = app.buttons["Verify"]
+        XCTAssertTrue(verifyButton.waitForExistence(timeout: 5))
+        verifyButton.tap()
 
         // Wait for daemon to process
-        sleep(2)
+        sleep(3)
 
         // Verify daemon received the claim
         let sessions = getPairingSessions()
@@ -60,35 +76,44 @@ class RunnerUITests: XCTestCase {
     }
 
     func testTrustedShellTransitionAfterApproval() {
+        // Wait for app to load
+        XCTAssertTrue(app.staticTexts["Continuum"].waitForExistence(timeout: 10))
+        
         // Create and claim a pairing session
         let session = createPairingSession()
         let code = session["code"] as! String
         let sessionId = session["session_id"] as! String
 
         // Navigate to manual entry and submit code
-        app.staticTexts["Enter code manually"].tap()
+        let enterCodeButton = app.staticTexts["Enter code manually"]
+        XCTAssertTrue(enterCodeButton.waitForExistence(timeout: 5))
+        enterCodeButton.tap()
 
         let textField = app.textFields.firstMatch
+        XCTAssertTrue(textField.waitForExistence(timeout: 5))
         textField.tap()
         textField.typeText("127.0.0.1:8767:\(code)")
 
-        app.buttons["Verify"].tap()
-        sleep(1)
+        let verifyButton = app.buttons["Verify"]
+        XCTAssertTrue(verifyButton.waitForExistence(timeout: 5))
+        verifyButton.tap()
+        sleep(2)
 
         // Approve the session via daemon API
         approvePairingSession(sessionId: sessionId)
 
         // Wait for app to transition to trusted shell
-        sleep(5)
+        sleep(6)
 
         // Tap Continue on success screen if it exists
-        if app.buttons["Continue"].exists {
-            app.buttons["Continue"].tap()
+        let continueButton = app.buttons["Continue"]
+        if continueButton.waitForExistence(timeout: 3) {
+            continueButton.tap()
             sleep(2)
         }
 
         // Verify trusted shell elements
-        XCTAssertTrue(app.staticTexts["Home"].exists)
+        XCTAssertTrue(app.staticTexts["Home"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["Sessions"].exists)
         XCTAssertTrue(app.staticTexts["Approvals"].exists)
     }
@@ -99,16 +124,16 @@ class RunnerUITests: XCTestCase {
         completePairing()
 
         // Verify dashboard elements
-        XCTAssertTrue(app.staticTexts["Home"].exists)
-        XCTAssertTrue(app.staticTexts["Active Sessions"].exists)
-        XCTAssertTrue(app.staticTexts["Pending Approvals"].exists)
+        XCTAssertTrue(app.staticTexts["Home"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Active Sessions"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Pending Approvals"].waitForExistence(timeout: 5))
     }
 
     func testDashboardShowsPairedDevices() {
         completePairing()
 
         // Verify paired devices section
-        XCTAssertTrue(app.staticTexts["Paired Devices"].exists)
+        XCTAssertTrue(app.staticTexts["Paired Devices"].waitForExistence(timeout: 5))
     }
 
     // MARK: - Navigation Tests
@@ -117,7 +142,9 @@ class RunnerUITests: XCTestCase {
         completePairing()
 
         // Navigate to Sessions tab
-        app.staticTexts["Sessions"].tap()
+        let sessionsTab = app.staticTexts["Sessions"]
+        XCTAssertTrue(sessionsTab.waitForExistence(timeout: 5))
+        sessionsTab.tap()
         sleep(2)
 
         // Verify sessions screen appears
@@ -128,7 +155,9 @@ class RunnerUITests: XCTestCase {
         completePairing()
 
         // Navigate to Approvals tab
-        app.staticTexts["Approvals"].tap()
+        let approvalsTab = app.staticTexts["Approvals"]
+        XCTAssertTrue(approvalsTab.waitForExistence(timeout: 5))
+        approvalsTab.tap()
         sleep(2)
 
         // Verify approvals screen appears

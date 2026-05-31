@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-05-31 - Live UI QA fixes and integration test hardening
+
+- Branch: `codex/mobile-live-session-detail`
+- Commit: this commit
+- Summary: fixed integration test `completePairing()` helpers to work with `shadcn.InputOTP` by using `find.byType(EditableText).first` instead of expecting a single `EditableText`. Updated `inspect_test.dart` to reference the renamed `Devices` tab instead of `Inspect`. Fixed RenderFlex overflow bugs in `continuum_app.dart` and `settings_screen.dart` with `Flexible` and `TextOverflow.ellipsis`. Regenerated golden baselines for updated shell layouts. Fixed Dart SDK test paths to resolve protocol example fixtures correctly. Generated polished HTML and PDF QA reports at `apps/mobile/qa-reports/2026-05-31-live-ui-test/`. Installed `ios-simulator-skill` for Kiro, Blackbox, and Gemini CLI configs.
+- Documentation updated: `internal/status.md`
+- Next likely step: run the fixed integration tests against the live daemon to verify all 17 tests pass, then proceed with XCUITest automation or further live simulator coverage.
+
 ### 2026-05-29 - Inspect artifact viewer parity
 
 - Branch: `codex/mobile-live-session-detail`

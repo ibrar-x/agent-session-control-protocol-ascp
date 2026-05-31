@@ -570,12 +570,15 @@ class _PrimaryAction extends StatelessWidget {
                 style: const TextStyle(color: Color(0xFFFFFFFF), fontSize: 28),
               ),
               const SizedBox(width: 12),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: Color(0xFFFFFFFF),
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
+              Flexible(
+                child: Text(
+                  label,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Color(0xFFFFFFFF),
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
             ],
@@ -616,12 +619,15 @@ class _SecondaryAction extends StatelessWidget {
                   children: [
                     Text(glyph, style: const TextStyle(fontSize: 28)),
                     const SizedBox(width: 12),
-                    Text(
-                      label,
-                      style: const TextStyle(
-                        color: SessionColors.textDark,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
+                    Flexible(
+                      child: Text(
+                        label,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: SessionColors.textDark,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                     ),
                   ],

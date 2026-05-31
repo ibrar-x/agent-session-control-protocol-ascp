@@ -24,7 +24,7 @@ void main() {
       expect(find.text('Unpaired'), findsOneWidget);
       expect(find.text('Scanning'), findsOneWidget);
       expect(find.text('Pair New Device'), findsOneWidget);
-      expect(find.text('Enter code manually'), findsOneWidget);
+      expect(find.text('or enter code'), findsOneWidget);
     });
 
     testWidgets('taps Enter code manually and shows text field',
@@ -32,10 +32,10 @@ void main() {
       app.main();
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Enter code manually'));
+      await tester.tap(find.text('or enter code'));
       await tester.pumpAndSettle();
 
-      expect(find.byType(EditableText), findsOneWidget);
+      expect(find.byType(EditableText), findsWidgets);
       expect(find.text('Verify'), findsOneWidget);
       expect(find.text('Enter Pairing Code'), findsOneWidget);
     });
@@ -48,11 +48,11 @@ void main() {
       app.main();
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Enter code manually'));
+      await tester.tap(find.text('or enter code'));
       await tester.pumpAndSettle();
 
       await tester.enterText(
-        find.byType(EditableText),
+        find.byType(EditableText).first,
         '127.0.0.1:8767:$code',
       );
 
@@ -81,11 +81,11 @@ void main() {
       app.main();
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Enter code manually'));
+      await tester.tap(find.text('or enter code'));
       await tester.pumpAndSettle();
 
       await tester.enterText(
-        find.byType(EditableText),
+        find.byType(EditableText).first,
         '127.0.0.1:8767:$code',
       );
 

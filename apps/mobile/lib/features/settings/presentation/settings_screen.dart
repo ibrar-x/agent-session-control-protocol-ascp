@@ -534,58 +534,69 @@ class _NavRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  color: SessionColors.warmSurface,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: SizedBox(
-                  width: 28,
-                  height: 28,
-                  child: Center(
-                    child: Text(
-                      glyph,
-                      style: const TextStyle(
-                        color: SessionColors.textSecondary,
-                        fontSize: 13,
+          Flexible(
+            child: Row(
+              children: [
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: SessionColors.warmSurface,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: SizedBox(
+                    width: 28,
+                    height: 28,
+                    child: Center(
+                      child: Text(
+                        glyph,
+                        style: const TextStyle(
+                          color: SessionColors.textSecondary,
+                          fontSize: 13,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: SessionColors.textDark,
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              if (value != null) ...[
-                Text(
-                  value!,
-                  style: const TextStyle(
-                    color: SessionColors.textMuted,
-                    fontSize: 13,
+                const SizedBox(width: 12),
+                Flexible(
+                  child: Text(
+                    label,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: SessionColors.textDark,
+                      fontSize: 14,
+                    ),
                   ),
                 ),
-                const SizedBox(width: 4),
               ],
-              const Text(
-                '›',
-                style: TextStyle(
-                  color: SessionColors.borderLight,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Row(
+              children: [
+                if (value != null) ...[
+                  Flexible(
+                    child: Text(
+                      value!,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: SessionColors.textMuted,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                ],
+                const Text(
+                  '›',
+                  style: TextStyle(
+                    color: SessionColors.borderLight,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),

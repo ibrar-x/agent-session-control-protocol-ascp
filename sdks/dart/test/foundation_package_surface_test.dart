@@ -28,7 +28,7 @@ void main() {
     test(
       'decodes the upstream Session example with protocol field names intact',
       () async {
-        final json = await _readJson('../../../protocol/examples/core/session.json');
+        final json = await _readJson('../../protocol/examples/core/session.json');
 
         final session = AscpSession.fromJson(json);
 
@@ -40,7 +40,7 @@ void main() {
     );
 
     test('decodes the upstream event envelope example', () async {
-      final json = await _readJson('../../../protocol/examples/events/event-envelope.json');
+      final json = await _readJson('../../protocol/examples/events/event-envelope.json');
 
       final event = AscpEventEnvelope.fromJson(json);
 
@@ -53,7 +53,7 @@ void main() {
 
     test('decodes the upstream subscribe success result', () async {
       final json = await _readJson(
-        '../../../protocol/examples/responses/sessions-subscribe.json',
+        '../../protocol/examples/responses/sessions-subscribe.json',
       );
 
       final response =
@@ -74,7 +74,7 @@ void main() {
       'decodes the upstream sync snapshot event into a typed payload',
       () async {
         final json = await _readJson(
-          '../../../protocol/examples/events/sync-snapshot.json',
+          '../../protocol/examples/events/sync-snapshot.json',
         );
 
         final event = AscpSyncSnapshotEvent.fromJson(json);

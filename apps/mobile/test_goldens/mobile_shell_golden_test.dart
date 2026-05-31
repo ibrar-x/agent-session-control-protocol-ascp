@@ -7,9 +7,7 @@ import 'package:mobile/core/security/local_auth_gate.dart';
 import 'package:mobile/features/approvals/application/approval_queue_controller.dart';
 import 'package:mobile/features/approvals/data/approval_repository.dart';
 import 'package:mobile/features/approvals/domain/approval_view_model.dart';
-import 'package:mobile/features/inspect/application/inspect_controller.dart';
-import 'package:mobile/features/inspect/data/inspect_repository.dart';
-import 'package:mobile/features/inspect/domain/inspect_item.dart';
+
 import 'package:mobile/features/settings/application/settings_controller.dart';
 import 'package:mobile/features/settings/data/settings_repository.dart';
 import 'package:mobile/features/settings/domain/transport_diagnostics.dart';
@@ -96,30 +94,19 @@ void main() {
     );
   });
 
-  testWidgets('trusted inspect shell golden', (tester) async {
+  testWidgets('trusted devices shell golden', (tester) async {
     await tester.binding.setSurfaceSize(const Size(390, 844));
-    final dependencies = MobileDependencies.memory(
-      inspectController: InspectController(
-        repository: MemoryInspectRepository(
-          items: const [
-            InspectItem.artifact('artifact_plan_md'),
-            InspectItem.diff('diff_mobile_runtime'),
-            InspectItem.artifact('artifact_web_build'),
-          ],
-        ),
-      ),
-    );
 
     await tester.pumpWidget(
-      ContinuumMobileApp(isTrusted: true, dependencies: dependencies),
+      ContinuumMobileApp(isTrusted: true),
     );
-    await tester.tap(find.text('Inspect').last);
+    await tester.tap(find.text('Devices').last);
     await tester.pump();
     await tester.pump();
 
     await expectLater(
       find.byType(ContinuumMobileApp),
-      matchesGoldenFile('goldens/trusted_inspect_shell.png'),
+      matchesGoldenFile('goldens/trusted_devices_shell.png'),
     );
   });
 

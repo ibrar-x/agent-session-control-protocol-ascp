@@ -23,11 +23,11 @@ void main() {
       app.main();
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Enter code manually'));
+      await tester.tap(find.text('or enter code'));
       await tester.pumpAndSettle();
 
       await tester.enterText(
-        find.byType(EditableText),
+        find.byType(EditableText).first,
         '127.0.0.1:8767:$code',
       );
 

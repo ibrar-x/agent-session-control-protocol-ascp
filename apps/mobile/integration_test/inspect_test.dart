@@ -23,11 +23,11 @@ void main() {
       app.main();
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Enter code manually'));
+      await tester.tap(find.text('or enter code'));
       await tester.pumpAndSettle();
 
       await tester.enterText(
-        find.byType(EditableText),
+        find.byType(EditableText).first,
         '127.0.0.1:8767:$code',
       );
 
@@ -47,18 +47,18 @@ void main() {
     testWidgets('shows inspect tab', (tester) async {
       await completePairing(tester);
 
-      // Navigate to Inspect tab
-      await tester.tap(find.text('Inspect'));
+      // Navigate to Devices tab
+      await tester.tap(find.text('Devices'));
       await tester.pumpAndSettle();
 
-      // Verify inspect screen appears
-      expect(find.text('Inspect'), findsWidgets);
+      // Verify devices screen appears
+      expect(find.text('Devices'), findsWidgets);
     });
 
     testWidgets('shows empty state when no session selected', (tester) async {
       await completePairing(tester);
 
-      await tester.tap(find.text('Inspect'));
+      await tester.tap(find.text('Devices'));
       await tester.pumpAndSettle();
 
       // Should show empty state or instructions
