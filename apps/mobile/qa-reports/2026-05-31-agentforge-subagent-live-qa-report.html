@@ -1,0 +1,248 @@
+<!doctype html><html><head><meta charset="utf-8"><title>AgentForge Subagent Live QA Report</title><style>
+@page { margin: 28px; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', Helvetica, Arial, sans-serif; background:#f6f1e9; color:#1c1712; margin:0; padding:32px; line-height:1.45; }
+h1 { font-size:32px; margin:0 0 8px; letter-spacing:0; }
+h2 { font-size:22px; margin:30px 0 10px; border-top:1px solid #ded5c9; padding-top:18px; }
+h3 { font-size:17px; margin:22px 0 8px; }
+p, li, td, th { font-size:12px; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace; background:#eee6db; border-radius:4px; padding:1px 4px; }
+pre { background:#15110c; color:#f5efe8; border-radius:8px; padding:14px; overflow-wrap:anywhere; white-space:pre-wrap; }
+table { width:100%; border-collapse:separate; border-spacing:0; margin:12px 0; background:#fffaf4; border:1px solid #ded5c9; border-radius:8px; overflow:hidden; }
+th { text-align:left; background:#ede4d8; }
+th, td { padding:8px; border-bottom:1px solid #e8dfd3; vertical-align:top; }
+tr:last-child td { border-bottom:0; }
+figure { margin:16px 0; padding:10px; background:#18130e; border-radius:12px; text-align:center; }
+img { max-width:260px; border-radius:18px; }
+figcaption { color:#c9b9aa; font-size:11px; margin-top:8px; }
+.spacer { height:4px; }
+</style></head><body><h1>AgentForge Subagent Live QA Report</h1>
+<div class="spacer"></div>
+<p>Date: 2026-05-31  </p>
+<p>Branch: <code>codex/mobile-live-session-detail</code>  </p>
+<p>App: Continuum / Sessio Flutter mobile companion  </p>
+<p>Backend: <code>@ascp/host-daemon</code> on loopback ports <code>9875</code> and <code>9876</code>  </p>
+<p>Simulator: iPhone 17 Pro, iOS 26.3, <code>45696EBE-0456-4051-8EAC-89385E73DD66</code></p>
+<div class="spacer"></div>
+<h2>Executive Summary</h2>
+<div class="spacer"></div>
+<p>The live mobile app is buildable and launchable against a real ASCP host daemon. The backend started successfully, generated a fresh six-digit numeric pairing code, and the Flutter app built for iOS simulator with live dart-defines. Core static and unit verification passed.</p>
+<div class="spacer"></div>
+<p>AgentForge routing was used:</p>
+<div class="spacer"></div>
+<ul>
+<li>OpenCode with <code>opencode-go/qwen3.7-max</code> executed the live backend/build/test/simulator checklist and used its own configured <code>XcodeBuildMCP</code> connection for install, launch, and screenshot capture. It stalled while processing screenshot evidence and did not write its final report, so Codex stopped the stuck process and preserved its observed command output.</li>
+<li>Kiro CLI completed a report-only live-readiness audit and wrote <code>qa-reports/2026-05-31-kiro-live-readiness-audit.md</code>.</li>
+<li>Blackbox CLI was attempted twice for a hardcoded-live-data audit. Both attempts exited without writing the requested report, so that route is recorded as failed.</li>
+<li>Codex acted as verifier/reviewer by inspecting subagent artifacts, confirming simulator state with XcodeBuildMCP, preserving screenshot evidence, and creating this consolidated QA report.</li>
+</ul>
+<div class="spacer"></div>
+<p>Overall verdict: live QA passes for buildability, daemon startup, numeric pairing-code generation, core repository wiring, and simulator launch to the pairing screen. It is not yet complete for model switching or fully automated in-simulator OTP claim/host approval because the current exposed Codex XcodeBuildMCP tool surface has screenshot/UI hierarchy but no tap/type actions, and OpenCode stalled after screenshot capture.</p>
+<div class="spacer"></div>
+<h2>Subagent Route Matrix</h2>
+<div class="spacer"></div>
+<table><thead><tr><th>Route</th><th>Model / Tooling</th><th>Result</th><th>Evidence</th></tr></thead><tbody>
+<tr><td>OpenCode</td><td><code>opencode-go/qwen3.7-max</code>, OpenCode MCP <code>XcodeBuildMCP</code></td><td>Partial success; ran backend/tests/build/simulator, then stalled before report write</td><td>Command transcript observed in Codex terminal session; screenshot captured by XcodeBuildMCP</td></tr>
+<tr><td>Kiro</td><td>Kiro CLI, trusted tools</td><td>Success; static live-readiness report created</td><td><code>qa-reports/2026-05-31-kiro-live-readiness-audit.md</code></td></tr>
+<tr><td>Blackbox</td><td>Blackbox CLI, yolo approval mode</td><td>Failed; no report file created after two attempts</td><td>First stopped after plan mode, second exited after context compression</td></tr>
+<tr><td>Codex verifier</td><td>XcodeBuildMCP, shell checks, image inspection</td><td>Success; verified simulator UI, backend port, report files, screenshot evidence</td><td><code>qa-reports/2026-05-31-subagent-live-qa-pairing-screen.jpg</code></td></tr>
+</tbody></table>
+<div class="spacer"></div>
+<h2>Environment</h2>
+<div class="spacer"></div>
+<p>OpenCode reported:</p>
+<div class="spacer"></div>
+<table><thead><tr><th>Tool</th><th>Version</th></tr></thead><tbody>
+<tr><td>Flutter</td><td><code>3.41.2</code> stable</td></tr>
+<tr><td>Dart</td><td><code>3.11.0</code></td></tr>
+<tr><td>Node</td><td><code>v25.9.0</code></td></tr>
+<tr><td>npm</td><td><code>11.16.0</code></td></tr>
+<tr><td>Xcode</td><td><code>26.3</code> build <code>17C529</code></td></tr>
+</tbody></table>
+<div class="spacer"></div>
+<p>Codex verifier confirmed:</p>
+<div class="spacer"></div>
+<ul>
+<li>Booted simulator: iPhone 17 Pro, iOS 26.3.</li>
+<li>App bundle id: <code>app.continuum.mobile</code>.</li>
+<li>Live daemon process listening on ports <code>9875</code> and <code>9876</code>.</li>
+</ul>
+<div class="spacer"></div>
+<h2>Backend Live Run</h2>
+<div class="spacer"></div>
+<p>OpenCode started the backend with:</p>
+<div class="spacer"></div>
+<pre><code>ASCP_HOST=127.0.0.1 ASCP_PORT=9875 ASCP_ADMIN_PORT=9876 \
+ASCP_DATABASE_PATH=/private/tmp/continuum-mobile-subagent-live-qa.sqlite \
+nohup npm --workspace @ascp/host-daemon run start &gt; /tmp/daemon-qa.log 2&gt;&amp;1 &amp;
+</code></pre>
+<div class="spacer"></div>
+<p>Daemon log:</p>
+<div class="spacer"></div>
+<pre><code>{"level":"info","message":"ASCP host daemon listening","admin_url":"http://127.0.0.1:9876","auth_transport":"loopback","database_path":"/private/tmp/continuum-mobile-subagent-live-qa.sqlite","runtime":"codex","url":"ws://127.0.0.1:9875"}
+</code></pre>
+<div class="spacer"></div>
+<p>Codex verifier confirmed the daemon is still listening:</p>
+<div class="spacer"></div>
+<pre><code>node ... TCP localhost:9875 (LISTEN)
+node ... TCP localhost:9876 (LISTEN)
+</code></pre>
+<div class="spacer"></div>
+<h2>Pairing</h2>
+<div class="spacer"></div>
+<p>OpenCode generated a fresh pairing session through the live daemon:</p>
+<div class="spacer"></div>
+<pre><code>curl -s -X POST -H 'Content-Type: application/json' \
+  -d '{"requested_scopes":["read:hosts","read:runtimes","read:sessions","write:sessions","read:approvals","write:approvals","read:artifacts"]}' \
+  http://127.0.0.1:9876/admin/pairing/sessions
+</code></pre>
+<div class="spacer"></div>
+<p>Observed response:</p>
+<div class="spacer"></div>
+<pre><code>{
+  "code": "424032",
+  "expires_at": "2026-05-31T02:21:11.693Z",
+  "qr_payload": "{\"code\":\"424032\",\"session_id\":\"pairing:cafda04a-beb4-40a1-9816-d887c9f09ed1\"}",
+  "session_id": "pairing:cafda04a-beb4-40a1-9816-d887c9f09ed1"
+}
+</code></pre>
+<div class="spacer"></div>
+<p>Result: pass for live backend numeric OTP generation. The code is six digits and matches the current Flutter <code>InputOTP</code> design.</p>
+<div class="spacer"></div>
+<p>Limitation: full in-simulator OTP entry and host approval were not completed in this run because the available Codex XcodeBuildMCP tool surface exposes screenshot/UI hierarchy but not tap/type actions. OpenCode had XcodeBuildMCP access and launched the app but stalled before completing interactive OTP entry.</p>
+<div class="spacer"></div>
+<h2>iOS Simulator</h2>
+<div class="spacer"></div>
+<p>OpenCode built the app using live dart-defines:</p>
+<div class="spacer"></div>
+<pre><code>flutter build ios --simulator --debug \
+  --dart-define=CONTINUUM_MOBILE_MODE=live \
+  --dart-define=CONTINUUM_ASCP_RPC_ENDPOINT=http://127.0.0.1:9875/rpc \
+  --dart-define=CONTINUUM_ASCP_WS_ENDPOINT=ws://127.0.0.1:9875/rpc \
+  --dart-define=CONTINUUM_DAEMON_ADMIN_BASE_URL=http://127.0.0.1:9876 \
+  --dart-define=CONTINUUM_HOST_ID=host_local \
+  --dart-define=CONTINUUM_ACTIVE_SESSION_ID=sess_active \
+  --dart-define=CONTINUUM_DEVICE_ID=device_mobile
+</code></pre>
+<div class="spacer"></div>
+<p>Observed result:</p>
+<div class="spacer"></div>
+<pre><code>✓ Built build/ios/iphonesimulator/Runner.app
+</code></pre>
+<div class="spacer"></div>
+<p>OpenCode then used its configured XcodeBuildMCP connection to:</p>
+<div class="spacer"></div>
+<ul>
+<li>list simulators,</li>
+<li>select booted iPhone 17 Pro,</li>
+<li>set session defaults for <code>ios/Runner.xcworkspace</code> / <code>Runner</code>,</li>
+<li>install <code>build/ios/iphonesimulator/Runner.app</code>,</li>
+<li>launch <code>app.continuum.mobile</code>,</li>
+<li>capture a screenshot.</li>
+</ul>
+<div class="spacer"></div>
+<p>Codex verifier captured and preserved the final simulator screenshot:</p>
+<div class="spacer"></div>
+<figure><img src="file:///Users/ibrar/Desktop/infinora.noworkspace/Continuum App/agent-session-control-protocol-ascp/apps/mobile/qa-reports/2026-05-31-subagent-live-qa-pairing-screen.jpg" alt="Pairing screen"><figcaption>Pairing screen</figcaption></figure><div class="spacer"></div>
+<p>UI hierarchy confirmed:</p>
+<div class="spacer"></div>
+<ul>
+<li><code>Pair a host</code></li>
+<li>QR frame copy</li>
+<li>six OTP text fields</li>
+<li><code>Claim device</code></li>
+<li><code>Enter the 6-digit host code</code></li>
+<li>safety copy at bottom</li>
+</ul>
+<div class="spacer"></div>
+<h2>Verification Commands</h2>
+<div class="spacer"></div>
+<p>OpenCode ran these checks successfully:</p>
+<div class="spacer"></div>
+<table><thead><tr><th>Check</th><th>Result</th></tr></thead><tbody>
+<tr><td><code>flutter analyze</code></td><td>Pass, no issues found</td></tr>
+<tr><td><code>flutter test</code></td><td>Pass, <code>154</code> tests</td></tr>
+<tr><td><code>flutter_shadcn validate --json</code></td><td>Pass</td></tr>
+<tr><td><code>flutter_shadcn audit --json</code></td><td>Pass</td></tr>
+<tr><td><code>flutter_shadcn deps --json</code></td><td>Pass</td></tr>
+<tr><td><code>npm --workspace @ascp/host-daemon run test</code></td><td>Pass, <code>21</code> files / <code>38</code> tests</td></tr>
+<tr><td><code>flutter build ios --simulator --debug ...live dart-defines...</code></td><td>Pass</td></tr>
+</tbody></table>
+<div class="spacer"></div>
+<h2>Feature Coverage</h2>
+<div class="spacer"></div>
+<p>Kiro reported these live-backed areas:</p>
+<div class="spacer"></div>
+<table><thead><tr><th>Area</th><th>Live Backing</th><th>Result</th></tr></thead><tbody>
+<tr><td>Pairing claim</td><td><code>DaemonPairingRepository.claim()</code> to <code>/pairing/claim</code></td><td>Pass by code inspection</td></tr>
+<tr><td>Pairing poll</td><td><code>DaemonPairingRepository.poll()</code> to <code>/pairing/claims/:token</code></td><td>Pass by code inspection</td></tr>
+<tr><td>Trust material</td><td><code>FlutterSecureStore</code> in live mode</td><td>Pass by code inspection</td></tr>
+<tr><td>Sessions list</td><td><code>AscpSessionRepository</code> to <code>sessions.list</code></td><td>Pass by code inspection</td></tr>
+<tr><td>Session timeline</td><td><code>AscpSessionRepository</code> to <code>sessions.get</code> with events</td><td>Pass by code inspection</td></tr>
+<tr><td>Chat send input</td><td><code>AscpSessionRepository</code> to <code>sessions.send_input</code></td><td>Pass by code inspection</td></tr>
+<tr><td>Live stream</td><td><code>AscpSessionSubscriptionRepository</code> to <code>sessions.subscribe</code> over WebSocket</td><td>Pass by code inspection</td></tr>
+<tr><td>Approvals</td><td><code>approvals.list</code> and <code>approvals.respond</code></td><td>Pass by code inspection</td></tr>
+<tr><td>Inspect/artifacts</td><td><code>artifacts.list</code>, <code>artifacts.get</code>, <code>diffs.get</code></td><td>Pass by code inspection</td></tr>
+<tr><td>Trusted devices</td><td>daemon <code>/admin/trusted-devices</code> list/revoke endpoints</td><td>Pass by code inspection</td></tr>
+</tbody></table>
+<div class="spacer"></div>
+<h2>Hardcoded / Live-Readiness Findings</h2>
+<div class="spacer"></div>
+<table><thead><tr><th>Severity</th><th>Area</th><th>Evidence</th><th>Result</th></tr></thead><tbody>
+<tr><td>Low</td><td>Settings diagnostics</td><td><code>DaemonSettingsRepository.readDiagnostics()</code> returns constructor-provided const diagnostics with <code>state: 'connected'</code></td><td>Needs live daemon diagnostics endpoint</td></tr>
+<tr><td>Low</td><td>Devices screen</td><td><code>_fallbackDevices</code> contains <code>MacBook Pro · Local</code> and <code>Ubuntu Workstation</code></td><td>Should become an empty state when daemon returns no devices</td></tr>
+<tr><td>Medium</td><td>Model switching</td><td>current model can be displayed from timeline events, but no UI/controller/repository invokes a model switch contract</td><td>Not implemented</td></tr>
+<tr><td>Medium</td><td>Interactive simulator pairing</td><td>app reaches live pairing screen and backend generates numeric OTP; this run did not complete OTP typing + host approval</td><td>Needs interactive UI automation route</td></tr>
+</tbody></table>
+<div class="spacer"></div>
+<h2>Model Switching</h2>
+<div class="spacer"></div>
+<p>Result: not implemented.</p>
+<div class="spacer"></div>
+<p>The app can display <code>currentModel</code> when a timeline event provides model metadata, but there is no live UI flow to change model from the chat. Kiro also found that <code>runtimes.list</code> is declared in the ASCP method enum, but there is no model-selection UI/controller path. ASCP also does not currently define a core model-switching method, so this should be designed as an explicit protocol-backed capability before UI implementation.</p>
+<div class="spacer"></div>
+<h2>App Logs</h2>
+<div class="spacer"></div>
+<p>Latest app OS log file:</p>
+<div class="spacer"></div>
+<pre><code>/Users/ibrar/Library/Developer/XcodeBuildMCP/workspaces/mobile-bbe25f1507dc/logs/app.continuum.mobile_oslog_2026-05-31T02-19-09-993Z_helperpid76578_ownerpid71257_b6f282da.log
+</code></pre>
+<div class="spacer"></div>
+<p>Observed contents:</p>
+<div class="spacer"></div>
+<pre><code>getpwuid_r did not find a match for uid 501
+Filtering the log data using "subsystem == "app.continuum.mobile""
+</code></pre>
+<div class="spacer"></div>
+<p>No Flutter crash was observed in this captured log.</p>
+<div class="spacer"></div>
+<h2>Blockers</h2>
+<div class="spacer"></div>
+<ul>
+<li>Model switching is not built yet.</li>
+<li>Full OTP entry and host approval were not completed via simulator automation in this run.</li>
+<li>Settings diagnostics still contain a hardcoded connected state.</li>
+<li>Devices screen still has fallback demo devices when no live devices are returned.</li>
+<li>Blackbox CLI did not produce its requested audit report after two attempts.</li>
+<li>OpenCode completed the live checks but stalled while processing screenshot evidence and did not write its own final markdown report.</li>
+</ul>
+<div class="spacer"></div>
+<h2>Recommendations</h2>
+<div class="spacer"></div>
+<ul>
+<li>Add a protocol/daemon-backed model selection contract before adding chat model switching UI.</li>
+<li>Add or expose tap/type-capable iOS automation to external agents so OTP entry, approval, session navigation, chat send, approval response, and settings revoke can be exercised end to end from the simulator.</li>
+<li>Replace `DaemonSettingsRepository.readDiagnostics()` with a real daemon health/transport diagnostics endpoint.</li>
+<li>Replace `DevicesScreen._fallbackDevices` with a real empty state.</li>
+<li>Add a live integration-test profile that starts the daemon, creates a pairing code, pairs the app, approves the device, and verifies sessions/chat/approvals from the same run.</li>
+</ul>
+<div class="spacer"></div>
+<h2>Artifacts</h2>
+<div class="spacer"></div>
+<ul>
+<li>Kiro live-readiness audit: <code>qa-reports/2026-05-31-kiro-live-readiness-audit.md</code></li>
+<li>Simulator screenshot: <code>qa-reports/2026-05-31-subagent-live-qa-pairing-screen.jpg</code></li>
+<li>OpenCode live QA prompt: <code>qa-reports/agent-prompts/2026-05-31-live-full-qa-opencode.prompt.md</code></li>
+<li>Blackbox hardcoded audit prompt: <code>qa-reports/agent-prompts/2026-05-31-live-hardcoded-audit-blackbox.prompt.md</code></li>
+</ul>
+<div class="spacer"></div>
+</body></html>
